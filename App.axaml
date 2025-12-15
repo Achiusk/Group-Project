@@ -1,0 +1,39 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="urban_city_power_managment.App"
+             xmlns:vm="using:urban_city_power_managment.ViewModels"
+             xmlns:views="using:urban_city_power_managment.Views"
+             xmlns:styling="using:Avalonia.Styling">
+
+    <Application.Styles>
+   <FluentTheme />
+        <StyleInclude Source="/Styles/ButtonStyles.axaml"/>
+    </Application.Styles>
+
+    <Application.DataTemplates>
+        <DataTemplate DataType="vm:DashboardViewModel">
+    <views:DashboardView/>
+      </DataTemplate>
+     <DataTemplate DataType="vm:PowerGenerationViewModel">
+       <views:PowerGenerationView/>
+        </DataTemplate>
+    <DataTemplate DataType="vm:ConsumersViewModel">
+<views:ConsumersView/>
+      </DataTemplate>
+  <DataTemplate DataType="vm:BusinessesViewModel">
+   <views:BusinessesView/>
+    </DataTemplate>
+  <DataTemplate DataType="vm:GasInfrastructureViewModel">
+       <views:GasInfrastructureView/>
+  </DataTemplate>
+        <DataTemplate DataType="vm:NotificationsViewModel">
+   <views:NotificationsView/>
+ </DataTemplate>
+        <DataTemplate DataType="vm:TasksViewModel">
+     <views:TasksView/>
+ </DataTemplate>
+ <DataTemplate DataType="vm:SettingsViewModel">
+  <views:SettingsView/>
+ </DataTemplate>
+    </Application.DataTemplates>
+</Application>

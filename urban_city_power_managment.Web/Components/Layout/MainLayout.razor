@@ -1,0 +1,38 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-header">
+         <div class="header-left">
+        <span class="app-title">Stedelijk Energiebeheer Eindhoven</span>
+        </div>
+            <div class="header-right">
+        <span class="location-info">📍 Eindhoven</span>
+    <span class="datetime">@DateTime.Now.ToString("dddd d MMMM yyyy HH:mm", new System.Globalization.CultureInfo("nl-NL"))</span>
+   </div>
+        </div>
+
+        <article class="content px-4">
+       @Body
+        </article>
+
+        <footer class="footer">
+        <div class="footer-content">
+         <span>© @DateTime.Now.Year Gemeente Eindhoven - Stedelijk Energiebeheer</span>
+     <span class="footer-links">
+     <a href="/privacy">Privacy</a> | 
+  <a href="/contact">Contact</a> | 
+      <a href="/help">Help</a>
+         </span>
+  </div>
+        </footer>
+  </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Er is een fout opgetreden. <a href="." class="reload">Pagina herladen</a>
+</div>

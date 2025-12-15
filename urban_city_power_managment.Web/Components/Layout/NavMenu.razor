@@ -1,0 +1,219 @@
+﻿<div class="sidebar">
+    <div class="sidebar-header">
+  <a href="/" class="brand">
+  <span class="brand-icon">&#x26A1;</span>
+      <span class="brand-text">Mijn Energie</span>
+ </a>
+    </div>
+
+    <nav class="sidebar-nav">
+  <ul class="nav-list">
+   <li class="nav-item">
+         <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+         <span class="nav-icon">&#x1F3E0;</span>
+ <span class="nav-text">Dashboard</span>
+ </NavLink>
+         </li>
+ <li class="nav-item">
+<NavLink class="nav-link" href="mijn-energie">
+      <span class="nav-icon">&#x1F4CA;</span>
+   <span class="nav-text">Mijn Energie</span>
+  </NavLink>
+   </li>
+   <li class="nav-item">
+  <NavLink class="nav-link" href="tips">
+       <span class="nav-icon">&#x1F4A1;</span>
+          <span class="nav-text">Bespaartips</span>
+  </NavLink>
+            </li>
+        <li class="nav-item">
+  <NavLink class="nav-link" href="leveranciers">
+   <span class="nav-icon">&#x1F3E2;</span>
+        <span class="nav-text">Leveranciers</span>
+    </NavLink>
+       </li>
+        </ul>
+
+        <div class="nav-divider"></div>
+
+        <ul class="nav-list">
+ <li class="nav-item">
+     <NavLink class="nav-link" href="instellingen">
+          <span class="nav-icon">&#x2699;&#xFE0F;</span>
+        <span class="nav-text">Instellingen</span>
+ </NavLink>
+            </li>
+    </ul>
+</nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+   <div class="user-avatar">&#x1F464;</div>
+            <div class="user-details">
+ <span class="user-name">Mijn Account</span>
+  <span class="user-address">Eindhoven</span>
+    </div>
+    </div>
+    </div>
+</div>
+
+<style>
+    .sidebar {
+ width: 260px;
+        height: 100vh;
+        background: linear-gradient(180deg, #1a237e 0%, #283593 100%);
+      color: white;
+        display: flex;
+   flex-direction: column;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .sidebar-header {
+    padding: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+    .brand {
+ display: flex;
+ align-items: center;
+   text-decoration: none;
+        color: white;
+    }
+
+    .brand-icon {
+   font-size: 2rem;
+        margin-right: 0.75rem;
+        font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif;
+    }
+
+    .brand-text {
+    font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .sidebar-nav {
+   flex: 1;
+      padding: 1rem 0;
+        overflow-y: auto;
+  }
+
+    .nav-list {
+        list-style: none;
+        padding: 0;
+      margin: 0;
+    }
+
+    .nav-item {
+        margin: 0.25rem 0.75rem;
+    }
+
+    .nav-link {
+     display: flex;
+        align-items: center;
+     padding: 0.875rem 1rem;
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+ background: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    .nav-link.active {
+  background: rgba(255,255,255,0.2);
+        color: white;
+ font-weight: 500;
+    }
+
+    .nav-icon {
+   font-size: 1.25rem;
+      margin-right: 0.875rem;
+ width: 1.5rem;
+   text-align: center;
+        font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif;
+    }
+
+    .nav-text {
+        font-size: 0.95rem;
+    }
+
+    .nav-divider {
+        height: 1px;
+        background: rgba(255,255,255,0.1);
+        margin: 1rem 1.5rem;
+    }
+
+    .sidebar-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info {
+     display: flex;
+        align-items: center;
+}
+
+    .user-avatar {
+ width: 40px;
+   height: 40px;
+       background: rgba(255,255,255,0.2);
+border-radius: 50%;
+        display: flex;
+ align-items: center;
+        justify-content: center;
+   font-size: 1.25rem;
+        margin-right: 0.75rem;
+ font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif;
+    }
+
+    .user-details {
+      display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .user-address {
+        font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
+    @@media (max-width: 768px) {
+     .sidebar {
+  width: 70px;
+ }
+     
+        .brand-text,
+        .nav-text,
+        .user-details {
+     display: none;
+  }
+    
+      .nav-icon {
+margin-right: 0;
+        }
+        
+        .nav-link {
+     justify-content: center;
+        }
+        
+        .sidebar-header {
+            padding: 1rem;
+         text-align: center;
+}
+        
+   .user-avatar {
+margin-right: 0;
+        }
+    }
+</style>
+

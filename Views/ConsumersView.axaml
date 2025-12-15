@@ -1,0 +1,83 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+     xmlns:vm="using:urban_city_power_managment.ViewModels"
+      mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+x:Class="urban_city_power_managment.Views.ConsumersView"
+   x:DataType="vm:ConsumersViewModel">
+    
+    <ScrollViewer>
+   <StackPanel Spacing="24">
+   <TextBlock Text="{Binding Title}" Classes="header"/>
+
+     <!-- Summary Cards -->
+    <Grid ColumnDefinitions="*,*,*">
+  <Border Classes="card" Grid.Column="0" Margin="0,0,10,0">
+     <StackPanel Spacing="12">
+<TextBlock Text="?? {Binding ConsumptionLabel}" Classes="subheader" FontSize="16"/>
+ <TextBlock Text="{Binding Consumption, StringFormat='{}{0:N1}'}" Classes="metric"/>
+   <TextBlock Text="kWh" Classes="label"/>
+    </StackPanel>
+ </Border>
+
+     <Border Classes="card" Grid.Column="1" Background="#F0FFF0" Margin="0,0,10,0">
+     <StackPanel Spacing="12">
+  <TextBlock Text="?? {Binding SolarReturnLabel}" Classes="subheader" FontSize="16" Foreground="#39870C"/>
+   <TextBlock Text="{Binding SolarReturn, StringFormat='{}{0:N1}'}" Classes="metric" Foreground="#39870C"/>
+       <TextBlock Text="kWh" Classes="label"/>
+      </StackPanel>
+      </Border>
+
+  <Border Classes="card" Grid.Column="2">
+   <StackPanel Spacing="12">
+   <TextBlock Text="?? {Binding NetConsumptionLabel}" Classes="subheader" FontSize="16"/>
+     <TextBlock Text="{Binding NetConsumption, StringFormat='{}{0:N1}'}" Classes="metric"/>
+     <TextBlock Text="kWh" Classes="label"/>
+     </StackPanel>
+ </Border>
+      </Grid>
+
+    <!-- Consumption Chart Placeholder -->
+   <Border Classes="card">
+      <StackPanel Spacing="16">
+     <TextBlock Text="Verbruik Trend (24 uur)" Classes="subheader"/>
+       <Border Background="#F5F5F5" Height="250" CornerRadius="4">
+  <TextBlock Text="?? Grafiek komt hier (AccuWeather integratie)" 
+   HorizontalAlignment="Center" 
+     VerticalAlignment="Center"
+FontSize="16"
+   Foreground="#696969"/>
+      </Border>
+   </StackPanel>
+        </Border>
+
+   <!-- Top Consumers -->
+      <Border Classes="card">
+        <StackPanel Spacing="16">
+       <TextBlock Text="Top Verbruikers Vandaag" Classes="subheader"/>
+  <StackPanel Spacing="8">
+       <Border Background="#F0F8FF" Padding="16" CornerRadius="4">
+     <Grid ColumnDefinitions="*,Auto">
+ <TextBlock Grid.Column="0" Text="Wijk Strijp-S" FontSize="14" FontWeight="SemiBold"/>
+      <TextBlock Grid.Column="1" Text="245.8 kWh" FontSize="14" FontWeight="SemiBold"/>
+        </Grid>
+    </Border>
+         <Border Background="#F0F8FF" Padding="16" CornerRadius="4">
+       <Grid ColumnDefinitions="*,Auto">
+   <TextBlock Grid.Column="0" Text="Wijk Gestel" FontSize="14" FontWeight="SemiBold"/>
+     <TextBlock Grid.Column="1" Text="198.4 kWh" FontSize="14" FontWeight="SemiBold"/>
+     </Grid>
+    </Border>
+       <Border Background="#F0F8FF" Padding="16" CornerRadius="4">
+ <Grid ColumnDefinitions="*,Auto">
+ <TextBlock Grid.Column="0" Text="Wijk Tongelre" FontSize="14" FontWeight="SemiBold"/>
+   <TextBlock Grid.Column="1" Text="176.2 kWh" FontSize="14" FontWeight="SemiBold"/>
+    </Grid>
+        </Border>
+   </StackPanel>
+    </StackPanel>
+   </Border>
+      </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,281 @@
+.page {
+    position: relative;
+    display: flex;
+  flex-direction: column;
+    min-height: 100vh;
+ }
+
+main {
+  flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Rijksoverheid-style sidebar - Dutch Government Blue */
+.sidebar {
+ background: linear-gradient(180deg, #154273 0%, #01689b 50%, #154273 100%);
+}
+
+/* Header styling */
+.top-header {
+    background-color: #154273;
+    color: white;
+ padding: 0.75rem 1.5rem;
+ display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #ffb612;
+}
+
+.top-header .app-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.top-header .header-right {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.top-header .location-info {
+    font-size: 0.9rem;
+}
+
+.top-header .datetime {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.top-row {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: flex-end;
+    height: 3.5rem;
+ display: flex;
+ align-items: center;
+}
+
+    .top-row ::deep a, .top-row ::deep .btn-link {
+      white-space: nowrap;
+        margin-left: 1.5rem;
+    text-decoration: none;
+    }
+
+ .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .top-row ::deep a:first-child {
+     overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+ /* Footer */
+.footer {
+    background-color: #154273;
+    color: white;
+    padding: 1rem;
+    margin-top: auto;
+}
+
+.footer-content {
+ display: flex;
+ justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    font-size: 0.85rem;
+}
+
+.footer-links a {
+    color: #ffb612;
+    text-decoration: none;
+    margin: 0 0.25rem;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+/* Content area */
+.content {
+    padding-top: 1.5rem;
+    flex: 1;
+}
+
+/* Dashboard container */
+.dashboard-container {
+    max-width: 1400px;
+}
+
+/* Stat cards */
+.stat-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+ transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #154273;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* Weather widget */
+.weather-widget .card {
+ background: linear-gradient(135deg, #01689b 0%, #154273 100%);
+    border: none;
+border-radius: 12px;
+}
+
+/* Card improvements */
+.card {
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 600;
+}
+
+/* Table improvements */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    border-top: none;
+    font-weight: 600;
+    color: #154273;
+}
+
+/* Alert improvements */
+.alert {
+    border-radius: 8px;
+}
+
+/* Progress bar improvements */
+.progress {
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+/* Button styling - Rijksoverheid yellow accent */
+.btn-primary {
+    background-color: #01689b;
+    border-color: #01689b;
+}
+
+.btn-primary:hover {
+    background-color: #154273;
+    border-color: #154273;
+}
+
+.btn-warning {
+    background-color: #ffb612;
+    border-color: #ffb612;
+    color: #000;
+}
+
+/* Responsive */
+@media (max-width: 640.98px) {
+    .top-row {
+   justify-content: space-between;
+    }
+
+    .top-row ::deep a, .top-row ::deep .btn-link {
+        margin-left: 0;
+    }
+
+    .top-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .top-header .header-right {
+    flex-direction: column;
+  gap: 0.25rem;
+    }
+
+    .footer-content {
+  flex-direction: column;
+      text-align: center;
+  gap: 0.5rem;
+    }
+}
+
+@media (min-width: 641px) {
+    .page {
+ flex-direction: row;
+  }
+
+    .sidebar {
+    width: 250px;
+     height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .top-row {
+ position: sticky;
+     top: 0;
+     z-index: 1;
+    }
+
+    .top-row.auth ::deep a:first-child {
+flex: 1;
+      text-align: right;
+        width: 0;
+  }
+
+    .top-row, article {
+   padding-left: 2rem !important;
+      padding-right: 1.5rem !important;
+    }
+}
+
+#blazor-error-ui {
+  color-scheme: light only;
+    background: lightyellow;
+    bottom: 0;
+  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+  width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+     top: 0.5rem;
+    }

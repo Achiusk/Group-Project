@@ -1,0 +1,133 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+     xmlns:vm="using:urban_city_power_managment.ViewModels"
+      mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+ x:Class="urban_city_power_managment.Views.PowerGenerationView"
+    x:DataType="vm:PowerGenerationViewModel">
+    
+    <ScrollViewer>
+ <StackPanel Spacing="24">
+       <TextBlock Text="{Binding Title}" Classes="header"/>
+
+        <TextBlock Text="{Binding GenerationOverview}" Classes="subheader" FontSize="18" FontWeight="SemiBold"/>
+
+    <!-- Energy Mix Cards -->
+   <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+   <!-- Wind Energy -->
+<Border Classes="card" Grid.Column="0" BorderBrush="#39870C" BorderThickness="0,0,0,4">
+    <StackPanel Spacing="16">
+      <StackPanel Orientation="Horizontal" Spacing="12">
+   <Border Background="#39870C" CornerRadius="4" Padding="10" Width="50" Height="50">
+ <TextBlock Text="WIND" FontSize="10" FontWeight="Bold" Foreground="White" TextAlignment="Center" VerticalAlignment="Center"/>
+      </Border>
+     <TextBlock Text="{Binding Wind}" Classes="subheader" VerticalAlignment="Center" FontSize="18"/>
+ </StackPanel>
+      <TextBlock Text="{Binding WindPercentage, StringFormat='{}{0}%'}" 
+  FontSize="32"
+     FontWeight="Bold"
+    Foreground="#39870C"/>
+       <ProgressBar Value="{Binding WindPercentage}" 
+     Maximum="100" 
+    Height="12"
+     Foreground="#39870C"/>
+  <StackPanel Spacing="4">
+<TextBlock Text="Capaciteit: 569 MW" Classes="body"/>
+       <TextBlock Text="Status: Operationeel" Classes="body" Foreground="#39870C" FontWeight="SemiBold"/>
+  <TextBlock Text="24 Turbines actief" Classes="label" Foreground="#666"/>
+     </StackPanel>
+   </StackPanel>
+      </Border>
+
+ <!-- Water Energy -->
+      <Border Classes="card" Grid.Column="1" BorderBrush="#01689B" BorderThickness="0,0,0,4">
+       <StackPanel Spacing="16">
+    <StackPanel Orientation="Horizontal" Spacing="12">
+<Border Background="#01689B" CornerRadius="4" Padding="10" Width="50" Height="50">
+       <TextBlock Text="WATER" FontSize="9" FontWeight="Bold" Foreground="White" TextAlignment="Center" VerticalAlignment="Center"/>
+   </Border>
+ <TextBlock Text="{Binding Water}" Classes="subheader" VerticalAlignment="Center" FontSize="18"/>
+  </StackPanel>
+    <TextBlock Text="{Binding WaterPercentage, StringFormat='{}{0}%'}" 
+   FontSize="32"
+         FontWeight="Bold"
+    Foreground="#01689B"/>
+    <ProgressBar Value="{Binding WaterPercentage}" 
+      Maximum="100" 
+     Height="12"
+Foreground="#01689B"/>
+  <StackPanel Spacing="4">
+      <TextBlock Text="Capaciteit: 569 MW" Classes="body"/>
+      <TextBlock Text="Status: Operationeel" Classes="body" Foreground="#39870C" FontWeight="SemiBold"/>
+    <TextBlock Text="8 Waterkrachtcentrales" Classes="label" Foreground="#666"/>
+</StackPanel>
+</StackPanel>
+ </Border>
+
+  <!-- Coal Energy -->
+ <Border Classes="card" Grid.Column="2" BorderBrush="#696969" BorderThickness="0,0,0,4">
+<StackPanel Spacing="16">
+      <StackPanel Orientation="Horizontal" Spacing="12">
+       <Border Background="#696969" CornerRadius="4" Padding="10" Width="50" Height="50">
+       <TextBlock Text="COAL" FontSize="10" FontWeight="Bold" Foreground="White" TextAlignment="Center" VerticalAlignment="Center"/>
+      </Border>
+  <TextBlock Text="{Binding Coal}" Classes="subheader" VerticalAlignment="Center" FontSize="18"/>
+    </StackPanel>
+ <TextBlock Text="{Binding CoalPercentage, StringFormat='{}{0}%'}" 
+   FontSize="32"
+       FontWeight="Bold"
+     Foreground="#696969"/>
+<ProgressBar Value="{Binding CoalPercentage}" 
+     Maximum="100" 
+       Height="12"
+    Foreground="#696969"/>
+     <StackPanel Spacing="4">
+ <TextBlock Text="Capaciteit: 1,707 MW" Classes="body"/>
+    <TextBlock Text="Status: Operationeel" Classes="body" Foreground="#E17000" FontWeight="SemiBold"/>
+     <TextBlock Text="Transitie naar duurzaam gepland" Classes="label" Foreground="#666"/>
+    </StackPanel>
+    </StackPanel>
+       </Border>
+   </Grid>
+
+<!-- Total Generation Summary -->
+   <Border Classes="card">
+   <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
+     <TextBlock Grid.Row="0" Grid.ColumnSpan="2" 
+   Text="Totale Productie Overzicht" 
+      Classes="subheader" FontSize="18" FontWeight="SemiBold"/>
+     
+    <TextBlock Grid.Row="1" Grid.Column="0" Text="Totale Capaciteit:" Classes="body" FontWeight="SemiBold" Margin="0,8,16,0"/>
+  <TextBlock Grid.Row="1" Grid.Column="1" Text="2,845 MW" Classes="body" HorizontalAlignment="Right" Margin="0,8,0,0"/>
+   
+   <TextBlock Grid.Row="2" Grid.Column="0" Text="Huidige Output:" Classes="body" FontWeight="SemiBold" Margin="0,8,16,0"/>
+   <TextBlock Grid.Row="2" Grid.Column="1" Text="2,156 MW (76%)" Classes="body" HorizontalAlignment="Right" Margin="0,8,0,0"/>
+        
+ <TextBlock Grid.Row="3" Grid.Column="0" Text="Duurzaamheidspercentage:" Classes="body" FontWeight="SemiBold" Margin="0,8,16,0"/>
+      <TextBlock Grid.Row="3" Grid.Column="1" Text="40%" Classes="body" HorizontalAlignment="Right" Foreground="#39870C" FontWeight="Bold" Margin="0,8,0,0"/>
+    </Grid>
+     </Border>
+
+  <!-- Environmental Impact -->
+   <Border Classes="card" Background="#F0FFF0" BorderBrush="#39870C" BorderThickness="2">
+  <StackPanel Spacing="12">
+    <StackPanel Orientation="Horizontal" Spacing="12">
+          <Border Background="#39870C" CornerRadius="4" Padding="8,4">
+    <TextBlock Text="ECO" FontSize="12" FontWeight="Bold" Foreground="White"/>
+      </Border>
+  <TextBlock Text="Milieu Impact" Classes="subheader" Foreground="#39870C" FontSize="18" FontWeight="SemiBold"/>
+   </StackPanel>
+    <TextBlock Text="Door hernieuwbare energie te verhogen naar 40%, bespaart Eindhoven jaarlijks:" 
+Classes="body"
+     TextWrapping="Wrap"/>
+      <StackPanel Spacing="6" Margin="20,0,0,0">
+    <TextBlock Text="• 250,000 ton CO?-uitstoot" Classes="body"/>
+    <TextBlock Text="• Equivalent aan 54,000 auto's van de weg" Classes="body"/>
+       <TextBlock Text="• Energie voor 85,000 huishoudens" Classes="body"/>
+       </StackPanel>
+      </StackPanel>
+ </Border>
+ </StackPanel>
+ </ScrollViewer>
+</UserControl>

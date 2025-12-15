@@ -1,0 +1,124 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+     xmlns:vm="using:urban_city_power_managment.ViewModels"
+       mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+    x:Class="urban_city_power_managment.Views.SettingsView"
+  x:DataType="vm:SettingsViewModel">
+    
+    <ScrollViewer>
+   <StackPanel Spacing="24" MaxWidth="800">
+    <TextBlock Text="{Binding Title}" Classes="header"/>
+
+      <!-- Language Settings -->
+       <Border Classes="card">
+    <StackPanel Spacing="16">
+       <TextBlock Text="{Binding LanguageLabel}" Classes="subheader"/>
+<TextBlock Text="Selecteer uw voorkeurstaal" Classes="body" Margin="0,0,0,12"/>
+     
+  <StackPanel Spacing="12">
+   <Button Click="OnSetDutchClick" Classes="secondary" HorizontalAlignment="Stretch" Cursor="Hand">
+ <Grid ColumnDefinitions="Auto,*,Auto">
+   <Border Grid.Column="0" Background="#01689B" CornerRadius="4" Padding="8,4" Margin="0,0,12,0">
+      <TextBlock Text="NL" FontSize="14" FontWeight="Bold" Foreground="White"/>
+ </Border>
+ <TextBlock Grid.Column="1" Text="{Binding DutchLabel}" FontSize="16" VerticalAlignment="Center"/>
+     <TextBlock Grid.Column="2" Text="?" FontSize="20" Foreground="#39870C" VerticalAlignment="Center"/>
+  </Grid>
+       </Button>
+     
+     <Button Click="OnSetEnglishClick" Classes="secondary" HorizontalAlignment="Stretch" Cursor="Hand">
+ <Grid ColumnDefinitions="Auto,*">
+        <Border Grid.Column="0" Background="#01689B" CornerRadius="4" Padding="8,4" Margin="0,0,12,0">
+     <TextBlock Text="EN" FontSize="14" FontWeight="Bold" Foreground="White"/>
+         </Border>
+ <TextBlock Grid.Column="1" Text="{Binding EnglishLabel}" FontSize="16" VerticalAlignment="Center"/>
+   </Grid>
+   </Button>
+     </StackPanel>
+   </StackPanel>
+ </Border>
+
+<!-- Theme Settings -->
+    <Border Classes="card">
+  <StackPanel Spacing="16">
+    <TextBlock Text="{Binding ThemeLabel}" Classes="subheader"/>
+  <TextBlock Text="Kies tussen lichte of donkere modus" Classes="body" Margin="0,0,0,12"/>
+        
+       <StackPanel Spacing="12">
+  <Button Click="OnSetLightThemeClick" Classes="secondary" HorizontalAlignment="Stretch" Cursor="Hand">
+   <Grid ColumnDefinitions="Auto,*,Auto">
+   <Border Grid.Column="0" Background="#FDB515" CornerRadius="4" Padding="8,4" Margin="0,0,12,0">
+    <TextBlock Text="LIGHT" FontSize="12" FontWeight="Bold" Foreground="White"/>
+    </Border>
+ <TextBlock Grid.Column="1" Text="{Binding LightModeLabel}" FontSize="16" VerticalAlignment="Center"/>
+      <TextBlock Grid.Column="2" Text="?" FontSize="20" Foreground="#39870C" VerticalAlignment="Center"/>
+      </Grid>
+       </Button>
+       
+       <Button Click="OnSetDarkThemeClick" Classes="secondary" HorizontalAlignment="Stretch" Cursor="Hand">
+ <Grid ColumnDefinitions="Auto,*">
+  <Border Grid.Column="0" Background="#154273" CornerRadius="4" Padding="8,4" Margin="0,0,12,0">
+       <TextBlock Text="DARK" FontSize="12" FontWeight="Bold" Foreground="White"/>
+ </Border>
+ <TextBlock Grid.Column="1" Text="{Binding DarkModeLabel}" FontSize="16" VerticalAlignment="Center"/>
+     </Grid>
+   </Button>
+  </StackPanel>
+    </StackPanel>
+ </Border>
+
+     <!-- Security Settings (2FA Placeholder) -->
+       <Border Classes="card" Background="#F0F8FF" BorderBrush="#01689B" BorderThickness="2">
+  <StackPanel Spacing="16">
+  <StackPanel Orientation="Horizontal" Spacing="12">
+         <Border Background="#D32F2F" CornerRadius="4" Padding="8,4">
+    <TextBlock Text="SECURITY" FontSize="12" FontWeight="Bold" Foreground="White"/>
+       </Border>
+    <TextBlock Text="Beveiliging" Classes="subheader"/>
+    </StackPanel>
+  <TextBlock Text="Two-Factor Authentication (2FA)" Classes="body" FontWeight="SemiBold"/>
+       <TextBlock Text="Configureer Microsoft Authenticator voor extra beveiliging" 
+        Classes="body" 
+     TextWrapping="Wrap"
+     Margin="0,0,0,12"/>
+    <Button Classes="primary" HorizontalAlignment="Left">
+        <TextBlock Text="2FA Instellen" FontWeight="SemiBold"/>
+ </Button>
+   </StackPanel>
+      </Border>
+
+ <!-- Azure Integration Info -->
+       <Border Classes="card" Background="#F0FFF0" BorderBrush="#39870C" BorderThickness="2">
+     <StackPanel Spacing="16">
+    <StackPanel Orientation="Horizontal" Spacing="12">
+        <Border Background="#0078D4" CornerRadius="4" Padding="8,4">
+        <TextBlock Text="CLOUD" FontSize="12" FontWeight="Bold" Foreground="White"/>
+          </Border>
+<TextBlock Text="Azure Cloud" Classes="subheader" Foreground="#39870C"/>
+       </StackPanel>
+        <TextBlock Text="Deze applicatie is voorbereid voor Azure hosting" 
+Classes="body" 
+      TextWrapping="Wrap"/>
+       <StackPanel Spacing="6" Margin="12,0,0,0">
+        <TextBlock Text="• Azure App Service ondersteuning" Classes="body"/>
+  <TextBlock Text="• Application Insights monitoring" Classes="body"/>
+        <TextBlock Text="• Azure Key Vault voor geheimen" Classes="body"/>
+    <TextBlock Text="• Microsoft Entra ID (Azure AD) authenticatie" Classes="body"/>
+       </StackPanel>
+ </StackPanel>
+ </Border>
+
+    <!-- About Section -->
+<Border Classes="card">
+ <StackPanel Spacing="12">
+  <TextBlock Text="Over deze applicatie" Classes="subheader"/>
+       <TextBlock Text="Stedelijk Energiebeheer Eindhoven" FontSize="16" FontWeight="SemiBold"/>
+   <TextBlock Text="Versie 1.0.0" Classes="body" Foreground="#696969"/>
+ <TextBlock Text="© 2024 Gemeente Eindhoven" Classes="body" Foreground="#696969"/>
+      </StackPanel>
+   </Border>
+  </StackPanel>
+    </ScrollViewer>
+</UserControl>

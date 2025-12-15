@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:urban_city_power_managment.ViewModels"
+  mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+   x:Class="urban_city_power_managment.Views.BusinessesView"
+   x:DataType="vm:BusinessesViewModel">
+    
+  <ScrollViewer>
+  <StackPanel Spacing="24">
+   <TextBlock Text="{Binding Title}" Classes="header"/>
+
+     <!--Summary Cards -->
+    <Grid ColumnDefinitions="*,*,*">
+        <Border Classes="card" Grid.Column="0" Margin="0,0,10,0">
+<StackPanel Spacing="12">
+      <TextBlock Text="?? {Binding ConsumptionLabel}" Classes="subheader" FontSize="16"/>
+     <TextBlock Text="{Binding Consumption, StringFormat='{}{0:N1}'}" Classes="metric"/>
+       <TextBlock Text="kWh" Classes="label"/>
+  </StackPanel>
+ </Border>
+
+        <Border Classes="card" Grid.Column="1" Background="#F0FFF0" Margin="0,0,10,0">
+  <StackPanel Spacing="12">
+      <TextBlock Text="?? {Binding SolarReturnLabel}" Classes="subheader" FontSize="16" Foreground="#39870C"/>
+   <TextBlock Text="{Binding SolarReturn, StringFormat='{}{0:N1}'}" Classes="metric" Foreground="#39870C"/>
+<TextBlock Text="kWh" Classes="label"/>
+ </StackPanel>
+     </Border>
+
+        <Border Classes="card" Grid.Column="2">
+    <StackPanel Spacing="12">
+        <TextBlock Text="?? {Binding NetConsumptionLabel}" Classes="subheader" FontSize="16"/>
+<TextBlock Text="{Binding NetConsumption, StringFormat='{}{0:N1}'}" Classes="metric"/>
+ <TextBlock Text="kWh" Classes="label"/>
+       </StackPanel>
+      </Border>
+  </Grid>
+
+      <!-- Business Type Breakdown -->
+      <Border Classes="card">
+      <StackPanel Spacing="16">
+    <TextBlock Text="Verbruik per Sector" Classes="subheader"/>
+   <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+     <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4" Margin="0,0,6,6">
+ <TextBlock Text="Industrie" Classes="label"/>
+        <ProgressBar Value="65" Maximum="100" Height="8"/>
+   <TextBlock Text="3,692 kWh (65%)" FontSize="14"/>
+     </StackPanel>
+     
+   <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4" Margin="6,0,0,6">
+ <TextBlock Text="Retail" Classes="label"/>
+ <ProgressBar Value="20" Maximum="100" Height="8"/>
+    <TextBlock Text="1,136 kWh (20%)" FontSize="14"/>
+      </StackPanel>
+  
+     <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4" Margin="0,6,6,0">
+ <TextBlock Text="Kantoren" Classes="label"/>
+ <ProgressBar Value="10" Maximum="100" Height="8"/>
+<TextBlock Text="568 kWh (10%)" FontSize="14"/>
+   </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" Margin="6,6,0,0">
+   <TextBlock Text="Overig" Classes="label"/>
+     <ProgressBar Value="5" Maximum="100" Height="8"/>
+<TextBlock Text="284 kWh (5%)" FontSize="14"/>
+   </StackPanel>
+     </Grid>
+      </StackPanel>
+  </Border>
+
+<!-- Top Business Consumers -->
+    <Border Classes="card">
+   <StackPanel Spacing="16">
+     <TextBlock Text="Top Bedrijven Vandaag" Classes="subheader"/>
+   <StackPanel Spacing="8">
+  <Border Background="#FFF5E6" Padding="16" CornerRadius="4" BorderBrush="#E17000" BorderThickness="1">
+   <Grid ColumnDefinitions="*,Auto,Auto">
+    <StackPanel Grid.Column="0" Spacing="2">
+       <TextBlock Text="ASML Eindhoven" FontSize="14" FontWeight="Bold"/>
+      <TextBlock Text="High-tech industrie" FontSize="12" Foreground="#696969"/>
+  </StackPanel>
+<Border Grid.Column="1" Classes="status-warning" Margin="0,0,12,0">
+  <TextBlock Text="Hoog" FontSize="11" Foreground="White" FontWeight="SemiBold"/>
+         </Border>
+   <TextBlock Grid.Column="2" Text="1,856 kWh" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+ </Grid>
+ </Border>
+    
+  <Border Background="#F0F8FF" Padding="16" CornerRadius="4">
+ <Grid ColumnDefinitions="*,Auto">
+<StackPanel Grid.Column="0" Spacing="2">
+        <TextBlock Text="Philips Research" FontSize="14" FontWeight="SemiBold"/>
+  <TextBlock Text="Onderzoek en Ontwikkeling" FontSize="12" Foreground="#696969"/>
+      </StackPanel>
+      <TextBlock Grid.Column="1" Text="1,245 kWh" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+     </Grid>
+     </Border>
+      
+       <Border Background="#F0F8FF" Padding="16" CornerRadius="4">
+        <Grid ColumnDefinitions="*,Auto">
+      <StackPanel Grid.Column="0" Spacing="2">
+    <TextBlock Text="DAF Trucks" FontSize="14" FontWeight="SemiBold"/>
+  <TextBlock Text="Productie" FontSize="12" Foreground="#696969"/>
+   </StackPanel>
+    <TextBlock Grid.Column="1" Text="987 kWh" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+     </Grid>
+     </Border>
+    </StackPanel>
+   </StackPanel>
+   </Border>
+ </StackPanel>
+    </ScrollViewer>
+</UserControl>

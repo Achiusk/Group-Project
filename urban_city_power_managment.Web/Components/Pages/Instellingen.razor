@@ -1,0 +1,202 @@
+@page "/instellingen"
+
+<PageTitle>Instellingen - Mijn Energie</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+       <h1>?? Instellingen</h1>
+         <p class="lead">Beheer je account en voorkeuren</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Profile Settings -->
+    <div class="card mb-4">
+        <div class="card-header">
+     <h5 class="mb-0">?? Mijn Profiel</h5>
+ </div>
+ <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+      <label class="form-label">Naam</label>
+    <input type="text" class="form-control" value="Jan de Vries" />
+     </div>
+        <div class="col-md-6">
+    <label class="form-label">E-mailadres</label>
+        <input type="email" class="form-control" value="jan.devries@email.nl" />
+               </div>
+ </div>
+ <div class="row mb-3">
+   <div class="col-md-6">
+       <label class="form-label">Adres</label>
+    <input type="text" class="form-control" value="Strijpsestraat 1" />
+</div>
+  <div class="col-md-3">
+       <label class="form-label">Postcode</label>
+       <input type="text" class="form-control" value="5616 AA" />
+   </div>
+   <div class="col-md-3">
+     <label class="form-label">Plaats</label>
+         <input type="text" class="form-control" value="Eindhoven" readonly />
+     </div>
+   </div>
+      <button class="btn btn-primary">Opslaan</button>
+  </div>
+   </div>
+
+          <!-- Meter Settings -->
+     <div class="card mb-4">
+  <div class="card-header">
+      <h5 class="mb-0">?? Mijn Slimme Meter</h5>
+  </div>
+  <div class="card-body">
+  <div class="row mb-3">
+            <div class="col-md-6">
+ <label class="form-label">Meter ID</label>
+       <input type="text" class="form-control" value="E0000001" readonly />
+ <small class="text-muted">Dit is je unieke meter identificatie</small>
+ </div>
+          <div class="col-md-6">
+     <label class="form-label">Type meter</label>
+      <input type="text" class="form-control" value="DSMR 5.0" readonly />
+      </div>
+          </div>
+        <div class="alert alert-info">
+        <strong>?? P1 Poort</strong><br />
+      Je slimme meter heeft een P1 poort waarmee we je verbruik kunnen uitlezen. 
+     Deze data wordt veilig opgeslagen en alleen voor jou gebruikt.
+    </div>
+    </div>
+   </div>
+
+  <!-- Notification Settings -->
+  <div class="card mb-4">
+  <div class="card-header">
+      <h5 class="mb-0">?? Meldingen</h5>
+ </div>
+     <div class="card-body">
+       <div class="form-check form-switch mb-3">
+               <input class="form-check-input" type="checkbox" id="notifyHighUsage" checked>
+      <label class="form-check-label" for="notifyHighUsage">
+      Waarschuw bij hoog verbruik
+  </label>
+     </div>
+       <div class="form-check form-switch mb-3">
+     <input class="form-check-input" type="checkbox" id="notifyTips" checked>
+        <label class="form-check-label" for="notifyTips">
+      Stuur me energiebespaartips
+     </label>
+    </div>
+       <div class="form-check form-switch mb-3">
+   <input class="form-check-input" type="checkbox" id="notifyOffers">
+ <label class="form-check-label" for="notifyOffers">
+ Ontvang aanbiedingen van leveranciers
+      </label>
+       </div>
+       <div class="form-check form-switch mb-3">
+        <input class="form-check-input" type="checkbox" id="weeklyReport" checked>
+ <label class="form-check-label" for="weeklyReport">
+  Wekelijks verbruiksoverzicht per e-mail
+    </label>
+          </div>
+ </div>
+</div>
+
+            <!-- Privacy Settings -->
+   <div class="card mb-4">
+                <div class="card-header">
+   <h5 class="mb-0">?? Privacy</h5>
+  </div>
+  <div class="card-body">
+       <div class="form-check form-switch mb-3">
+         <input class="form-check-input" type="checkbox" id="shareData" checked>
+  <label class="form-check-label" for="shareData">
+     Deel geanonimiseerde data voor wijkstatistieken
+  </label>
+   </div>
+<div class="form-check form-switch mb-3">
+   <input class="form-check-input" type="checkbox" id="compareNeighbors" checked>
+     <label class="form-check-label" for="compareNeighbors">
+    Vergelijk mijn verbruik met de wijk
+      </label>
+       </div>
+          <p class="text-muted small">
+    Je persoonlijke gegevens worden nooit gedeeld met derden. 
+       <a href="#">Lees ons privacybeleid</a>
+    </p>
+       </div>
+  </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+ <!-- Quick Stats -->
+    <div class="card mb-4">
+          <div class="card-header bg-primary text-white">
+         <h5 class="mb-0">?? Mijn Statistieken</h5>
+     </div>
+           <div class="card-body">
+       <div class="stat-item mb-3">
+  <small class="text-muted">Lid sinds</small>
+    <p class="mb-0"><strong>Januari 2024</strong></p>
+</div>
+      <div class="stat-item mb-3">
+     <small class="text-muted">Totale besparing</small>
+  <p class="mb-0 text-success"><strong>€ 234,50</strong></p>
+         </div>
+<div class="stat-item mb-3">
+ <small class="text-muted">Toegepaste tips</small>
+    <p class="mb-0"><strong>8 van 15</strong></p>
+     </div>
+   <div class="stat-item">
+<small class="text-muted">Energie label</small>
+      <p class="mb-0"><span class="badge bg-success fs-5">B</span></p>
+       </div>
+        </div>
+    </div>
+
+            <!-- Solar Panel Status -->
+<div class="card mb-4">
+        <div class="card-header bg-warning">
+      <h5 class="mb-0">?? Zonnepanelen</h5>
+      </div>
+      <div class="card-body">
+        <div class="form-check form-switch mb-3">
+     <input class="form-check-input" type="checkbox" id="hasSolar" checked>
+ <label class="form-check-label" for="hasSolar">
+   Ik heb zonnepanelen
+     </label>
+  </div>
+      <div class="mb-3">
+      <label class="form-label">Aantal panelen</label>
+ <input type="number" class="form-control" value="12" />
+    </div>
+       <div class="mb-3">
+ <label class="form-label">Installatie jaar</label>
+   <input type="number" class="form-control" value="2022" />
+         </div>
+        </div>
+            </div>
+
+        <!-- Help -->
+  <div class="card">
+     <div class="card-body text-center">
+      <h5>Hulp nodig?</h5>
+                    <p class="text-muted small">Neem contact op met onze klantenservice</p>
+  <a href="mailto:support@mijnenergie.nl" class="btn btn-outline-primary btn-sm mb-2 w-100">
+  ?? E-mail ons
+      </a>
+ <a href="tel:0401234567" class="btn btn-outline-primary btn-sm w-100">
+   ?? 040-123 4567
+         </a>
+  </div>
+      </div>
+      </div>
+    </div>
+</div>
+
+@code {
+    // Settings logic would go here
+}
