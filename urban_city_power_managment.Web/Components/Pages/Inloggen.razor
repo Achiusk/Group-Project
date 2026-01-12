@@ -1,0 +1,161 @@
+@page "/inloggen"
+@using urban_city_power_managment.Web.Models
+@using urban_city_power_managment.Web.Services
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Inloggen - Mijn Energie</PageTitle>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+         <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+          <h2 class="mb-0">Inloggen</h2>
+     <p class="mb-0 opacity-75">Welkom terug!</p>
+          </div>
+                <div class="card-body p-4">
+                 
+      @if (!string.IsNullOrEmpty(errorMessage))
+   {
+             <div class="alert alert-danger alert-dismissible fade show" role="alert">
+       <strong>Fout:</strong> @errorMessage
+    <button type="button" class="btn-close" @onclick="ClearError"></button>
+            </div>
+      }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+          {
+     <div class="alert alert-success">
+       @successMessage
+     </div>
+        }
+
+     <EditForm Model="@model" OnValidSubmit="HandleLogin">
+   <DataAnnotationsValidator />
+         
+      <div class="mb-3">
+      <label class="form-label">E-mailadres</label>
+  <input type="email" class="form-control" 
+                   @bind="model.Email" 
+             placeholder="jan.devries@email.nl" />
+     <ValidationMessage For="@(() => model.Email)" />
+               </div>
+
+          <div class="mb-3">
+        <label class="form-label">Wachtwoord</label>
+               <div class="input-group">
+            <input type="@(showPassword ? "text" : "password")" class="form-control" 
+                  @bind="model.Password" 
+          placeholder="Je wachtwoord" />
+   <button class="btn btn-outline-secondary" type="button" @onclick="TogglePassword">
+    @(showPassword ? "Verberg" : "Toon")
+      </button>
+     </div>
+    <ValidationMessage For="@(() => model.Password)" />
+           </div>
+
+   <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="form-check">
+               <input type="checkbox" class="form-check-input" id="rememberMe" @bind="model.RememberMe" />
+      <label class="form-check-label" for="rememberMe">Onthoud mij</label>
+      </div>
+ <a href="/wachtwoord-vergeten" class="text-decoration-none">Wachtwoord vergeten?</a>
+            </div>
+
+    <button type="submit" class="btn btn-primary w-100 btn-lg" disabled="@isLoggingIn">
+           @if (isLoggingIn)
+   {
+          <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+       <text>Bezig met inloggen...</text>
+          }
+      else
+       {
+        <text>Inloggen</text>
+    }
+            </button>
+    </EditForm>
+
+        <hr class="my-4" />
+
+        <div class="text-center">
+       <p class="text-muted mb-3">Of log in met</p>
+                  <div class="d-grid gap-2">
+        <button class="btn btn-outline-secondary" disabled>
+        Google (Binnenkort beschikbaar)
+         </button>
+   </div>
+  </div>
+          </div>
+        <div class="card-footer text-center py-3 bg-light">
+               Nog geen account? <a href="/registreren" class="fw-bold">Registreren</a>
+         </div>
+            </div>
+
+       <div class="card mt-4 bg-light border-0">
+     <div class="card-body">
+                    <h6 class="mb-2">Tip</h6>
+    <p class="small text-muted mb-0">
+        Gebruik een sterk wachtwoord en deel je inloggegevens nooit met anderen.
+  Als je vermoedt dat iemand toegang heeft tot je account, wijzig dan direct je wachtwoord.
+ </p>
+       </div>
+      </div>
+      </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel model = new();
+    private bool showPassword = false;
+    private bool isLoggingIn = false;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+
+    protected override void OnInitialized()
+    {
+    var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+     if (uri.Query.Contains("registered=true"))
+        {
+         successMessage = "Je account is aangemaakt! Je kunt nu inloggen.";
+   }
+    }
+
+    private void ClearError()
+    {
+        errorMessage = string.Empty;
+    }
+
+    private void TogglePassword()
+    {
+        showPassword = !showPassword;
+    }
+
+    private async Task HandleLogin()
+    {
+        isLoggingIn = true;
+        errorMessage = string.Empty;
+
+      try
+        {
+   var (success, message, user) = await AuthService.LoginAsync(model);
+
+       if (success && user != null)
+          {
+        Navigation.NavigateTo("/", forceLoad: true);
+            }
+   else
+            {
+      errorMessage = message;
+          }
+        }
+        catch (Exception)
+    {
+            errorMessage = "Er is een fout opgetreden. Probeer het later opnieuw.";
+        }
+        finally
+    {
+     isLoggingIn = false;
+   }
+    }
+}

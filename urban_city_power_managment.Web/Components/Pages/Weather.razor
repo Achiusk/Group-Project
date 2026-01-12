@@ -1,63 +1,291 @@
-﻿@page "/weather"
+﻿@page "/weer"
+@using urban_city_power_managment.Web.Models
+@using urban_city_power_managment.Web.Services
+@inject IWeatherService WeatherService
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>Weer - Eindhoven Energie</PageTitle>
 
-<h1>Weather</h1>
+<div class="container-fluid">
+    <div class="row mb-4">
+   <div class="col">
+            <h1><span class="emoji">🌤️</span> Weer Eindhoven</h1>
+ <p class="lead">Actuele weersomstandigheden en impact op energieverbruik</p>
+        </div>
+ </div>
 
-<p>This component demonstrates showing data.</p>
+    @if (currentWeather != null)
+    {
+        <!-- Current Weather -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+  <div class="card weather-card-main">
+         <div class="card-body text-center p-5">
+            <span class="weather-icon">@((MarkupString)GetWeatherIcon())</span>
+             <h1 class="display-1 mb-0">@currentWeather.Temperature.ToString("F0")°C</h1>
+ <p class="lead" style="color: rgba(255,255,255,0.8);">Eindhoven, Nederland</p>
+            <p class="mb-0">
+      Luchtvochtigheid: @currentWeather.Humidity%
+              </p>
+<p style="color: rgba(255,255,255,0.7);" class="small">
+    Wind: @currentWeather.WindSpeed.ToString("F1") km/h
+              </p>
+              </div>
+ </div>
+  </div>
+            <div class="col-md-6">
+         <div class="card h-100">
+       <div class="card-header">
+     <h5 class="mb-0"><span class="emoji">⚡</span> Weer & Energie Impact</h5>
+    </div>
+      <div class="card-body">
+            <div class="impact-item mb-3 p-3 rounded @GetSolarImpactClass()">
+           <div class="d-flex align-items-center">
+    <span class="emoji me-3" style="font-size: 2rem;">☀️</span>
+           <div>
+   <strong>Zonne-energie</strong>
+      <p class="mb-0 small">@GetSolarImpactText()</p>
+       </div>
+    </div>
+         </div>
+      <div class="impact-item mb-3 p-3 rounded @GetWindImpactClass()">
+  <div class="d-flex align-items-center">
+        <span class="emoji me-3" style="font-size: 2rem;">🌬️</span>
+           <div>
+               <strong>Windenergie</strong>
+          <p class="mb-0 small">@GetWindImpactText()</p>
+     </div>
+              </div>
+          </div>
+      <div class="impact-item p-3 rounded @GetHeatingImpactClass()">
+   <div class="d-flex align-items-center">
+      <span class="emoji me-3" style="font-size: 2rem;">🏠</span>
+        <div>
+              <strong>Verwarmingsbehoefte</strong>
+      <p class="mb-0 small">@GetHeatingImpactText()</p>
+           </div>
+            </div>
+      </div>
+ </div>
+                </div>
+            </div>
+        </div>
 
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th aria-label="Temperature in Celsius">Temp. (C)</th>
-                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        <!-- Forecast -->
+   <div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0"><span class="emoji">📅</span> 5-Daagse Voorspelling</h5>
+          </div>
+            <div class="card-body">
+     <div class="row text-center">
+     @foreach (var day in forecast)
+          {
+     <div class="col">
+              <div class="forecast-day p-3">
+        <p class="mb-1 fw-bold">@day.Date.ToString("ddd", new System.Globalization.CultureInfo("nl-NL"))</p>
+         <span class="emoji" style="font-size: 2rem;">@((MarkupString)GetWeatherIconForTemp(day.TemperatureC))</span>
+            <p class="mb-0 mt-2">
+      <span class="text-danger">@day.TemperatureC°</span>
+      </p>
+        <small class="text-muted">@day.Summary</small>
+         </div>
+     </div>
+  }
+    </div>
+            </div>
+     </div>
+
+    <!-- Energy Tips Based on Weather -->
+        <div class="card mb-4 bg-light">
+  <div class="card-body">
+   <h5><span class="emoji">💡</span> Tips voor vandaag</h5>
+      <div class="row mt-3">
+            @if (currentWeather.Temperature > 20)
+         {
+             <div class="col-md-4 mb-3">
+   <div class="tip-item p-3 bg-white rounded">
+          <span class="emoji">🧊</span> Het is warm! Vermijd overmatig gebruik van airco - zet ramen open voor natuurlijke ventilatie.
+   </div>
+     </div>
+              }
+        @if (currentWeather.Temperature < 10)
+  {
+             <div class="col-md-4 mb-3">
+    <div class="tip-item p-3 bg-white rounded">
+         <span class="emoji">🌡️</span> Koud weer verwacht. Optimaliseer je verwarming door de thermostaat op 19°C te zetten.
+                 </div>
+        </div>
+        }
+          @if (currentWeather.WindSpeed > 15)
+       {
+             <div class="col-md-4 mb-3">
+              <div class="tip-item p-3 bg-white rounded">
+        <span class="emoji">🌬️</span> Winderig weer! Windenergie productie is hoog - ideaal moment om energie-intensieve taken te doen.
+                </div>
+     </div>
+     }
+    @if (DateTime.Now.Hour >= 10 && DateTime.Now.Hour <= 15)
+      {
+            <div class="col-md-4 mb-3">
+          <div class="tip-item p-3 bg-white rounded">
+           <span class="emoji">☀️</span> Piekuren voor zonne-energie! Als je zonnepanelen hebt, is dit het moment om wasmachine of vaatwasser te draaien.
+        </div>
+     </div>
+       }
+    @if (currentWeather.Temperature >= 10 && currentWeather.Temperature <= 20 && currentWeather.WindSpeed <= 15)
+      {
+   <div class="col-md-4 mb-3">
+  <div class="tip-item p-3 bg-white rounded">
+        <span class="emoji">✅</span> Perfecte weersomstandigheden! Ideaal om te luchten en energie te besparen.
+  </div>
+     </div>
+   }
+        </div>
+      </div>
+        </div>
+ }
+    else
+    {
+    <div class="text-center p-5">
+  <div class="spinner-border text-primary" role="status">
+           <span class="visually-hidden">Laden...</span>
+            </div>
+          <p class="mt-3">Weergegevens worden geladen...</p>
+        </div>
+    }
+</div>
+
+<style>
+    .weather-card-main {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+  border-radius: 16px;
+    }
+    .weather-icon {
+        font-size: 5rem;
+   display: block;
+        margin-bottom: 1rem;
+    }
+    .impact-item {
+        transition: all 0.2s;
+ }
+    .impact-good {
+        background: #e8f5e9;
+        border-left: 4px solid #4caf50;
+    }
+    .impact-moderate {
+     background: #fff8e1;
+        border-left: 4px solid #ff9800;
+    }
+ .impact-low {
+        background: #ffebee;
+   border-left: 4px solid #f44336;
+    }
+    .forecast-day {
+   border-radius: 12px;
+ transition: all 0.2s;
+    }
+    .forecast-day:hover {
+        background: #f8f9fa;
+    }
+    .tip-item {
+        border-left: 3px solid #667eea;
+    }
+    .emoji {
+ font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Symbol", sans-serif;
+    }
+</style>
 
 @code {
-    private WeatherForecast[]? forecasts;
+  private WeatherData? currentWeather;
+    private List<ForecastDay> forecast = new();
 
-    protected override async Task OnInitializedAsync()
+  protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate a loading indicator
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+        currentWeather = await WeatherService.GetCurrentWeatherAsync();
+  GenerateForecast();
     }
 
-    private class WeatherForecast
+    private void GenerateForecast()
     {
-        public DateOnly Date { get; set; }
+        var random = new Random();
+   var summaries = new[] { "Zonnig", "Bewolkt", "Regen", "Wisselend", "Helder" };
+ 
+      for (int i = 1; i <= 5; i++)
+   {
+            forecast.Add(new ForecastDay
+            {
+          Date = DateOnly.FromDateTime(DateTime.Now.AddDays(i)),
+    TemperatureC = random.Next(5, 25),
+   Summary = summaries[random.Next(summaries.Length)]
+   });
+        }
+    }
+
+    private string GetWeatherIcon()
+    {
+        var hour = DateTime.Now.Hour;
+        if (hour < 6 || hour > 20) return "🌙";
+        if (currentWeather?.Temperature > 20) return "☀️";
+        if (currentWeather?.Temperature < 5) return "❄️";
+        return "🌤️";
+    }
+
+    private string GetWeatherIconForTemp(int temp)
+    {
+        if (temp > 20) return "☀️";
+        if (temp < 5) return "❄️";
+        return "🌤️";
+    }
+
+    private string GetSolarImpactClass()
+    {
+  var hour = DateTime.Now.Hour;
+        if (hour >= 10 && hour <= 15) return "impact-good";
+        if (hour >= 7 && hour <= 18) return "impact-moderate";
+        return "impact-low";
+    }
+
+    private string GetSolarImpactText()
+    {
+        var hour = DateTime.Now.Hour;
+      if (hour >= 10 && hour <= 15) return "Optimale productie - piekuren!";
+        if (hour >= 7 && hour <= 18) return "Matige productie verwacht";
+        return "Geen zonlicht - geen productie";
+    }
+
+    private string GetWindImpactClass()
+    {
+        if (currentWeather?.WindSpeed > 20) return "impact-good";
+        if (currentWeather?.WindSpeed > 10) return "impact-moderate";
+        return "impact-low";
+    }
+
+    private string GetWindImpactText()
+    {
+        if (currentWeather?.WindSpeed > 20) return "Sterke wind - hoge productie!";
+        if (currentWeather?.WindSpeed > 10) return "Matige wind - normale productie";
+        return "Weinig wind - lage productie";
+    }
+
+    private string GetHeatingImpactClass()
+    {
+        if (currentWeather?.Temperature > 18) return "impact-good";
+ if (currentWeather?.Temperature > 10) return "impact-moderate";
+      return "impact-low";
+    }
+
+    private string GetHeatingImpactText()
+    {
+        if (currentWeather?.Temperature > 18) return "Geen verwarming nodig";
+        if (currentWeather?.Temperature > 10) return "Lichte verwarming aanbevolen";
+        return "Verwarming nodig - let op gasverbruik";
+    }
+
+ private class ForecastDay
+    {
+     public DateOnly Date { get; set; }
         public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+     public string? Summary { get; set; }
     }
 }
