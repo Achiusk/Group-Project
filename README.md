@@ -1,89 +1,139 @@
-# Urban City Power Management
+# Mijn Energie - Consumer Energy Advisor
 
-Energy management system for Eindhoven municipality with real-time monitoring of household energy consumption via P1 smart meters.
+A Blazor Server web application for Dutch consumers to monitor their energy consumption through smart meters (P1 sensors).
 
-## Tech Stack
-
-| Component | Technology |
-|-----------|------------|
-| **Backend** | .NET 9, Entity Framework Core |
-| **Web App** | Blazor Server |
-| **Desktop App** | Avalonia UI |
-| **Database** | SQL Server / Azure SQL |
-| **Cloud** | Azure App Service, Key Vault |
-
-## Quick Start
-
-```bash
-# Clone
-git clone https://github.com/Achiusk/Group-Project.git
-cd "urban city power managment"
-
-# Run Web App
-cd urban_city_power_managment.Web
-dotnet run
-```
-
-**Web App URL:** http://localhost:5022
+![.NET 9](https://img.shields.io/badge/.NET-9.0-purple)
+![Blazor Server](https://img.shields.io/badge/Blazor-Server-blue)
+![MySQL](https://img.shields.io/badge/Database-MySQL-orange)
 
 ## Features
 
-- **Dashboard** - Real-time energy overview with efficiency scores
-- **Mijn Energie** - P1 smart meter data visualization
-- **Bespaartips** - Personalized energy saving recommendations
-- **Leveranciers** - Vendor directory for energy services
-- **Gas Monitoring** - Leak detection and pressure alerts
+### Consumer Features
+- **Dashboard** - Overview of energy consumption and solar return
+- **Mijn Energie** - Detailed energy usage statistics
+- **Bespaartips** - Personalized energy saving tips
+- **Leveranciers** - Energy supplier directory and comparison
+- **Weer** - Weather information with energy impact analysis
+- **Instellingen** - User settings with dark mode and language switch (NL/EN)
+
+### User Management
+- User registration with validation:
+  - Names: A-Z letters only (no numbers or aliases)
+  - Age: Must be 18+ years old
+  - Dutch postal code lookup with automatic address fill
+  - Smart meter detection with Netbeheerder contact info
+  - Secure password with BCrypt hashing
+- User login with remember me option
+
+### Technical Features
+- MySQL database integration (Pomelo Entity Framework)
+- Dutch address lookup by postal code + house number
+- Automatic Netbeheerder detection (Enexis, Liander, Stedin, etc.)
+- Real-time weather data from Open-Meteo API
+- Dark mode with localStorage persistence
+- Dutch/English language switching
+
+## Tech Stack
+
+- **Framework**: Blazor Server (.NET 9)
+- **Database**: MySQL with Pomelo EF Core 8.0
+- **Authentication**: BCrypt password hashing
+- **Styling**: Bootstrap 5
+- **Weather API**: Open-Meteo (free, no API key required)
 
 ## Project Structure
 
 ```
-??? urban_city_power_managment.Web/    # Blazor Web Application
-?   ??? Components/Pages/         # Razor pages
-?   ??? Services/# Business logic
-?   ??? Models/    # Data models
-?   ??? Database/     # SQL scripts
-?
-??? [root]/                # Avalonia Desktop Application
-    ??? Views/# AXAML views
-    ??? ViewModels/             # MVVM ViewModels
-    ??? Services/    # Desktop services
+urban_city_power_managment.Web/
+??? Components/
+?   ??? Layout/
+?   ?   ??? NavMenu.razor
+?   ??? Pages/
+?       ??? Home.razor (Dashboard)
+?       ??? MijnEnergie.razor
+?       ??? Tips.razor
+?       ??? Leveranciers.razor
+?       ??? Weather.razor
+?       ??? Instellingen.razor
+?       ??? Registreren.razor
+?       ??? Inloggen.razor
+??? Data/
+?   ??? EnergyDbContext.cs
+??? Models/
+?   ??? EnergyModels.cs
+?   ??? UserModels.cs
+??? Services/
+?   ??? AuthService.cs
+?   ??? NetbeheerderService.cs
+?   ??? PostalCodeService.cs
+?   ??? P1SensorService.cs
+?   ??? VendorService.cs
+?   ??? EnergyTipsService.cs
+?   ??? PowerGenerationService.cs
+? ??? OpenMeteoWeatherService.cs
+??? Program.cs
 ```
 
-## Database Setup
+## Getting Started
 
-```bash
-# Using LocalDB (development)
-sqlcmd -S "(localdb)\mssqllocaldb" -i urban_city_power_managment.Web/Database/setup-database.sql
+### Prerequisites
+- .NET 9 SDK
+- MySQL Server 8.0+
 
-# Add mock data
-sqlcmd -S "(localdb)\mssqllocaldb" -d EindhovenEnergy -i urban_city_power_managment.Web/Database/clients-data.sql
-```
+### Configuration
 
-## Configuration
-
-Update `appsettings.json`:
-
+1. Update `appsettings.json` with your MySQL connection:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=EindhovenEnergy;Trusted_Connection=True"
+    "DefaultConnection": "Server=localhost;Port=3306;Database=EindhovenEnergy;User=root;Password=your_password;"
   }
 }
 ```
 
-## API Endpoints
+2. Run migrations:
+```bash
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+```
 
-| Endpoint | Description |
-|----------|-------------|
-| `/` | Consumer dashboard |
-| `/mijn-energie` | Personal energy data |
-| `/tips` | Energy saving tips |
-| `/leveranciers` | Vendor directory |
+3. Run the application:
+```bash
+dotnet run --project urban_city_power_managment.Web
+```
+
+## Dutch Grid Operators (Netbeheerders)
+
+The app automatically detects the user's grid operator based on postal code:
+
+| Operator | Regions |
+|----------|---------|
+| Enexis | Noord-Brabant, Limburg, Groningen, Drenthe |
+| Liander | Noord-Holland, Gelderland, Flevoland |
+| Stedin | Zuid-Holland, Utrecht |
+| Westland Infra | Westland |
+| Coteq | Twente |
+| Rendo | Parts of Drenthe/Overijssel |
+
+## Screenshots
+
+### Dashboard
+Consumer energy overview with real-time consumption data.
+
+### Registration
+4-step wizard: Personal info ? Address ? Smart meter ? Password
+
+### Settings
+Dark mode toggle and Dutch/English language switch.
 
 ## Authors
 
-FHICT Group Project Team
+- Group Project Team - Fontys ICT
 
 ## License
 
-Educational use only - © 2024
+This project is for educational purposes.
+
+---
+
+*Gemeente Eindhoven - Stedelijk Energiebeheer*

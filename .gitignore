@@ -27,69 +27,44 @@ bld/
 # Visual Studio cache/options directory
 .vs/
 
-# Avalonia specific
-.avalonia/
+# Blazor specific
+wwwroot/css/bootstrap/
+wwwroot/css/open-iconic/
 
-# Rider
-.idea/
-*.sln.iml
+# Logs
+*.log
+app_output.log
+error.log
+output.log
 
-# User-specific files (Rider)
-*.sln.DotSettings.user
-
-# Sensitive configuration files - NEVER COMMIT THESE!
-appsettings.json
-appsettings.*.json
-!appsettings.Development.json.template
-
-# Azure secrets
-*.publishsettings
-*.azurePubxml
-
-# Key files
-*.pfx
-*.key
-*.pem
-
-# Environment variables
-.env
-.env.local
-.env.production
-
-# NuGet Packages
-*.nupkg
-*.snupkg
-**/packages/*
-
-# Azure Functions local settings
-local.settings.json
-
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
-
-# Folder config file
-Desktop.ini
-
-# macOS
-.DS_Store
+# Local development
+appsettings.Development.json
+appsettings.Local.json
 
 # JetBrains Rider
 .idea/
 *.sln.iml
 
-# VS Code
-.vscode/
+# Mac
+.DS_Store
 
-# ReSharper
-_ReSharper*/
+# Windows
+Thumbs.db
+ehthumbs.db
 
-# Azure specific
-.azure/
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
 
-# Application Insights
-ApplicationInsights.config
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
 
-# Publish profiles
-*.pubxml
-*.PublishSettings
+# Entity Framework migrations (optional - uncomment if you want to ignore)
+# **/Migrations/
+
+# Published output
+publish/
+PublishOutput/
