@@ -1,6 +1,6 @@
-# Docker Deployment Guide - Mijn Energie
+# Deployment Guide - Mijn Energie
 
-## Quick Start (Local Development)
+## Option 1: Docker (Recommended for Local Development)
 
 ### Prerequisites
 - Docker Desktop installed
@@ -30,43 +30,66 @@ docker-compose down
 
 ---
 
-## Educloud Deployment
+## Option 2: IIS Deployment (Educloud)
 
-### Option 1: Using Docker Compose
+### Prerequisites
+- .NET 9 SDK installed
+- Access to Educloud server
+- MySQL database on Educloud
 
-1. **Upload files to Educloud:**
-   - `Dockerfile`
-   - `docker-compose.yml`
-   - `docker/` folder
-   - `urban_city_power_managment.Web/` folder
+### Step 1: Publish the Application
 
-2. **SSH into Educloud and run:**
+**Using Visual Studio:**
+1. Right-click on `urban_city_power_managment.Web` project
+2. Select **Publish**
+3. Choose **Folder** as target
+4. Set path to `./publish`
+5. Click **Publish**
+
+**Using Command Line:**
 ```bash
-docker-compose up -d --build
+cd Group-Project
+dotnet publish urban_city_power_managment.Web -c Release -o ./publish
 ```
 
-### Option 2: Build and Push to Registry
+### Step 2: Configure Database Connection
 
-1. **Build the image locally:**
-```bash
-docker build -t mijn-energie:latest .
+Edit `publish/appsettings.json`:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_EDUCLOUD_MYSQL_HOST;Port=3306;Database=EindhovenEnergy;User=YOUR_USER;Password=YOUR_PASSWORD;"
+  }
+}
 ```
 
-2. **Tag for your registry:**
+### Step 3: Upload to Educloud
+
+1. Connect to Educloud via **FileZilla** or **SFTP**
+2. Upload entire `publish` folder contents to your web directory
+3. Make sure these files are included:
+   - `urban_city_power_managment.Web.dll`
+   - `urban_city_power_managment.Web.exe`
+   - `web.config`
+   - `appsettings.json`
+   - `wwwroot/` folder
+
+### Step 4: Configure IIS
+
+1. Open **IIS Manager** on Educloud
+2. Create new website or application
+3. Set **Physical Path** to your upload directory
+4. Set **Application Pool** to `.NET CLR Version: No Managed Code`
+5. Ensure **ASP.NET Core Hosting Bundle** is installed
+
+### Step 5: Initialize Database
+
+Run the SQL script on your Educloud MySQL:
 ```bash
-docker tag mijn-energie:latest your-registry/mijn-energie:latest
+mysql -u your_user -p your_database < docker/mysql-init/01-init.sql
 ```
 
-3. **Push to registry:**
-```bash
-docker push your-registry/mijn-energie:latest
-```
-
-4. **On Educloud, pull and run:**
-```bash
-docker pull your-registry/mijn-energie:latest
-docker run -d -p 8080:8080 --name mijn-energie your-registry/mijn-energie:latest
-```
+Or import via phpMyAdmin on Educloud.
 
 ---
 
@@ -75,126 +98,85 @@ docker run -d -p 8080:8080 --name mijn-energie your-registry/mijn-energie:latest
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `ASPNETCORE_ENVIRONMENT` | Environment mode | Production |
-| `ConnectionStrings__DefaultConnection` | MySQL connection string | See docker-compose.yml |
-
-### Custom Database Connection
-
-```bash
-docker run -d -p 8080:8080 \
-  -e "ConnectionStrings__DefaultConnection=Server=your-host;Port=3306;Database=EindhovenEnergy;User=user;Password=pass;" \
-  mijn-energie:latest
-```
+| `ConnectionStrings__DefaultConnection` | MySQL connection string | See appsettings.json |
 
 ---
 
-## Database Access
+## Database Credentials
 
-### MySQL Credentials (Docker)
+### Docker (Local)
 - **Host:** localhost (or `mysql` from within containers)
 - **Port:** 3306
 - **Database:** EindhovenEnergy
 - **User:** energie_user
 - **Password:** Energie123!
-- **Root Password:** rootpassword123
 
-### phpMyAdmin
-- URL: http://localhost:8081
-- Login with above credentials
+### Educloud
+Use credentials provided by your Educloud administrator.
 
 ---
 
 ## Useful Commands
 
+### Docker
 ```bash
 # View running containers
 docker ps
 
 # View logs
 docker-compose logs -f web
-docker-compose logs -f mysql
-
-# Restart services
-docker-compose restart
 
 # Rebuild after code changes
 docker-compose up -d --build
 
-# Remove everything (including data)
+# Remove everything
 docker-compose down -v
+```
 
-# Access MySQL CLI
-docker exec -it mijn-energie-mysql mysql -u energie_user -pEnergie123! EindhovenEnergy
+### IIS Troubleshooting
+```bash
+# Check if .NET 9 is installed
+dotnet --list-runtimes
 
-# Access container shell
-docker exec -it mijn-energie-web /bin/bash
+# Test database connection
+dotnet run --project urban_city_power_managment.Web
 ```
 
 ---
 
-## Troubleshooting
+## Quick Reference
 
-### App won't start
-```bash
-# Check logs
-docker-compose logs web
+| Deployment | URL | Database |
+|------------|-----|----------|
+| Docker Local | http://localhost:8080 | Included (MySQL container) |
+| Educloud IIS | http://your-educloud-url | Educloud MySQL |
 
-# Ensure MySQL is healthy
-docker-compose ps
+---
+
+## Files Structure for IIS
+
 ```
-
-### Database connection failed
-```bash
-# Wait for MySQL to be ready (takes ~30 seconds on first start)
-docker-compose logs mysql
-
-# Verify connection string in environment
-docker exec mijn-energie-web printenv | grep Connection
-```
-
-### Port already in use
-```bash
-# Change ports in docker-compose.yml
-ports:
-  - "9090:8080"  # Use 9090 instead of 8080
+publish/
+|-- urban_city_power_managment.Web.dll
+|-- urban_city_power_managment.Web.exe
+|-- web.config
+|-- appsettings.json
+|-- wwwroot/
+|   |-- css/
+|   |-- lib/
+|   +-- favicon.png
++-- (other DLL files)
 ```
 
 ---
 
-## Architecture
+## Team Checklist
 
-```
-+-------------------+  +-------------------+
-|   Web Browser     |   |    phpMyAdmin     |
-|Port: 8080      |     |    Port: 8081     |
-+--------+----------+     +--------+----------+
-         |        |
-     v     v
-+--------+-------------------------+----------+
-|           Docker Network         |
-|            |
-|  +---------------+    +------------------+  |
-|  | Blazor Web    |  | MySQL Database   |  |
-|  | Container     +--->| Container |  |
-|  | Port: 8080    |    | Port: 3306       |  |
-|  +---------------++------------------+  |
-|     |              |
-|            v      |
-|               +------+------+       |
-|  | mysql-data  | |
-|         | (Volume)    |       |
-|       +-------------+       |
-+---------------------------------------------+
-```
+- [ ] Clone repository
+- [ ] Choose deployment method (Docker or IIS)
+- [ ] Configure database connection
+- [ ] Run/Deploy application
+- [ ] Test all pages work
+- [ ] Verify database connection
 
----
-
-## Team Members
-
-Share these files with your team:
-- `Dockerfile`
-- `docker-compose.yml`
-- `.dockerignore`
-- `docker/mysql-init/01-init.sql`
-- `DOCKER.md` (this file)
-
-Everyone can run `docker-compose up -d` to get the same environment!
+Questions? Check the logs or contact the team!
