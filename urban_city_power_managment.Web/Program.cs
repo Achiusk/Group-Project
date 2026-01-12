@@ -8,12 +8,30 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Health checks for Docker
+// Health checks for Docker and Azure
 builder.Services.AddHealthChecks();
 
-// MySQL Connection String
+// Azure Application Insights (if configured)
+var appInsightsConnectionString = builder.Configuration["Azure:ApplicationInsights:ConnectionString"];
+if (!string.IsNullOrEmpty(appInsightsConnectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+      options.ConnectionString = appInsightsConnectionString;
+    });
+}
+
+// MySQL Connection String - works with Azure MySQL, Docker MySQL, or local MySQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+ ?? Environment.GetEnvironmentVariable("MYSQLCONNSTR_DefaultConnection")
     ?? "Server=localhost;Port=3306;Database=EindhovenEnergy;User=root;Password=;";
+
+// Handle Azure MySQL connection string format
+if (connectionString.Contains("Database=") == false && connectionString.Contains("localhost") == false)
+{
+    // Azure MySQL flexible server format adjustment if needed
+    connectionString = connectionString.Replace("localdb", "localhost");
+}
 
 // Configure MySQL with Pomelo provider
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 36));
@@ -21,12 +39,22 @@ var serverVersion = new MySqlServerVersion(new Version(8, 0, 36));
 builder.Services.AddDbContext<EnergyDbContext>(options =>
 {
     options.UseMySql(connectionString, serverVersion, mySqlOptions =>
- {
-      mySqlOptions.EnableRetryOnFailure(
-    maxRetryCount: 5,
-       maxRetryDelay: TimeSpan.FromSeconds(30),
-    errorNumbersToAdd: null);
+    {
+        mySqlOptions.EnableRetryOnFailure(
+   maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null);
+
+        // Azure recommended settings
+        mySqlOptions.CommandTimeout(60);
     });
+    
+    // Enable sensitive data logging only in development
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+    options.EnableDetailedErrors();
+    }
 });
 
 // Authentication & User services
@@ -52,23 +80,37 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<EnergyDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
     try
     {
-        await dbContext.Database.EnsureCreatedAsync();
-        app.Logger.LogInformation("MySQL Database initialized successfully");
+        // Apply pending migrations in production, create in development
+        if (app.Environment.IsProduction())
+   {
+            await dbContext.Database.MigrateAsync();
+  logger.LogInformation("Database migrations applied successfully");
+        }
+        else
+        {
+      await dbContext.Database.EnsureCreatedAsync();
+  logger.LogInformation("Database created/verified successfully");
+        }
     }
     catch (Exception ex)
     {
-        app.Logger.LogWarning(ex, "MySQL Database initialization failed. Using mock data.");
-}
+        logger.LogWarning(ex, "Database initialization failed. App will continue with limited functionality.");
+    }
 }
 
-// Health check endpoint for Docker
+// Health check endpoint for Docker and Azure
 app.MapHealthChecks("/health");
+
+// Azure warmup endpoint
+app.MapGet("/warmup", () => Results.Ok("Warmed up!"));
 
 if (!app.Environment.IsDevelopment())
 {
-  app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
 

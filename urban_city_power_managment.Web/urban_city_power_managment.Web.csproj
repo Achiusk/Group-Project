@@ -22,8 +22,12 @@
     <!-- Password Hashing with BCrypt -->
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     
-    <!-- Azure Identity (optional) -->
+    <!-- Azure Services -->
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
+    
+    <!-- Health Checks -->
+    <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="8.0.1" />
   </ItemGroup>
 
 </Project>
