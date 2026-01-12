@@ -8,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Health checks for Docker
+builder.Services.AddHealthChecks();
+
 // MySQL Connection String
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? "Server=localhost;Port=3306;Database=EindhovenEnergy;User=root;Password=;";
@@ -59,6 +62,9 @@ using (var scope = app.Services.CreateScope())
         app.Logger.LogWarning(ex, "MySQL Database initialization failed. Using mock data.");
 }
 }
+
+// Health check endpoint for Docker
+app.MapHealthChecks("/health");
 
 if (!app.Environment.IsDevelopment())
 {
