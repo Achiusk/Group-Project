@@ -45,33 +45,33 @@ A Blazor Server web application for Dutch consumers to monitor their energy cons
 
 ```
 urban_city_power_managment.Web/
-??? Components/
-?   ??? Layout/
-?   ?   ??? NavMenu.razor
-?   ??? Pages/
-?       ??? Home.razor (Dashboard)
-?       ??? MijnEnergie.razor
-?       ??? Tips.razor
-?       ??? Leveranciers.razor
-?       ??? Weather.razor
-?       ??? Instellingen.razor
-?       ??? Registreren.razor
-?       ??? Inloggen.razor
-??? Data/
-?   ??? EnergyDbContext.cs
-??? Models/
-?   ??? EnergyModels.cs
-?   ??? UserModels.cs
-??? Services/
-?   ??? AuthService.cs
-?   ??? NetbeheerderService.cs
-?   ??? PostalCodeService.cs
-?   ??? P1SensorService.cs
-?   ??? VendorService.cs
-?   ??? EnergyTipsService.cs
-?   ??? PowerGenerationService.cs
-? ??? OpenMeteoWeatherService.cs
-??? Program.cs
+|-- Components/
+|   |-- Layout/
+|   |   +-- NavMenu.razor
+|   +-- Pages/
+|     |-- Home.razor (Dashboard)
+|       |-- MijnEnergie.razor
+| |-- Tips.razor
+|    |-- Leveranciers.razor
+|       |-- Weather.razor
+|       |-- Instellingen.razor
+|       |-- Registreren.razor
+|       +-- Inloggen.razor
+|-- Data/
+|   +-- EnergyDbContext.cs
+|-- Models/
+|   |-- EnergyModels.cs
+|   +-- UserModels.cs
+|-- Services/
+|   |-- AuthService.cs
+|   |-- NetbeheerderService.cs
+| |-- PostalCodeService.cs
+|   |-- P1SensorService.cs
+|   |-- VendorService.cs
+|   |-- EnergyTipsService.cs
+|   |-- PowerGenerationService.cs
+|   +-- OpenMeteoWeatherService.cs
++-- Program.cs
 ```
 
 ## Getting Started
@@ -115,16 +115,18 @@ The app automatically detects the user's grid operator based on postal code:
 | Coteq | Twente |
 | Rendo | Parts of Drenthe/Overijssel |
 
-## Screenshots
+## Pages
 
-### Dashboard
-Consumer energy overview with real-time consumption data.
-
-### Registration
-4-step wizard: Personal info ? Address ? Smart meter ? Password
-
-### Settings
-Dark mode toggle and Dutch/English language switch.
+| Page | Route | Description |
+|------|-------|-------------|
+| Dashboard | `/` | Energy overview |
+| Mijn Energie | `/mijn-energie` | Detailed consumption |
+| Bespaartips | `/tips` | Energy saving tips |
+| Leveranciers | `/leveranciers` | Supplier comparison |
+| Weer | `/weer` | Weather and energy impact |
+| Instellingen | `/instellingen` | Settings (dark mode, language) |
+| Registreren | `/registreren` | User registration |
+| Inloggen | `/inloggen` | User login |
 
 ## Authors
 
