@@ -3,37 +3,61 @@
 @using urban_city_power_managment.Web.Services
 @inject NavigationManager Navigation
 @inject IAuthService AuthService
+@inject IJSRuntime JSRuntime
 
-<PageTitle>Eindhoven Energie - Beheer je Energieverbruik Slim</PageTitle>
+<PageTitle>@(isEnglish ? "Eindhoven Energy - Smart Energy Management" : "Eindhoven Energie - Beheer je Energieverbruik Slim")</PageTitle>
 
-<div class="landing-page">
+<div class="landing-page" data-theme="@(isDarkMode ? "dark" : "light")">
+    <!-- Global Settings Bar -->
+    <div class="settings-bar">
+        <div class="container d-flex justify-content-end align-items-center gap-3 py-2">
+            <!-- Dark Mode Toggle -->
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-sun-fill text-warning"></i>
+                <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" id="darkModeToggle" 
+                           checked="@isDarkMode" @onchange="ToggleDarkMode" />
+                </div>
+                <i class="bi bi-moon-fill text-light"></i>
+            </div>
+            <!-- Language Toggle -->
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn @(!isEnglish ? "btn-warning" : "btn-outline-light")" 
+                        @onclick="() => SetLanguage(false)">NL</button>
+                <button type="button" class="btn @(isEnglish ? "btn-warning" : "btn-outline-light")" 
+                        @onclick="() => SetLanguage(true)">EN</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
             <div class="row align-items-center min-vh-75">
                 <div class="col-lg-6">
                     <h1 class="display-4 fw-bold mb-4">
-                        Beheer je Energieverbruik <span class="text-accent">Slim</span>
+                        @(isEnglish ? "Manage Your Energy" : "Beheer je Energieverbruik") <span class="text-accent">@(isEnglish ? "Smartly" : "Slim")</span>
                     </h1>
                     <p class="lead mb-4">
-                        Inzicht in je stroom en gas met realtime P1-sensor data. 
-                        Bespaar geld en draag bij aan een duurzamer Eindhoven.
+                        @(isEnglish 
+                            ? "Insight into your electricity and gas with real-time P1 sensor data. Save money and contribute to a more sustainable Eindhoven."
+                            : "Inzicht in je stroom en gas met realtime P1-sensor data. Bespaar geld en draag bij aan een duurzamer Eindhoven.")
                     </p>
                     <div class="d-flex gap-3 flex-wrap">
                         <a href="/registreren" class="btn btn-warning btn-lg px-4">
-                            <i class="bi bi-person-plus me-2"></i>Gratis Registreren
+                            <i class="bi bi-person-plus me-2"></i>@(isEnglish ? "Register Free" : "Gratis Registreren")
                         </a>
                         <a href="/inloggen" class="btn btn-outline-light btn-lg px-4">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Inloggen
+                            <i class="bi bi-box-arrow-in-right me-2"></i>@(isEnglish ? "Login" : "Inloggen")
                         </a>
                     </div>
                     <div class="mt-4 text-light opacity-75">
                         <small>
-                            <i class="bi bi-shield-check me-1"></i> Veilig & Betrouwbaar
+                            <i class="bi bi-shield-check me-1"></i> @(isEnglish ? "Safe & Reliable" : "Veilig & Betrouwbaar")
                             <span class="mx-2">|</span>
-                            <i class="bi bi-lightning me-1"></i> Realtime Data
+                            <i class="bi bi-lightning me-1"></i> @(isEnglish ? "Realtime Data" : "Realtime Data")
                             <span class="mx-2">|</span>
-                            <i class="bi bi-graph-up me-1"></i> Slimme Inzichten
+                            <i class="bi bi-graph-up me-1"></i> @(isEnglish ? "Smart Insights" : "Slimme Inzichten")
                         </small>
                     </div>
                 </div>
@@ -41,22 +65,22 @@
                     <div class="hero-image text-center">
                         <div class="dashboard-preview">
                             <div class="preview-card">
-                                <div class="preview-header">Dashboard Preview</div>
+                                <div class="preview-header">@(isEnglish ? "Dashboard Preview" : "Dashboard Preview")</div>
                                 <div class="preview-stats">
                                     <div class="stat-item">
-                                        <span class="stat-icon">?</span>
+                                        <span class="stat-icon"><i class="bi bi-lightning-charge-fill text-warning"></i></span>
                                         <span class="stat-value">2.4 kW</span>
-                                        <span class="stat-label">Huidig verbruik</span>
+                                        <span class="stat-label">@(isEnglish ? "Current usage" : "Huidig verbruik")</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-icon">??</span>
+                                        <span class="stat-icon"><i class="bi bi-sun-fill text-warning"></i></span>
                                         <span class="stat-value">1.8 kW</span>
-                                        <span class="stat-label">Zonne-energie</span>
+                                        <span class="stat-label">@(isEnglish ? "Solar energy" : "Zonne-energie")</span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-icon">??</span>
+                                        <span class="stat-icon"><i class="bi bi-piggy-bank-fill text-success"></i></span>
                                         <span class="stat-value">€ 3.45</span>
-                                        <span class="stat-label">Vandaag bespaard</span>
+                                        <span class="stat-label">@(isEnglish ? "Saved today" : "Vandaag bespaard")</span>
                                     </div>
                                 </div>
                             </div>
@@ -70,34 +94,50 @@
     <!-- Features Section -->
     <section class="features-section py-5">
         <div class="container">
-            <h2 class="text-center mb-5">Waarom Eindhoven Energie?</h2>
+            <h2 class="text-center mb-5">@(isEnglish ? "Why Eindhoven Energy?" : "Waarom Eindhoven Energie?")</h2>
             <div class="row g-4">
                 <div class="col-md-6 col-lg-3">
                     <div class="feature-card h-100">
-                        <div class="feature-icon">?</div>
-                        <h4>Realtime Monitoring</h4>
-                        <p>Zie je energieverbruik live via je P1 slimme meter. Elke seconde up-to-date.</p>
+                        <div class="feature-icon">
+                            <i class="bi bi-speedometer2"></i>
+                        </div>
+                        <h4>@(isEnglish ? "Realtime Monitoring" : "Realtime Monitoring")</h4>
+                        <p>@(isEnglish 
+                            ? "See your energy usage live via your P1 smart meter. Updated every second."
+                            : "Zie je energieverbruik live via je P1 slimme meter. Elke seconde up-to-date.")</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <div class="feature-card h-100">
-                        <div class="feature-icon">??</div>
-                        <h4>Uitgebreide Analyses</h4>
-                        <p>Analyseer je verbruik per uur, dag, week of maand met overzichtelijke grafieken.</p>
+                        <div class="feature-icon">
+                            <i class="bi bi-bar-chart-line-fill"></i>
+                        </div>
+                        <h4>@(isEnglish ? "Detailed Analytics" : "Uitgebreide Analyses")</h4>
+                        <p>@(isEnglish 
+                            ? "Analyze your usage by hour, day, week or month with clear graphs."
+                            : "Analyseer je verbruik per uur, dag, week of maand met overzichtelijke grafieken.")</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <div class="feature-card h-100">
-                        <div class="feature-icon">??</div>
-                        <h4>Slimme Bespaartips</h4>
-                        <p>Ontvang persoonlijke tips om energie te besparen en je rekening te verlagen.</p>
+                        <div class="feature-icon">
+                            <i class="bi bi-lightbulb-fill"></i>
+                        </div>
+                        <h4>@(isEnglish ? "Smart Saving Tips" : "Slimme Bespaartips")</h4>
+                        <p>@(isEnglish 
+                            ? "Receive personalized tips to save energy and reduce your bill."
+                            : "Ontvang persoonlijke tips om energie te besparen en je rekening te verlagen.")</p>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <div class="feature-card h-100">
-                        <div class="feature-icon">??</div>
-                        <h4>Zonnepanelen Tracking</h4>
-                        <p>Volg je zonnepanelen opbrengst en zie hoeveel je teruglevert aan het net.</p>
+                        <div class="feature-icon">
+                            <i class="bi bi-sun-fill"></i>
+                        </div>
+                        <h4>@(isEnglish ? "Solar Panel Tracking" : "Zonnepanelen Tracking")</h4>
+                        <p>@(isEnglish 
+                            ? "Track your solar panel output and see how much you feed back to the grid."
+                            : "Volg je zonnepanelen opbrengst en zie hoeveel je teruglevert aan het net.")</p>
                     </div>
                 </div>
             </div>
@@ -107,36 +147,36 @@
     <!-- How It Works Section -->
     <section class="how-it-works-section py-5">
         <div class="container">
-            <h2 class="text-center mb-5">Hoe werkt het?</h2>
+            <h2 class="text-center mb-5">@(isEnglish ? "How does it work?" : "Hoe werkt het?")</h2>
             <div class="row justify-content-center">
                 <div class="col-lg-10">
                     <div class="steps-container">
                         <div class="step">
                             <div class="step-number">1</div>
                             <div class="step-content">
-                                <h5>Registreer je account</h5>
-                                <p>Maak gratis een account aan met je e-mail en postcode</p>
+                                <h5>@(isEnglish ? "Register your account" : "Registreer je account")</h5>
+                                <p>@(isEnglish ? "Create a free account with your email and postal code" : "Maak gratis een account aan met je e-mail en postcode")</p>
                             </div>
                         </div>
                         <div class="step">
                             <div class="step-number">2</div>
                             <div class="step-content">
-                                <h5>Koppel je slimme meter</h5>
-                                <p>Verbind je P1-poort met onze app voor realtime data</p>
+                                <h5>@(isEnglish ? "Connect your smart meter" : "Koppel je slimme meter")</h5>
+                                <p>@(isEnglish ? "Connect your P1 port to our app for realtime data" : "Verbind je P1-poort met onze app voor realtime data")</p>
                             </div>
                         </div>
                         <div class="step">
                             <div class="step-number">3</div>
                             <div class="step-content">
-                                <h5>Bekijk je dashboard</h5>
-                                <p>Krijg direct inzicht in je energieverbruik en kosten</p>
+                                <h5>@(isEnglish ? "View your dashboard" : "Bekijk je dashboard")</h5>
+                                <p>@(isEnglish ? "Get instant insight into your energy usage and costs" : "Krijg direct inzicht in je energieverbruik en kosten")</p>
                             </div>
                         </div>
                         <div class="step">
                             <div class="step-number">4</div>
                             <div class="step-content">
-                                <h5>Start met besparen</h5>
-                                <p>Ontvang tips en optimaliseer je energiegebruik</p>
+                                <h5>@(isEnglish ? "Start saving" : "Start met besparen")</h5>
+                                <p>@(isEnglish ? "Receive tips and optimize your energy usage" : "Ontvang tips en optimaliseer je energiegebruik")</p>
                             </div>
                         </div>
                     </div>
@@ -152,25 +192,25 @@
                 <div class="col-6 col-md-3">
                     <div class="stat-box">
                         <div class="stat-number">10.000+</div>
-                        <div class="stat-text">Huishoudens</div>
+                        <div class="stat-text">@(isEnglish ? "Households" : "Huishoudens")</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="stat-box">
                         <div class="stat-number">15%</div>
-                        <div class="stat-text">Gem. Besparing</div>
+                        <div class="stat-text">@(isEnglish ? "Avg. Savings" : "Gem. Besparing")</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="stat-box">
                         <div class="stat-number">8</div>
-                        <div class="stat-text">Wijken in Eindhoven</div>
+                        <div class="stat-text">@(isEnglish ? "Districts in Eindhoven" : "Wijken in Eindhoven")</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
                     <div class="stat-box">
                         <div class="stat-number">24/7</div>
-                        <div class="stat-text">Monitoring</div>
+                        <div class="stat-text">@(isEnglish ? "Monitoring" : "Monitoring")</div>
                     </div>
                 </div>
             </div>
@@ -180,10 +220,12 @@
     <!-- CTA Section -->
     <section class="cta-section py-5">
         <div class="container text-center">
-            <h2 class="mb-4">Klaar om te beginnen?</h2>
-            <p class="lead mb-4">Start vandaag nog met slim energiebeheer en bespaar direct op je energierekening.</p>
+            <h2 class="mb-4">@(isEnglish ? "Ready to get started?" : "Klaar om te beginnen?")</h2>
+            <p class="lead mb-4">@(isEnglish 
+                ? "Start smart energy management today and save immediately on your energy bill."
+                : "Start vandaag nog met slim energiebeheer en bespaar direct op je energierekening.")</p>
             <a href="/registreren" class="btn btn-warning btn-lg px-5">
-                <i class="bi bi-rocket-takeoff me-2"></i>Start Gratis
+                <i class="bi bi-rocket-takeoff me-2"></i>@(isEnglish ? "Start Free" : "Start Gratis")
             </a>
         </div>
     </section>
@@ -197,7 +239,7 @@
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <a href="#" class="text-muted me-3">Privacy</a>
-                    <a href="#" class="text-muted me-3">Voorwaarden</a>
+                    <a href="#" class="text-muted me-3">@(isEnglish ? "Terms" : "Voorwaarden")</a>
                     <a href="#" class="text-muted">Contact</a>
                 </div>
             </div>
@@ -208,13 +250,28 @@
 <style>
     .landing-page {
         --primary-blue: #154273;
+        --secondary-blue: #01689b;
         --accent-yellow: #ffb612;
-        --light-blue: #01689b;
+    }
+
+    /* Settings Bar at top */
+    .settings-bar {
+        background: var(--primary-blue);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .settings-bar .form-check-input {
+        cursor: pointer;
+    }
+
+    .settings-bar .form-check-input:checked {
+        background-color: var(--accent-yellow);
+        border-color: var(--accent-yellow);
     }
 
     /* Hero Section */
     .hero-section {
-        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
         color: white;
         padding: 4rem 0;
         min-height: 80vh;
@@ -292,6 +349,10 @@
         background: #f8f9fa;
     }
 
+    .features-section h2 {
+        color: var(--primary-blue);
+    }
+
     .feature-card {
         background: white;
         border-radius: 12px;
@@ -309,6 +370,11 @@
     .feature-icon {
         font-size: 3rem;
         margin-bottom: 1rem;
+        color: var(--secondary-blue);
+    }
+
+    .feature-icon i {
+        display: inline-block;
     }
 
     .feature-card h4 {
@@ -324,6 +390,10 @@
     /* How It Works */
     .how-it-works-section {
         background: white;
+    }
+
+    .how-it-works-section h2 {
+        color: var(--primary-blue);
     }
 
     .steps-container {
@@ -410,68 +480,122 @@
         text-decoration: underline;
     }
 
-    /* Dark Mode Support */
-    [data-theme="dark"] .features-section,
-    [data-theme="dark"] .how-it-works-section {
-        background: #1a1a1a;
+    /* ==========================================
+       DARK MODE STYLES
+       ========================================== */
+    .landing-page[data-theme="dark"] {
+        --bg-dark: #121212;
+        --bg-card: #1e1e1e;
+        --bg-card-hover: #2a2a2a;
+        --text-primary: #ffffff;
+        --text-secondary: #aaaaaa;
+        --border-color: #333333;
     }
 
-    [data-theme="dark"] .feature-card {
-        background: #2a2a2a;
-        color: #ffffff;
+    .landing-page[data-theme="dark"] .settings-bar {
+        background: #0a0a0a;
+        border-bottom-color: var(--border-color);
     }
 
-    [data-theme="dark"] .feature-card h4 {
+    .landing-page[data-theme="dark"] .features-section {
+        background: var(--bg-dark);
+    }
+
+    .landing-page[data-theme="dark"] .features-section h2 {
         color: var(--accent-yellow);
     }
 
-    [data-theme="dark"] .feature-card p {
-        color: #aaa;
+    .landing-page[data-theme="dark"] .feature-card {
+        background: var(--bg-card);
+        color: var(--text-primary);
     }
 
-    [data-theme="dark"] .step-content h5 {
+    .landing-page[data-theme="dark"] .feature-card:hover {
+        background: var(--bg-card-hover);
+    }
+
+    .landing-page[data-theme="dark"] .feature-card h4 {
         color: var(--accent-yellow);
     }
 
-    [data-theme="dark"] .step-content p {
-        color: #aaa;
+    .landing-page[data-theme="dark"] .feature-card p {
+        color: var(--text-secondary);
     }
 
-    [data-theme="dark"] .cta-section {
-        background: #2a2a2a;
-    }
-
-    [data-theme="dark"] .cta-section h2 {
+    .landing-page[data-theme="dark"] .feature-icon {
         color: var(--accent-yellow);
     }
 
-    [data-theme="dark"] .landing-footer {
-        background: #1a1a1a;
-        border-top-color: #333;
+    .landing-page[data-theme="dark"] .how-it-works-section {
+        background: var(--bg-dark);
     }
 
-    [data-theme="dark"] .stat-item {
-        background: #2a2a2a;
-    }
-
-    [data-theme="dark"] .preview-card {
-        background: #2a2a2a;
-    }
-
-    [data-theme="dark"] .preview-header {
+    .landing-page[data-theme="dark"] .how-it-works-section h2 {
         color: var(--accent-yellow);
     }
 
-    [data-theme="dark"] .stat-value {
+    .landing-page[data-theme="dark"] .step-content h5 {
         color: var(--accent-yellow);
     }
 
-    [data-theme="dark"] .stat-label {
-        color: #aaa;
+    .landing-page[data-theme="dark"] .step-content p {
+        color: var(--text-secondary);
+    }
+
+    .landing-page[data-theme="dark"] .cta-section {
+        background: var(--bg-card);
+    }
+
+    .landing-page[data-theme="dark"] .cta-section h2 {
+        color: var(--accent-yellow);
+    }
+
+    .landing-page[data-theme="dark"] .cta-section p {
+        color: var(--text-secondary);
+    }
+
+    .landing-page[data-theme="dark"] .landing-footer {
+        background: var(--bg-dark);
+        border-top-color: var(--border-color);
+    }
+
+    .landing-page[data-theme="dark"] .landing-footer .text-muted {
+        color: var(--text-secondary) !important;
+    }
+
+    .landing-page[data-theme="dark"] .stat-item {
+        background: var(--bg-card);
+    }
+
+    .landing-page[data-theme="dark"] .preview-card {
+        background: var(--bg-card);
+    }
+
+    .landing-page[data-theme="dark"] .preview-header {
+        color: var(--accent-yellow);
+        border-bottom-color: var(--accent-yellow);
+    }
+
+    .landing-page[data-theme="dark"] .stat-value {
+        color: var(--accent-yellow);
+    }
+
+    .landing-page[data-theme="dark"] .stat-label {
+        color: var(--text-secondary);
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .settings-bar .container {
+            justify-content: center !important;
+        }
     }
 </style>
 
 @code {
+    private bool isDarkMode = false;
+    private bool isEnglish = false;
+
     protected override async Task OnInitializedAsync()
     {
         // If user is already logged in, redirect to dashboard
@@ -479,5 +603,62 @@
         {
             Navigation.NavigateTo("/dashboard");
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Load saved preferences from localStorage
+                var darkModeSaved = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "darkMode");
+                var languageSaved = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "language");
+
+                isDarkMode = darkModeSaved == "true";
+                isEnglish = languageSaved == "en";
+
+                // Apply theme globally
+                await ApplyGlobalTheme();
+
+                StateHasChanged();
+            }
+            catch
+            {
+                // localStorage not available, use defaults
+            }
+        }
+    }
+
+    private async Task ToggleDarkMode(ChangeEventArgs e)
+    {
+        isDarkMode = (bool)(e.Value ?? false);
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "darkMode", isDarkMode.ToString().ToLower());
+            await ApplyGlobalTheme();
+        }
+        catch { }
+    }
+
+    private async Task SetLanguage(bool english)
+    {
+        isEnglish = english;
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "language", isEnglish ? "en" : "nl");
+        }
+        catch { }
+    }
+
+    private async Task ApplyGlobalTheme()
+    {
+        try
+        {
+            // Apply theme to document body for global effect
+            var theme = isDarkMode ? "dark" : "light";
+            await JSRuntime.InvokeVoidAsync("eval", $"document.documentElement.setAttribute('data-theme', '{theme}')");
+        }
+        catch { }
     }
 }
