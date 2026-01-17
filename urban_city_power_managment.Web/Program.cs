@@ -8,17 +8,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Add session support for authentication
+// Add secure session support for authentication
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromHours(2);
-    options.Cookie.HttpOnly = true;
+    options.Cookie.HttpOnly = true;        // Prevents JavaScript access (XSS protection)
     options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // HTTPS only
+    options.Cookie.SameSite = SameSiteMode.Strict;  // CSRF protection
+    options.Cookie.Name = ".EindhovenEnergie.Session";  // Custom name (security through obscurity)
 });
 
 // Add HttpContextAccessor for accessing session in services
 builder.Services.AddHttpContextAccessor();
+
+// Add Data Protection for secure cookie encryption
+builder.Services.AddDataProtection();
 
 // ONLY Azure MySQL In-App - NO Docker, NO local MySQL complexity
 var connectionString = Environment.GetEnvironmentVariable("MYSQLCONNSTR_localdb");
@@ -83,7 +89,7 @@ if (!string.IsNullOrEmpty(connectionString))
         if (canConnect)
         {
             await dbContext.Database.EnsureCreatedAsync();
-            await seeder.SeedAsync(); // Seed with 10 mock accounts and P1 data
+            await seeder.SeedAsync();
             Console.WriteLine("? Database initialized and seeded with mock data");
         }
     }
@@ -110,5 +116,5 @@ app.UseSession();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-Console.WriteLine("? Application starting with authentication support...");
+Console.WriteLine("? Application starting with secure authentication support...");
 app.Run();
