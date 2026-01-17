@@ -1,92 +1,130 @@
-﻿<div class="sidebar">
+﻿@using urban_city_power_managment.Web.Services
+@using urban_city_power_managment.Web.Models
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="sidebar">
     <div class="sidebar-header">
-  <a href="/" class="brand">
+        <a href="/" class="brand">
             <span class="brand-icon">⚡</span>
-<span class="brand-text">Mijn Energie</span>
-     </a>
+            <span class="brand-text">Mijn Energie</span>
+        </a>
     </div>
 
     <nav class="sidebar-nav">
         <ul class="nav-list">
-     <li class="nav-item">
-   <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-       <span class="nav-icon">🏠</span>
-      <span class="nav-text">Dashboard</span>
-        </NavLink>
-    </li>
-      <li class="nav-item">
-     <NavLink class="nav-link" href="mijn-energie">
-        <span class="nav-icon">📊</span>
-      <span class="nav-text">Mijn Energie</span>
-            </NavLink>
-      </li>
-   <li class="nav-item">
-          <NavLink class="nav-link" href="tips">
-<span class="nav-icon">💡</span>
-   <span class="nav-text">Bespaartips</span>
-         </NavLink>
-     </li>
- <li class="nav-item">
-  <NavLink class="nav-link" href="leveranciers">
-          <span class="nav-icon">🏢</span>
-          <span class="nav-text">Leveranciers</span>
-     </NavLink>
-  </li>
-       <li class="nav-item">
-  <NavLink class="nav-link" href="weer">
-         <span class="nav-icon">🌤️</span>
-   <span class="nav-text">Weer</span>
-      </NavLink>
-   </li>
+            @if (isAuthenticated)
+            {
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="dashboard" Match="NavLinkMatch.All">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Dashboard</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="mijn-energie">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Mijn Energie</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="tips">
+                        <span class="nav-icon">💡</span>
+                        <span class="nav-text">Bespaartips</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="leveranciers">
+                        <span class="nav-icon">🏢</span>
+                        <span class="nav-text">Leveranciers</span>
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="weer">
+                        <span class="nav-icon">🌤️</span>
+                        <span class="nav-text">Weer</span>
+                    </NavLink>
+                </li>
+            }
+            else
+            {
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Home</span>
+                    </NavLink>
+                </li>
+            }
         </ul>
 
-        <div class="nav-divider"></div>
+        @if (isAuthenticated)
+        {
+            <div class="nav-divider"></div>
 
-     <ul class="nav-list">
-          <li class="nav-item">
-   <NavLink class="nav-link" href="instellingen">
-       <span class="nav-icon">⚙️</span>
-     <span class="nav-text">Instellingen</span>
-       </NavLink>
-     </li>
-   </ul>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="instellingen">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Instellingen</span>
+                    </NavLink>
+                </li>
+            </ul>
+        }
     </nav>
 
     <div class="sidebar-footer">
-     <div class="auth-buttons">
-      <a href="/inloggen" class="btn btn-outline-light btn-sm w-100 mb-2">
-        🔐 Inloggen
-    </a>
-    <a href="/registreren" class="btn btn-light btn-sm w-100">
-    📝 Registreren
-    </a>
-   </div>
+        @if (isAuthenticated && currentUser != null)
+        {
+            <div class="user-info mb-3">
+                <div class="user-avatar">
+                    @currentUser.FirstName[0]@currentUser.LastName[0]
+                </div>
+                <div class="user-details">
+                    <span class="user-name">@currentUser.FirstName @currentUser.LastName</span>
+                    <small class="user-email">@currentUser.Email</small>
+                </div>
+            </div>
+            <button class="btn btn-outline-light btn-sm w-100" @onclick="HandleLogout">
+                🚪 Uitloggen
+            </button>
+        }
+        else
+        {
+            <div class="auth-buttons">
+                <a href="/inloggen" class="btn btn-outline-light btn-sm w-100 mb-2">
+                    🔐 Inloggen
+                </a>
+                <a href="/registreren" class="btn btn-warning btn-sm w-100">
+                    📝 Registreren
+                </a>
+            </div>
+        }
     </div>
 </div>
 
 <style>
     .sidebar {
- width: 260px;
-  height: 100vh;
-        background: linear-gradient(180deg, #1a237e 0%, #283593 100%);
-color: white;
-   display: flex;
- flex-direction: column;
-position: fixed;
-   left: 0;
+        width: 260px;
+        height: 100vh;
+        background: linear-gradient(180deg, #154273 0%, #01689b 100%);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        left: 0;
         top: 0;
-     z-index: 1000;
-}
+        z-index: 1000;
+    }
 
     .sidebar-header {
-padding: 1.5rem;
-   border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
     .brand {
         display: flex;
-  align-items: center;
-    text-decoration: none;
+        align-items: center;
+        text-decoration: none;
         color: white;
     }
 
@@ -95,10 +133,10 @@ padding: 1.5rem;
         margin-right: 0.75rem;
     }
 
- .brand-text {
+    .brand-text {
         font-size: 1.25rem;
-     font-weight: 600;
-  }
+        font-weight: 600;
+    }
 
     .sidebar-nav {
         flex: 1;
@@ -107,9 +145,9 @@ padding: 1.5rem;
     }
 
     .nav-list {
-     list-style: none;
+        list-style: none;
         padding: 0;
-    margin: 0;
+        margin: 0;
     }
 
     .nav-item {
@@ -117,83 +155,166 @@ padding: 1.5rem;
     }
 
     .nav-link {
-    display: flex;
-     align-items: center;
-    padding: 0.875rem 1rem;
+        display: flex;
+        align-items: center;
+        padding: 0.875rem 1rem;
         color: rgba(255,255,255,0.8);
-    text-decoration: none;
-      border-radius: 10px;
+        text-decoration: none;
+        border-radius: 10px;
         transition: all 0.2s ease;
     }
 
-  .nav-link:hover {
-   background: rgba(255,255,255,0.1);
+    .nav-link:hover {
+        background: rgba(255,255,255,0.1);
         color: white;
     }
 
     .nav-link.active {
- background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.2);
         color: white;
         font-weight: 500;
     }
 
     .nav-icon {
- font-size: 1.25rem;
- margin-right: 0.875rem;
-    width: 1.5rem;
-     text-align: center;
+        font-size: 1.25rem;
+        margin-right: 0.875rem;
+        width: 1.5rem;
+        text-align: center;
     }
 
     .nav-text {
-      font-size: 0.95rem;
+        font-size: 0.95rem;
     }
 
     .nav-divider {
-  height: 1px;
+        height: 1px;
         background: rgba(255,255,255,0.1);
-     margin: 1rem 1.5rem;
+        margin: 1rem 1.5rem;
     }
 
     .sidebar-footer {
-   padding: 1rem 1.5rem;
-       border-top: 1px solid rgba(255,255,255,0.1);
+        padding: 1rem 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .user-name {
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .user-email {
+        font-size: 0.75rem;
+        opacity: 0.7;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .auth-buttons .btn {
         font-size: 0.85rem;
     }
 
-  @@media (max-width: 768px) {
-    .sidebar {
-width: 70px;
+    @@media (max-width: 768px) {
+        .sidebar {
+            width: 70px;
         }
-    
-     .brand-text,
- .nav-text {
-     display: none;
-   }
-      
-        .nav-icon {
-         margin-right: 0;
-        }
-     
-        .nav-link {
-   justify-content: center;
-   }
         
-      .sidebar-header {
-           padding: 1rem;
-   text-align: center;
+        .brand-text,
+        .nav-text,
+        .user-details {
+            display: none;
+        }
+        
+        .nav-icon {
+            margin-right: 0;
+        }
+        
+        .nav-link {
+            justify-content: center;
+        }
+        
+        .sidebar-header {
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .user-info {
+            justify-content: center;
         }
         
         .auth-buttons .btn {
-        padding: 0.5rem;
-   font-size: 1rem;
+            padding: 0.5rem;
+            font-size: 1rem;
         }
-        
-      .auth-buttons .btn span {
-display: none;
-     }
-  }
+    }
 </style>
+
+@code {
+    private bool isAuthenticated = false;
+    private UserAccount? currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAuthenticationAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            // Refresh auth state on navigation
+            await CheckAuthenticationAsync();
+        }
+    }
+
+    private async Task CheckAuthenticationAsync()
+    {
+        try
+        {
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                currentUser = await AuthService.GetCurrentUserAsync();
+            }
+            StateHasChanged();
+        }
+        catch
+        {
+            isAuthenticated = false;
+            currentUser = null;
+        }
+    }
+
+    private async Task HandleLogout()
+    {
+        await AuthService.LogoutAsync();
+        isAuthenticated = false;
+        currentUser = null;
+        Navigation.NavigateTo("/landing", forceLoad: true);
+    }
+}
 

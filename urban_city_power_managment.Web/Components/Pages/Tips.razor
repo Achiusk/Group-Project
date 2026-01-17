@@ -3,127 +3,138 @@
 @using urban_city_power_managment.Web.Services
 @inject IEnergyTipsService TipsService
 @inject IP1SensorService P1SensorService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
 
 <PageTitle>Energiebespaartips - Eindhoven Energie</PageTitle>
 
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col">
-   <h1><span class="emoji">&#x1F4A1;</span> Energiebespaartips</h1>
-     <p class="lead">Persoonlijke tips om energie en geld te besparen</p>
-   </div>
+@if (!isAuthenticated)
+{
+    <div class="text-center py-5">
+        <p>Laden...</p>
     </div>
-
-    <div class="card mb-4 bg-success text-white">
-        <div class="card-body">
-    <div class="row align-items-center">
-         <div class="col-md-8">
-       <h4><span class="emoji">&#x1F3AF;</span> Jouw bespaarpotentieel</h4>
-        <p class="mb-0">Op basis van je verbruikspatroon kun je tot <strong>&#x20AC;@totalSavings/jaar</strong> besparen!</p>
-          </div>
-        <div class="col-md-4 text-end">
-      <h2 class="mb-0">&#x20AC;@totalSavings</h2>
-    <small>per jaar mogelijk</small>
-  </div>
-         </div>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-     <div class="card-body">
-            <div class="d-flex flex-wrap gap-2">
-    <button class="btn @(selectedCategory == null ? "btn-primary" : "btn-outline-primary")" 
-          @onclick="() => FilterByCategory(null)">
-   Alle tips
- </button>
-    @foreach (var cat in categories)
-      {
- <button class="btn @(selectedCategory == cat.Key ? "btn-primary" : "btn-outline-primary")"
-           @onclick="() => FilterByCategory(cat.Key)">
-     @((MarkupString)cat.Value)
-           </button>
-        }
-   </div>
-   </div>
-    </div>
-
-    <div class="row">
-    @if (filteredTips != null)
-     {
- @foreach (var tip in filteredTips)
-   {
-     <div class="col-md-6 col-lg-4 mb-4">
-    <div class="card h-100 tip-card">
-       <div class="card-body">
-    <div class="d-flex align-items-start mb-3">
-     <span class="tip-emoji me-3">@((MarkupString)GetTipIconHtml(tip.IconEmoji))</span>
-       <div>
-      <h5 class="card-title mb-1">@tip.Title</h5>
-      <span class="badge bg-secondary">@((MarkupString)GetCategoryName(tip.Category))</span>
+}
+else
+{
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col">
+                <h1><span class="emoji">&#x1F4A1;</span> Energiebespaartips</h1>
+                <p class="lead">Persoonlijke tips om energie en geld te besparen</p>
             </div>
- </div>
-     
-      <p class="card-text">@tip.Description</p>
-           
-          <div class="tip-details mb-3">
-   <div class="row text-center">
-    <div class="col-4">
-     <small class="text-muted d-block">Besparing</small>
-        <strong class="text-success">&#x20AC;@tip.EstimatedYearlySavingsEuro/jr</strong>
         </div>
-          <div class="col-4">
-   <small class="text-muted d-block">Moeite</small>
-     <strong>@tip.Difficulty</strong>
-    </div>
-         <div class="col-4">
-   <small class="text-muted d-block">Investering</small>
-           <strong>@tip.Investment</strong>
-  </div>
-    </div>
-         </div>
 
-          <div class="tip-advice p-3 bg-light rounded mb-3">
-       <small>@tip.DetailedAdvice</small>
-      </div>
-
-  @if (tip.RelatedVendorCategory != null)
-    {
-         <a href="/leveranciers?category=@tip.RelatedVendorCategory" 
-        class="btn btn-outline-primary btn-sm w-100">
-      <span class="emoji">&#x1F517;</span> Bekijk aanbieders
-        </a>
-        }
-    </div>
-      <div class="card-footer bg-transparent">
-      <div class="d-flex justify-content-between align-items-center">
-      <span class="badge @GetPriorityBadgeClass(tip.Priority)">
-         @((MarkupString)GetPriorityText(tip.Priority))
-     </span>
-           <small class="text-muted">~@tip.PotentialSavingsPercent% besparing</small>
- </div>
-     </div>
-    </div>
+        <div class="card mb-4 bg-success text-white">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4><span class="emoji">&#x1F3AF;</span> Jouw bespaarpotentieel</h4>
+                        <p class="mb-0">Op basis van je verbruikspatroon kun je tot <strong>&#x20AC;@totalSavings/jaar</strong> besparen!</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <h2 class="mb-0">&#x20AC;@totalSavings</h2>
+                        <small>per jaar mogelijk</small>
+                    </div>
+                </div>
+            </div>
         </div>
-       }
-    }
-    </div>
 
-    <div class="card mt-4 mb-4">
-      <div class="card-body text-center py-5">
-         <h4><span class="emoji">&#x1F3E0;</span> Wil je professioneel advies?</h4>
- <p class="text-muted">Onze partner-adviseurs kunnen een complete energiescan van je woning maken.</p>
-<a href="/leveranciers?category=EnergieAdvies" class="btn btn-primary btn-lg">
- Vind een energieadviseur
-   </a>
- </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn @(selectedCategory == null ? "btn-primary" : "btn-outline-primary")" 
+                            @onclick="() => FilterByCategory(null)">
+                        Alle tips
+                    </button>
+                    @foreach (var cat in categories)
+                    {
+                        <button class="btn @(selectedCategory == cat.Key ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => FilterByCategory(cat.Key)">
+                            @((MarkupString)cat.Value)
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            @if (filteredTips != null)
+            {
+                @foreach (var tip in filteredTips)
+                {
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 tip-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <span class="tip-emoji me-3">@((MarkupString)GetTipIconHtml(tip.IconEmoji))</span>
+                                    <div>
+                                        <h5 class="card-title mb-1">@tip.Title</h5>
+                                        <span class="badge bg-secondary">@((MarkupString)GetCategoryName(tip.Category))</span>
+                                    </div>
+                                </div>
+                                
+                                <p class="card-text">@tip.Description</p>
+                                
+                                <div class="tip-details mb-3">
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <small class="text-muted d-block">Besparing</small>
+                                            <strong class="text-success">&#x20AC;@tip.EstimatedYearlySavingsEuro/jr</strong>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-muted d-block">Moeite</small>
+                                            <strong>@tip.Difficulty</strong>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="text-muted d-block">Investering</small>
+                                            <strong>@tip.Investment</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tip-advice p-3 bg-light rounded mb-3">
+                                    <small>@tip.DetailedAdvice</small>
+                                </div>
+
+                                @if (tip.RelatedVendorCategory != null)
+                                {
+                                    <a href="/leveranciers?category=@tip.RelatedVendorCategory" 
+                                       class="btn btn-outline-primary btn-sm w-100">
+                                        <span class="emoji">&#x1F517;</span> Bekijk aanbieders
+                                    </a>
+                                }
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge @GetPriorityBadgeClass(tip.Priority)">
+                                        @((MarkupString)GetPriorityText(tip.Priority))
+                                    </span>
+                                    <small class="text-muted">~@tip.PotentialSavingsPercent% besparing</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="card mt-4 mb-4">
+            <div class="card-body text-center py-5">
+                <h4><span class="emoji">&#x1F3E0;</span> Wil je professioneel advies?</h4>
+                <p class="text-muted">Onze partner-adviseurs kunnen een complete energiescan van je woning maken.</p>
+                <a href="/leveranciers?category=EnergieAdvies" class="btn btn-primary btn-lg">
+                    Vind een energieadviseur
+                </a>
+            </div>
+        </div>
     </div>
-</div>
+}
 
 <style>
     .tip-card {
         transition: all 0.3s ease;
         border: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
     
     .tip-card:hover {
@@ -132,15 +143,15 @@
     }
     
     .tip-emoji {
-     font-size: 2.5rem;
- line-height: 1;
+        font-size: 2.5rem;
+        line-height: 1;
         font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif;
     }
-  
+    
     .tip-details {
         border-top: 1px solid #eee;
-     border-bottom: 1px solid #eee;
-      padding: 1rem 0;
+        border-bottom: 1px solid #eee;
+        padding: 1rem 0;
     }
 
     .tip-advice {
@@ -149,6 +160,9 @@
     }
     
     .emoji { font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif; }
+
+    [data-theme="dark"] .tip-card { background-color: #1e1e1e; }
+    [data-theme="dark"] .tip-advice { background-color: #2a2a2a !important; }
 </style>
 
 @code {
@@ -156,30 +170,47 @@
     private List<EnergyTip>? filteredTips;
     private TipCategory? selectedCategory = null;
     private int totalSavings = 0;
+    private bool isAuthenticated = false;
+    private UserAccount? currentUser;
 
     private Dictionary<TipCategory, string> categories = new()
     {
-    { TipCategory.Verwarming, "&#x1F321;&#xFE0F; Verwarming" },
+        { TipCategory.Verwarming, "&#x1F321;&#xFE0F; Verwarming" },
         { TipCategory.Isolatie, "&#x1F3E0; Isolatie" },
-   { TipCategory.ZonneEnergie, "&#x2600;&#xFE0F; Zonne-energie" },
+        { TipCategory.ZonneEnergie, "&#x2600;&#xFE0F; Zonne-energie" },
         { TipCategory.Apparaten, "&#x1F50C; Apparaten" },
         { TipCategory.Verlichting, "&#x1F4A1; Verlichting" },
         { TipCategory.Water, "&#x1F6BF; Water" },
         { TipCategory.Gedrag, "&#x1F3AF; Gedrag" },
-   { TipCategory.SlimMeten, "&#x1F4CA; Slim meten" }
+        { TipCategory.SlimMeten, "&#x1F4CA; Slim meten" }
     };
 
     protected override async Task OnInitializedAsync()
     {
-    var readings = await P1SensorService.GetLatestReadingsAsync();
-        var profile = await TipsService.AnalyzeConsumerProfileAsync("CONS-0001", readings);
-      
+        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        
+        if (!isAuthenticated)
+        {
+            Navigation.NavigateTo("/landing");
+            return;
+        }
+
+        currentUser = await AuthService.GetCurrentUserAsync();
+        await LoadTipsAsync();
+    }
+
+    private async Task LoadTipsAsync()
+    {
+        var readings = await P1SensorService.GetLatestReadingsAsync();
+        var consumerId = currentUser != null ? $"USER-{currentUser.Id:D4}" : "CONS-0001";
+        var profile = await TipsService.AnalyzeConsumerProfileAsync(consumerId, readings);
+        
         allTips = await TipsService.GetPersonalizedTipsAsync(profile);
         
-if (allTips.Count < 10)
+        if (allTips.Count < 10)
         {
-var allAvailableTips = await TipsService.GetAllTipsAsync();
-         allTips = allAvailableTips;
+            var allAvailableTips = await TipsService.GetAllTipsAsync();
+            allTips = allAvailableTips;
         }
         
         filteredTips = allTips;
@@ -189,64 +220,38 @@ var allAvailableTips = await TipsService.GetAllTipsAsync();
     private void FilterByCategory(TipCategory? category)
     {
         selectedCategory = category;
- if (category == null)
-    {
-          filteredTips = allTips;
-        }
-        else
-        {
-         filteredTips = allTips?.Where(t => t.Category == category).ToList();
-   }
+        filteredTips = category == null ? allTips : allTips?.Where(t => t.Category == category).ToList();
     }
 
-    private string GetCategoryName(TipCategory category)
-    {
-        return categories.TryGetValue(category, out var name) ? name : category.ToString();
-    }
+    private string GetCategoryName(TipCategory category) =>
+        categories.TryGetValue(category, out var name) ? name : category.ToString();
 
-    private string GetTipIconHtml(string emoji)
+    private string GetTipIconHtml(string emoji) => emoji switch
     {
-        return emoji switch
-        {
-    _ when emoji.Contains("\U0001F321") || emoji == "???" => "&#x1F321;&#xFE0F;",
- _ when emoji.Contains("\U0001F4F1") || emoji == "??" => "&#x1F4F1;",
-            _ when emoji.Contains("\U0001F527") || emoji == "??" => "&#x1F527;",
- _ when emoji.Contains("\U0001F3E0") || emoji == "??" => "&#x1F3E0;",
-   _ when emoji.Contains("\U0001F6AA") || emoji == "??" => "&#x1F6AA;",
-       _ when emoji.Contains("\U0001FA9F") || emoji == "??" => "&#x1FA9F;",
-          _ when emoji.Contains("\u2600") || emoji == "??" => "&#x2600;&#xFE0F;",
-    _ when emoji.Contains("\U0001F50B") || emoji == "??" => "&#x1F50B;",
-            _ when emoji.Contains("\U0001F9CA") || emoji == "??" => "&#x1F9CA;",
-        _ when emoji.Contains("\U0001F50C") || emoji == "??" => "&#x1F50C;",
-            _ when emoji.Contains("\U0001F455") || emoji == "??" => "&#x1F455;",
-      _ when emoji.Contains("\U0001F4A1") || emoji == "??" => "&#x1F4A1;",
-         _ when emoji.Contains("\U0001F6BF") || emoji == "??" => "&#x1F6BF;",
-    _ when emoji.Contains("\U0001F4CA") || emoji == "??" => "&#x1F4CA;",
-            _ when emoji.Contains("\U0001F4C8") || emoji == "??" => "&#x1F4C8;",
-            _ when emoji.Contains("\u23F0") || emoji == "?" => "&#x23F0;",
-    _ => "&#x1F4A1;"
-        };
- }
+        _ when emoji.Contains("\U0001F321") => "&#x1F321;&#xFE0F;",
+        _ when emoji.Contains("\U0001F3E0") => "&#x1F3E0;",
+        _ when emoji.Contains("\u2600") => "&#x2600;&#xFE0F;",
+        _ when emoji.Contains("\U0001F50C") => "&#x1F50C;",
+        _ when emoji.Contains("\U0001F4A1") => "&#x1F4A1;",
+        _ when emoji.Contains("\U0001F6BF") => "&#x1F6BF;",
+        _ when emoji.Contains("\U0001F3AF") => "&#x1F3AF;",
+        _ when emoji.Contains("\U0001F4CA") => "&#x1F4CA;",
+        _ => "&#x1F4A1;"
+    };
 
-    private string GetPriorityBadgeClass(int priority)
+    private string GetPriorityBadgeClass(int priority) => priority switch
     {
-  return priority switch
- {
         5 => "bg-danger",
-          4 => "bg-warning text-dark",
-         3 => "bg-info",
-            _ => "bg-secondary"
-   };
-  }
+        4 => "bg-warning text-dark",
+        3 => "bg-info",
+        _ => "bg-secondary"
+    };
 
-    private string GetPriorityText(int priority)
+    private string GetPriorityText(int priority) => priority switch
     {
-        return priority switch
-        {
-          5 => "&#x2B50; Hoge prioriteit",
-            4 => "Aanbevolen",
-   3 => "Handig",
-_ => "Optioneel"
-        };
-    }
+        5 => "&#x2B50; Hoge prioriteit",
+        4 => "Aanbevolen",
+        3 => "Handig",
+        _ => "Optioneel"
+    };
 }

@@ -408,7 +408,7 @@ background: #dee2e6;
 @code {
     private RegistrationModel model = new();
     private int currentStep = 1;
-  private bool showPassword = false;
+    private bool showPassword = false;
     private bool isSubmitting = false;
     private bool isLookingUpAddress = false;
     private bool addressLookupFailed = false;
@@ -424,6 +424,15 @@ background: #dee2e6;
     private bool HasNumber => !string.IsNullOrEmpty(model.Password) && model.Password.Any(char.IsDigit);
     private bool HasSpecial => !string.IsNullOrEmpty(model.Password) && model.Password.Any(c => "!@#$%^&*()_+-=[]{}|;':\",./<>?".Contains(c));
     private bool HasMinLength => !string.IsNullOrEmpty(model.Password) && model.Password.Length >= 8;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if already logged in
+        if (await AuthService.IsAuthenticatedAsync())
+        {
+            Navigation.NavigateTo("/dashboard");
+        }
+    }
 
     private string GetStepLabel(int step) => step switch
     {
@@ -596,31 +605,32 @@ if (address != null)
     private async Task HandleRegistration()
     {
         if (!CanSubmit())
-  return;
+            return;
 
-  isSubmitting = true;
+        isSubmitting = true;
         errorMessage = string.Empty;
 
         try
         {
-      var (success, message, user) = await AuthService.RegisterAsync(model);
+            var (success, message, user) = await AuthService.RegisterAsync(model);
 
- if (success)
-         {
-            registrationSuccess = true;
-       }
+            if (success)
+            {
+                // AuthService auto-logs in the user, redirect to dashboard
+                Navigation.NavigateTo("/dashboard", forceLoad: true);
+            }
             else
             {
-       errorMessage = message;
- }
+                errorMessage = message;
+            }
         }
         catch
         {
-       errorMessage = "Er is een onverwachte fout opgetreden. Probeer het later opnieuw.";
- }
-    finally
+            errorMessage = "Er is een onverwachte fout opgetreden. Probeer het later opnieuw.";
+        }
+        finally
         {
             isSubmitting = false;
-   }
+        }
     }
 }

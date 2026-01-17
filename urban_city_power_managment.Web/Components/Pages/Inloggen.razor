@@ -9,101 +9,138 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-         <div class="card shadow-lg border-0">
+            <div class="card shadow-lg border-0">
                 <div class="card-header bg-primary text-white text-center py-4">
-          <h2 class="mb-0">Inloggen</h2>
-     <p class="mb-0 opacity-75">Welkom terug!</p>
-          </div>
+                    <h2 class="mb-0">?? Inloggen</h2>
+                    <p class="mb-0 opacity-75">Welkom terug!</p>
+                </div>
                 <div class="card-body p-4">
-                 
-      @if (!string.IsNullOrEmpty(errorMessage))
-   {
-             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-       <strong>Fout:</strong> @errorMessage
-    <button type="button" class="btn-close" @onclick="ClearError"></button>
-            </div>
-      }
+                    
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Fout:</strong> @errorMessage
+                            <button type="button" class="btn-close" @onclick="ClearError"></button>
+                        </div>
+                    }
 
-    @if (!string.IsNullOrEmpty(successMessage))
-          {
-     <div class="alert alert-success">
-       @successMessage
-     </div>
-        }
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success">
+                            ? @successMessage
+                        </div>
+                    }
 
-     <EditForm Model="@model" OnValidSubmit="HandleLogin">
-   <DataAnnotationsValidator />
-         
-      <div class="mb-3">
-      <label class="form-label">E-mailadres</label>
-  <input type="email" class="form-control" 
-                   @bind="model.Email" 
-             placeholder="jan.devries@email.nl" />
-     <ValidationMessage For="@(() => model.Email)" />
-               </div>
+                    <EditForm Model="@model" OnValidSubmit="HandleLogin">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">E-mailadres</label>
+                            <input type="email" class="form-control" 
+                                   @bind="model.Email" 
+                                   placeholder="jan.devries@example.nl" />
+                            <ValidationMessage For="@(() => model.Email)" />
+                        </div>
 
-          <div class="mb-3">
-        <label class="form-label">Wachtwoord</label>
-               <div class="input-group">
-            <input type="@(showPassword ? "text" : "password")" class="form-control" 
-                  @bind="model.Password" 
-          placeholder="Je wachtwoord" />
-   <button class="btn btn-outline-secondary" type="button" @onclick="TogglePassword">
-    @(showPassword ? "Verberg" : "Toon")
-      </button>
-     </div>
-    <ValidationMessage For="@(() => model.Password)" />
-           </div>
+                        <div class="mb-3">
+                            <label class="form-label">Wachtwoord</label>
+                            <div class="input-group">
+                                <input type="@(showPassword ? "text" : "password")" class="form-control" 
+                                       @bind="model.Password" 
+                                       placeholder="Je wachtwoord" />
+                                <button class="btn btn-outline-secondary" type="button" @onclick="TogglePassword">
+                                    @(showPassword ? "??" : "???")
+                                </button>
+                            </div>
+                            <ValidationMessage For="@(() => model.Password)" />
+                        </div>
 
-   <div class="d-flex justify-content-between align-items-center mb-4">
-          <div class="form-check">
-               <input type="checkbox" class="form-check-input" id="rememberMe" @bind="model.RememberMe" />
-      <label class="form-check-label" for="rememberMe">Onthoud mij</label>
-      </div>
- <a href="/wachtwoord-vergeten" class="text-decoration-none">Wachtwoord vergeten?</a>
-            </div>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe" @bind="model.RememberMe" />
+                                <label class="form-check-label" for="rememberMe">Onthoud mij</label>
+                            </div>
+                            <a href="#" class="text-decoration-none small">Wachtwoord vergeten?</a>
+                        </div>
 
-    <button type="submit" class="btn btn-primary w-100 btn-lg" disabled="@isLoggingIn">
-           @if (isLoggingIn)
-   {
-          <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-       <text>Bezig met inloggen...</text>
-          }
-      else
-       {
-        <text>Inloggen</text>
-    }
-            </button>
-    </EditForm>
+                        <button type="submit" class="btn btn-primary w-100 btn-lg" disabled="@isLoggingIn">
+                            @if (isLoggingIn)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                <text>Bezig met inloggen...</text>
+                            }
+                            else
+                            {
+                                <text>?? Inloggen</text>
+                            }
+                        </button>
+                    </EditForm>
 
-        <hr class="my-4" />
+                    <hr class="my-4" />
 
-        <div class="text-center">
-       <p class="text-muted mb-3">Of log in met</p>
-                  <div class="d-grid gap-2">
-        <button class="btn btn-outline-secondary" disabled>
-        Google (Binnenkort beschikbaar)
-         </button>
-   </div>
-  </div>
-          </div>
-        <div class="card-footer text-center py-3 bg-light">
-               Nog geen account? <a href="/registreren" class="fw-bold">Registreren</a>
-         </div>
+                    <div class="text-center">
+                        <p class="text-muted mb-0">
+                            Nog geen account? <a href="/registreren" class="fw-bold">Registreer hier</a>
+                        </p>
+                    </div>
+                </div>
             </div>
 
-       <div class="card mt-4 bg-light border-0">
-     <div class="card-body">
-                    <h6 class="mb-2">Tip</h6>
-    <p class="small text-muted mb-0">
-        Gebruik een sterk wachtwoord en deel je inloggegevens nooit met anderen.
-  Als je vermoedt dat iemand toegang heeft tot je account, wijzig dan direct je wachtwoord.
- </p>
-       </div>
-      </div>
-      </div>
+            <!-- Demo accounts info -->
+            <div class="card mt-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">?? Demo Accounts</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Test de applicatie met een demo account:</p>
+                    <div class="bg-light p-2 rounded">
+                        <code class="d-block">Email: jan.devries@example.nl</code>
+                        <code class="d-block">Wachtwoord: Password123!</code>
+                    </div>
+                    <p class="small text-muted mt-2 mb-0">
+                        <em>Er zijn 10 demo accounts beschikbaar. Alle wachtwoorden zijn: <strong>Password123!</strong></em>
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+    /* Dark mode support for login page */
+    [data-theme="dark"] .card {
+        background-color: #1e1e1e;
+        border-color: #333;
+    }
+    
+    [data-theme="dark"] .card-header.bg-primary {
+        background: linear-gradient(135deg, #154273, #01689b) !important;
+    }
+    
+    [data-theme="dark"] .card-body {
+        color: #fff;
+    }
+    
+    [data-theme="dark"] .form-control {
+        background-color: #2a2a2a;
+        border-color: #444;
+        color: #fff;
+    }
+    
+    [data-theme="dark"] .form-control:focus {
+        background-color: #2a2a2a;
+        border-color: #01689b;
+        color: #fff;
+    }
+    
+    [data-theme="dark"] .bg-light {
+        background-color: #2a2a2a !important;
+    }
+    
+    [data-theme="dark"] .text-muted {
+        color: #aaa !important;
+    }
+</style>
 
 @code {
     private LoginModel model = new();
@@ -112,13 +149,20 @@
     private string errorMessage = string.Empty;
     private string successMessage = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-    var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-     if (uri.Query.Contains("registered=true"))
+        // Check if already logged in
+        if (await AuthService.IsAuthenticatedAsync())
         {
-         successMessage = "Je account is aangemaakt! Je kunt nu inloggen.";
-   }
+            Navigation.NavigateTo("/dashboard");
+            return;
+        }
+
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        if (uri.Query.Contains("registered=true"))
+        {
+            successMessage = "Je account is aangemaakt! Je kunt nu inloggen.";
+        }
     }
 
     private void ClearError()
@@ -136,26 +180,27 @@
         isLoggingIn = true;
         errorMessage = string.Empty;
 
-      try
+        try
         {
-   var (success, message, user) = await AuthService.LoginAsync(model);
+            var (success, message, user) = await AuthService.LoginAsync(model);
 
-       if (success && user != null)
-          {
-        Navigation.NavigateTo("/", forceLoad: true);
-            }
-   else
+            if (success && user != null)
             {
-      errorMessage = message;
-          }
+                // Redirect to dashboard on successful login
+                Navigation.NavigateTo("/dashboard", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = message;
+            }
         }
         catch (Exception)
-    {
+        {
             errorMessage = "Er is een fout opgetreden. Probeer het later opnieuw.";
         }
         finally
-    {
-     isLoggingIn = false;
-   }
+        {
+            isLoggingIn = false;
+        }
     }
 }
