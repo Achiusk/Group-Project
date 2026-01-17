@@ -8,61 +8,42 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Health checks for Docker and Azure
-builder.Services.AddHealthChecks();
+// ONLY Azure MySQL In-App - NO Docker, NO local MySQL complexity
+var connectionString = Environment.GetEnvironmentVariable("MYSQLCONNSTR_localdb");
 
-// Azure Application Insights (if configured)
-var appInsightsConnectionString = builder.Configuration["Azure:ApplicationInsights:ConnectionString"];
-if (!string.IsNullOrEmpty(appInsightsConnectionString))
+// Development fallback ONLY
+if (string.IsNullOrEmpty(connectionString) && builder.Environment.IsDevelopment())
 {
-    builder.Services.AddApplicationInsightsTelemetry(options =>
-    {
-      options.ConnectionString = appInsightsConnectionString;
-    });
+    connectionString = "Server=localhost;Port=3306;Database=EindhovenEnergy_Dev;User=root;Password=;";
 }
 
-// MySQL Connection String - works with Azure MySQL, Docker MySQL, or local MySQL
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
- ?? Environment.GetEnvironmentVariable("MYSQLCONNSTR_DefaultConnection")
-    ?? "Server=localhost;Port=3306;Database=EindhovenEnergy;User=root;Password=;";
-
-// Handle Azure MySQL connection string format
-if (connectionString.Contains("Database=") == false && connectionString.Contains("localhost") == false)
+// Configure database ONLY if we have a connection string
+if (!string.IsNullOrEmpty(connectionString))
 {
-    // Azure MySQL flexible server format adjustment if needed
-    connectionString = connectionString.Replace("localdb", "localhost");
-}
-
-// Configure MySQL with Pomelo provider
-var serverVersion = new MySqlServerVersion(new Version(8, 0, 36));
-
-builder.Services.AddDbContext<EnergyDbContext>(options =>
-{
-    options.UseMySql(connectionString, serverVersion, mySqlOptions =>
+    try
     {
-        mySqlOptions.EnableRetryOnFailure(
-   maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorNumbersToAdd: null);
-
-        // Azure recommended settings
-        mySqlOptions.CommandTimeout(60);
-    });
-    
-    // Enable sensitive data logging only in development
-    if (builder.Environment.IsDevelopment())
-    {
-        options.EnableSensitiveDataLogging();
-    options.EnableDetailedErrors();
+        // Azure MySQL In-App uses MySQL 5.7.9
+        var serverVersion = new MySqlServerVersion(new Version(5, 7, 9));
+        
+        builder.Services.AddDbContext<EnergyDbContext>(options =>
+        {
+            options.UseMySql(connectionString, serverVersion, mySqlOptions =>
+            {
+                mySqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
+                mySqlOptions.CommandTimeout(30);
+            });
+        });
     }
-});
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database configuration failed: {ex.Message}. App will start without database.");
+    }
+}
 
-// Authentication & User services
+// Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<INetbeheerderService, NetbeheerderService>();
 builder.Services.AddScoped<IPostalCodeService, PostalCodeService>();
-
-// Consumer-focused services
 builder.Services.AddScoped<IP1SensorService, P1SensorService>();
 builder.Services.AddScoped<IVendorService, VendorService>();
 builder.Services.AddScoped<IEnergyTipsService, EnergyTipsService>();
@@ -76,38 +57,29 @@ builder.Services.AddHttpClient<IWeatherService, OpenMeteoWeatherService>(client 
 
 var app = builder.Build();
 
-// Initialize MySQL database
-using (var scope = app.Services.CreateScope())
+// Simple database initialization - wrapped to NEVER crash the app
+if (!string.IsNullOrEmpty(connectionString))
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<EnergyDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    
     try
     {
-        // Apply pending migrations in production, create in development
-        if (app.Environment.IsProduction())
-   {
-            await dbContext.Database.MigrateAsync();
-  logger.LogInformation("Database migrations applied successfully");
-        }
-        else
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<EnergyDbContext>();
+        
+        var canConnect = await dbContext.Database.CanConnectAsync();
+        if (canConnect)
         {
-      await dbContext.Database.EnsureCreatedAsync();
-  logger.LogInformation("Database created/verified successfully");
+            await dbContext.Database.EnsureCreatedAsync();
+            Console.WriteLine("? Database initialized");
         }
     }
     catch (Exception ex)
     {
-        logger.LogWarning(ex, "Database initialization failed. App will continue with limited functionality.");
+        Console.WriteLine($"? Database initialization skipped: {ex.Message}");
+        // App continues - pages will work, just no database functionality
     }
 }
 
-// Health check endpoint for Docker and Azure
-app.MapHealthChecks("/health");
-
-// Azure warmup endpoint
-app.MapGet("/warmup", () => Results.Ok("Warmed up!"));
-
+// Configure middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -116,9 +88,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAntiforgery();
+app.UseStaticFiles();
 
-app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+Console.WriteLine("? Application starting...");
 app.Run();
