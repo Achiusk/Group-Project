@@ -1,21 +1,26 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using urban_city_power_managment.Web.Data;
 using urban_city_power_managment.Web.Models;
+using System.Text.Json;
 
 namespace urban_city_power_managment.Web.Services
 {
   /// <summary>
     /// Authentication service for user registration and login
-    /// Uses BCrypt for secure password hashing
+    /// Uses BCrypt for secure password hashing and sessions for state
     /// </summary>
 public interface IAuthService
     {
         Task<(bool Success, string Message, UserAccount? User)> RegisterAsync(RegistrationModel model);
         Task<(bool Success, string Message, UserAccount? User)> LoginAsync(LoginModel model);
-  Task<bool> EmailExistsAsync(string email);
-   Task<UserAccount?> GetUserByIdAsync(int userId);
-     Task<UserAccount?> GetUserByEmailAsync(string email);
-   Task<bool> UpdateLastLoginAsync(int userId);
+        Task LogoutAsync();
+        Task<UserAccount?> GetCurrentUserAsync();
+        Task<bool> IsAuthenticatedAsync();
+        Task<bool> EmailExistsAsync(string email);
+        Task<UserAccount?> GetUserByIdAsync(int userId);
+        Task<UserAccount?> GetUserByEmailAsync(string email);
+        Task<bool> UpdateLastLoginAsync(int userId);
    string HashPassword(string password);
         bool VerifyPassword(string password, string hash);
     }
@@ -25,18 +30,22 @@ public interface IAuthService
     private readonly EnergyDbContext _dbContext;
         private readonly ILogger<AuthService> _logger;
         private readonly INetbeheerderService _netbeheerderService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         // BCrypt work factor (higher = more secure but slower)
         private const int BCRYPT_WORK_FACTOR = 12;
+        private const string USER_SESSION_KEY = "CurrentUser";
 
         public AuthService(
             EnergyDbContext dbContext,
   ILogger<AuthService> logger,
-         INetbeheerderService netbeheerderService)
+         INetbeheerderService netbeheerderService,
+         IHttpContextAccessor httpContextAccessor)
      {
        _dbContext = dbContext;
      _logger = logger;
           _netbeheerderService = netbeheerderService;
+          _httpContextAccessor = httpContextAccessor;
         }
 
    public async Task<(bool Success, string Message, UserAccount? User)> RegisterAsync(RegistrationModel model)
@@ -89,6 +98,9 @@ public interface IAuthService
         _dbContext.Users.Add(user);
        await _dbContext.SaveChangesAsync();
 
+                // Auto-login after registration
+                await SetCurrentUserAsync(user);
+
        _logger.LogInformation("New user registered: {Email}", user.Email);
 
      return (true, "Account succesvol aangemaakt!", user);
@@ -126,6 +138,9 @@ public interface IAuthService
       // Update last login timestamp
   await UpdateLastLoginAsync(user.Id);
 
+                // Store user in session
+                await SetCurrentUserAsync(user);
+
   _logger.LogInformation("User logged in: {Email}", user.Email);
 
          return (true, "Inloggen gelukt!", user);
@@ -137,7 +152,55 @@ public interface IAuthService
             }
         }
 
-    public async Task<bool> EmailExistsAsync(string email)
+        public async Task LogoutAsync()
+        {
+            var session = _httpContextAccessor.HttpContext?.Session;
+            if (session != null)
+            {
+                session.Remove(USER_SESSION_KEY);
+                await Task.CompletedTask;
+            }
+        }
+
+        public async Task<UserAccount?> GetCurrentUserAsync()
+        {
+            var session = _httpContextAccessor.HttpContext?.Session;
+            if (session == null) return null;
+
+            var userJson = session.GetString(USER_SESSION_KEY);
+            if (string.IsNullOrEmpty(userJson)) return null;
+
+            var userInfo = JsonSerializer.Deserialize<UserSessionInfo>(userJson);
+            if (userInfo == null) return null;
+
+            // Get fresh user data from database
+            return await GetUserByIdAsync(userInfo.UserId);
+        }
+
+        public async Task<bool> IsAuthenticatedAsync()
+        {
+            var user = await GetCurrentUserAsync();
+            return user != null;
+        }
+
+        private async Task SetCurrentUserAsync(UserAccount user)
+        {
+            var session = _httpContextAccessor.HttpContext?.Session;
+            if (session != null)
+            {
+                var userInfo = new UserSessionInfo
+                {
+                    UserId = user.Id,
+                    Email = user.Email,
+                    FullName = $"{user.FirstName} {user.LastName}"
+                };
+
+                session.SetString(USER_SESSION_KEY, JsonSerializer.Serialize(userInfo));
+                await Task.CompletedTask;
+            }
+        }
+
+        public async Task<bool> EmailExistsAsync(string email)
      {
           if (string.IsNullOrWhiteSpace(email))
             return false;
@@ -203,6 +266,14 @@ return await _dbContext.Users
  _logger.LogError(ex, "Error verifying password");
      return false;
  }
+        }
+
+        // Helper class for session storage
+        private class UserSessionInfo
+        {
+            public int UserId { get; set; }
+            public string Email { get; set; } = "";
+            public string FullName { get; set; } = "";
         }
     }
 }

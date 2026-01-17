@@ -8,6 +8,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Add session support for authentication
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(2);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Add HttpContextAccessor for accessing session in services
+builder.Services.AddHttpContextAccessor();
+
 // ONLY Azure MySQL In-App - NO Docker, NO local MySQL complexity
 var connectionString = Environment.GetEnvironmentVariable("MYSQLCONNSTR_localdb");
 
@@ -48,6 +60,7 @@ builder.Services.AddScoped<IP1SensorService, P1SensorService>();
 builder.Services.AddScoped<IVendorService, VendorService>();
 builder.Services.AddScoped<IEnergyTipsService, EnergyTipsService>();
 builder.Services.AddScoped<IPowerGenerationService, PowerGenerationService>();
+builder.Services.AddScoped<DatabaseSeeder>();
 
 builder.Services.AddHttpClient<IWeatherService, OpenMeteoWeatherService>(client =>
 {
@@ -57,25 +70,26 @@ builder.Services.AddHttpClient<IWeatherService, OpenMeteoWeatherService>(client 
 
 var app = builder.Build();
 
-// Simple database initialization - wrapped to NEVER crash the app
+// Simple database initialization and seeding
 if (!string.IsNullOrEmpty(connectionString))
 {
     try
     {
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<EnergyDbContext>();
+        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
         
         var canConnect = await dbContext.Database.CanConnectAsync();
         if (canConnect)
         {
             await dbContext.Database.EnsureCreatedAsync();
-            Console.WriteLine("? Database initialized");
+            await seeder.SeedAsync(); // Seed with 10 mock accounts and P1 data
+            Console.WriteLine("? Database initialized and seeded with mock data");
         }
     }
     catch (Exception ex)
     {
         Console.WriteLine($"? Database initialization skipped: {ex.Message}");
-        // App continues - pages will work, just no database functionality
     }
 }
 
@@ -87,11 +101,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAntiforgery();
 app.UseStaticFiles();
+app.UseAntiforgery();
+
+// Add session middleware (must be before routing)
+app.UseSession();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-Console.WriteLine("? Application starting...");
+Console.WriteLine("? Application starting with authentication support...");
 app.Run();

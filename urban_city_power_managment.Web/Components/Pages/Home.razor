@@ -1,218 +1,191 @@
-﻿@page "/"
+﻿@page "/dashboard"
 @using urban_city_power_managment.Web.Models
 @using urban_city_power_managment.Web.Services
 @inject IP1SensorService P1SensorService
 @inject IEnergyTipsService TipsService
 @inject IWeatherService WeatherService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
 
 <PageTitle>Mijn Energie Dashboard - Eindhoven Energie</PageTitle>
 
+@if (!isAuthenticated)
+{
+    <div class="text-center py-5">
+        <p>Laden...</p>
+    </div>
+}
+else
+{
 <div class="consumer-dashboard">
     <div class="welcome-section mb-4">
-     <div class="row align-items-center">
-          <div class="col-md-8">
-       <h1><span class="emoji">&#x1F44B;</span> Welkom terug!</h1>
-<p class="lead text-muted">Bekijk je energieverbruik en ontdek hoe je kunt besparen</p>
-   </div>
-  <div class="col-md-4 text-end">
-    <div class="weather-mini">
-   @if (weather != null)
-       {
-  <span class="weather-icon emoji">&#x1F324;&#xFE0F;</span>
-      <span class="weather-temp">@weather.Temperature.ToString("F0")°C</span>
-     <small class="text-muted d-block">Eindhoven</small>
-   }
-      </div>
-      </div>
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><span class="emoji">&#x1F44B;</span> Welkom terug@(currentUser != null ? $", {currentUser.FirstName}" : "")!</h1>
+                <p class="lead text-muted">Bekijk je energieverbruik en ontdek hoe je kunt besparen</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="weather-mini">
+                    @if (weather != null)
+                    {
+                        <span class="weather-icon emoji">&#x1F324;&#xFE0F;</span>
+                        <span class="weather-temp">@weather.Temperature.ToString("F0")°C</span>
+                        <small class="text-muted d-block">Eindhoven</small>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="row mb-4">
-     <div class="col-md-6">
-         <div class="card score-card efficiency-card">
-             <div class="card-body text-center">
-        <div class="score-circle @GetScoreClass(profile?.EfficiencyScore ?? 0)">
-   <span class="score-value">@(profile?.EfficiencyScore ?? 0)</span>
- <span class="score-label">/ 100</span>
-       </div>
-         <h5 class="mt-3"><span class="emoji">&#x26A1;</span> Efficientie Score</h5>
-      <p class="text-muted small">Hoe zuinig je bent vergeleken met gemiddeld</p>
-             </div>
-   </div>
- </div>
-  <div class="col-md-6">
-       <div class="card score-card sustainability-card">
-  <div class="card-body text-center">
-         <div class="score-circle @GetScoreClass(profile?.SustainabilityScore ?? 0)">
-       <span class="score-value">@(profile?.SustainabilityScore ?? 0)</span>
-     <span class="score-label">/ 100</span>
-   </div>
-    <h5 class="mt-3"><span class="emoji">&#x1F331;</span> Duurzaamheid Score</h5>
-<p class="text-muted small">Je bijdrage aan een groene toekomst</p>
- </div>
-            </div>
- </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-md-3">
-   <div class="card stat-card">
-  <div class="card-body text-center">
-      <div class="stat-icon emoji">&#x26A1;</div>
-     <h3 class="stat-value">@(latestReading?.CurrentPowerConsumption.ToString("F2") ?? "0.00") kW</h3>
-    <p class="stat-label">Huidig verbruik</p>
-    </div>
-  </div>
-     </div>
-     <div class="col-md-3">
-   <div class="card stat-card">
+        <div class="col-md-6">
+            <div class="card score-card efficiency-card">
                 <div class="card-body text-center">
-         <div class="stat-icon emoji">&#x2600;&#xFE0F;</div>
-   <h3 class="stat-value text-success">@(latestReading?.CurrentPowerReturn.ToString("F2") ?? "0.00") kW</h3>
-      <p class="stat-label">Zonne-opbrengst</p>
-    </div>
-      </div>
-      </div>
-        <div class="col-md-3">
- <div class="card stat-card">
-      <div class="card-body text-center">
-        <div class="stat-icon emoji">&#x1F525;</div>
-     <h3 class="stat-value">@(profile?.AverageMonthlyGasM3.ToString("F0") ?? "0") m³</h3>
-   <p class="stat-label">Gas deze maand</p>
-    </div>
-   </div>
+                    <div class="score-circle @GetScoreClass(profile?.EfficiencyScore ?? 0)">
+                        <span class="score-value">@(profile?.EfficiencyScore ?? 0)</span>
+                        <span class="score-label">/ 100</span>
+                    </div>
+                    <h5 class="mt-3"><span class="emoji">&#x26A1;</span> Efficientie Score</h5>
+                    <p class="text-muted small">Hoe zuinig je bent vergeleken met gemiddeld</p>
+                </div>
+            </div>
         </div>
-     <div class="col-md-3">
-      <div class="card stat-card">
-            <div class="card-body text-center">
-   <div class="stat-icon emoji">&#x1F4B0;</div>
- <h3 class="stat-value">&#x20AC;@(GetTotalCost())</h3>
-       <p class="stat-label">Geschatte maandkosten</p>
-      </div>
-    </div>
- </div>
+        <div class="col-md-6">
+            <div class="card score-card sustainability-card">
+                <div class="card-body text-center">
+                    <div class="score-circle @GetScoreClass(profile?.SustainabilityScore ?? 0)">
+                        <span class="score-value">@(profile?.SustainabilityScore ?? 0)</span>
+                        <span class="score-label">/ 100</span>
+                    </div>
+                    <h5 class="mt-3"><span class="emoji">&#x1F331;</span> Duurzaamheid Score</h5>
+                    <p class="text-muted small">Je bijdrage aan een groene toekomst</p>
+                </div>
+            </div>
+        </div>
     </div>
 
- <div class="row mb-4">
-     <div class="col-md-8">
-       <div class="card">
-         <div class="card-header">
-          <h5 class="mb-0"><span class="emoji">&#x1F4CA;</span> Jouw verbruik vs. gemiddeld huishouden</h5>
-  </div>
-  <div class="card-body">
-  <div class="comparison-item mb-3">
-         <div class="d-flex justify-content-between mb-1">
-     <span>Elektriciteit</span>
-      <span class="@(profile?.ComparedToAveragePercent > 0 ? "text-danger" : "text-success")">
-   @GetComparisonText(profile?.ComparedToAveragePercent ?? 0)
-    </span>
-   </div>
-           <div class="progress" style="height: 25px;">
-  <div class="progress-bar @(profile?.ComparedToAveragePercent > 0 ? "bg-warning" : "bg-success")" 
-            style="width: @GetProgressWidth(profile?.ComparedToAveragePercent ?? 0)%">
-           @(profile?.AverageMonthlyConsumptionKwh.ToString("F0") ?? "0") kWh/maand
-    </div>
-        </div>
-    <small class="text-muted">Gemiddeld huishouden: 250 kWh/maand</small>
-      </div>
-      <div class="comparison-item">
-             <div class="d-flex justify-content-between mb-1">
-       <span>Gas</span>
-      <span class="@(profile?.GasComparedToAveragePercent > 0 ? "text-danger" : "text-success")">
-             @GetComparisonText(profile?.GasComparedToAveragePercent ?? 0)
- </span>
-         </div>
-    <div class="progress" style="height: 25px;">
-        <div class="progress-bar @(profile?.GasComparedToAveragePercent > 0 ? "bg-warning" : "bg-success")" 
-   style="width: @GetProgressWidth(profile?.GasComparedToAveragePercent ?? 0)%">
-         @(profile?.AverageMonthlyGasM3.ToString("F0") ?? "0") m³/maand
- </div>
-       </div>
-           <small class="text-muted">Gemiddeld huishouden: 120 m³/maand</small>
-  </div>
-      </div>
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon emoji">&#x26A1;</div>
+                    <h3 class="stat-value">@(latestReading?.CurrentPowerConsumption.ToString("F2") ?? "0.00") kW</h3>
+                    <p class="stat-label">Huidig verbruik</p>
+                </div>
             </div>
-     </div>
-  <div class="col-md-4">
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon emoji">&#x2600;&#xFE0F;</div>
+                    <h3 class="stat-value text-success">@(latestReading?.CurrentPowerReturn.ToString("F2") ?? "0.00") kW</h3>
+                    <p class="stat-label">Zonne-opbrengst</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon emoji">&#x1F525;</div>
+                    <h3 class="stat-value">@(profile?.AverageMonthlyGasM3.ToString("F0") ?? "0") m³</h3>
+                    <p class="stat-label">Gas deze maand</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body text-center">
+                    <div class="stat-icon emoji">&#x1F4B0;</div>
+                    <h3 class="stat-value">&#x20AC;@(GetTotalCost())</h3>
+                    <p class="stat-label">Geschatte maandkosten</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="emoji">&#x1F4CA;</span> Jouw verbruik vs. gemiddeld huishouden</h5>
+                </div>
+                <div class="card-body">
+                    <div class="comparison-item mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Elektriciteit</span>
+                            <span class="@(profile?.ComparedToAveragePercent > 0 ? "text-danger" : "text-success")">
+                                @GetComparisonText(profile?.ComparedToAveragePercent ?? 0)
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar @(profile?.ComparedToAveragePercent > 0 ? "bg-warning" : "bg-success")" 
+                                 style="width: @GetProgressWidth(profile?.ComparedToAveragePercent ?? 0)%">
+                                @(profile?.AverageMonthlyConsumptionKwh.ToString("F0") ?? "0") kWh/maand
+                            </div>
+                        </div>
+                        <small class="text-muted">Gemiddeld huishouden: 250 kWh/maand</small>
+                    </div>
+                    <div class="comparison-item">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Gas</span>
+                            <span class="@(profile?.GasComparedToAveragePercent > 0 ? "text-danger" : "text-success")">
+                                @GetComparisonText(profile?.GasComparedToAveragePercent ?? 0)
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar @(profile?.GasComparedToAveragePercent > 0 ? "bg-warning" : "bg-success")" 
+                                 style="width: @GetProgressWidth(profile?.GasComparedToAveragePercent ?? 0)%">
+                                @(profile?.AverageMonthlyGasM3.ToString("F0") ?? "0") m³/maand
+                            </div>
+                        </div>
+                        <small class="text-muted">Gemiddeld huishouden: 120 m³/maand</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
             <div class="card h-100 savings-card">
-      <div class="card-body text-center d-flex flex-column justify-content-center">
-       <div class="savings-icon emoji">&#x1F4A1;</div>
-   <h4>Potentiele besparing</h4>
-       <h2 class="text-success">&#x20AC;@(profile?.PotentialMonthlySavings.ToString("F0") ?? "0")<small>/maand</small></h2>
-       <p class="text-muted">Ontdek hoe in onze tips!</p>
-       <a href="/tips" class="btn btn-success">Bekijk bespaartips</a>
-       </div>
- </div>
- </div>
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div class="savings-icon emoji">&#x1F4A1;</div>
+                    <h4>Potentiele besparing</h4>
+                    <h2 class="text-success">&#x20AC;@(profile?.PotentialMonthlySavings.ToString("F0") ?? "0")<small>/maand</small></h2>
+                    <p class="text-muted">Ontdek hoe in onze tips!</p>
+                    <a href="/tips" class="btn btn-success">Bekijk bespaartips</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-   <h5 class="mb-0"><span class="emoji">&#x1F4A1;</span> Aanbevolen voor jou</h5>
-    <a href="/tips" class="btn btn-sm btn-outline-primary">Alle tips</a>
-   </div>
-  <div class="card-body">
-         <div class="row">
-    @if (tips != null)
-    {
-     @foreach (var tip in tips.Take(3))
-      {
-             <div class="col-md-4">
-          <div class="tip-card p-3 mb-3">
-   <div class="d-flex align-items-start">
-          <span class="tip-icon me-2 emoji">@((MarkupString)GetTipIconHtml(tip.IconEmoji))</span>
-         <div>
-  <h6 class="mb-1">@tip.Title</h6>
-        <p class="small text-muted mb-2">@tip.Description</p>
-            <span class="badge bg-success">Bespaar &#x20AC;@tip.EstimatedYearlySavingsEuro/jaar</span>
-     </div>
-     </div>
-  </div>
-         </div>
-     }
-   }
-   </div>
-  </div>
-    </div>
-
-    @if (profile?.HasSolarPanels == true)
-    {
-        <div class="card solar-card mb-4">
-         <div class="card-body">
-       <div class="row align-items-center">
- <div class="col-md-2 text-center">
-      <span class="emoji" style="font-size: 3rem;">&#x2600;&#xFE0F;</span>
-     </div>
-<div class="col-md-6">
-   <h5>Zonnepanelen Status</h5>
- <p class="mb-0">Je panelen produceren momenteel <strong>@(latestReading?.CurrentPowerReturn.ToString("F2") ?? "0") kW</strong></p>
-          <small class="text-muted">Eigen verbruik: @(profile.SelfConsumptionPercent.ToString("F0"))%</small>
-  </div>
-  <div class="col-md-4 text-end">
-     <h4 class="text-success mb-0">@(profile.SolarProductionKwh.ToString("F0")) kWh</h4>
-      <small class="text-muted">Totale productie deze maand</small>
-   </div>
-      </div>
+            <h5 class="mb-0"><span class="emoji">&#x1F4A1;</span> Aanbevolen voor jou</h5>
+            <a href="/tips" class="btn btn-sm btn-outline-primary">Alle tips</a>
         </div>
-   </div>
-    }
-    else
-    {
-        <div class="card cta-card mb-4">
-     <div class="card-body">
-      <div class="row align-items-center">
-    <div class="col-md-8">
-   <h5><span class="emoji">&#x2600;&#xFE0F;</span> Overweeg zonnepanelen!</h5>
-  <p class="mb-0">Met zonnepanelen kun je tot 50% besparen op je elektriciteitskosten.</p>
-  </div>
-         <div class="col-md-4 text-end">
-       <a href="/leveranciers?category=Zonnepanelen" class="btn btn-warning">Bekijk aanbieders</a>
-              </div>
-  </div>
-  </div>
- </div>
-    }
+        <div class="card-body">
+            <div class="row">
+                @if (tips != null)
+                {
+                    @foreach (var tip in tips.Take(3))
+                    {
+                        <div class="col-md-4">
+                            <div class="tip-card p-3 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <span class="tip-icon me-2 emoji">@((MarkupString)GetTipIconHtml(tip.IconEmoji))</span>
+                                    <div>
+                                        <h6 class="mb-1">@tip.Title</h6>
+                                        <p class="small text-muted mb-2">@tip.Description</p>
+                                        <span class="badge bg-success">Bespaar &#x20AC;@tip.EstimatedYearlySavingsEuro/jaar</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
 </div>
+}
 
 <style>
     .consumer-dashboard { max-width: 1200px; margin: 0 auto; }
@@ -221,7 +194,7 @@
     .score-card { border: none; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     .score-circle { width: 120px; height: 120px; border-radius: 50%; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; }
     .score-circle.score-low { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); color: white; }
-.score-circle.score-medium { background: linear-gradient(135deg, #ffd93d, #f9c74f); color: #333; }
+    .score-circle.score-medium { background: linear-gradient(135deg, #ffd93d, #f9c74f); color: #333; }
     .score-circle.score-high { background: linear-gradient(135deg, #6bcb77, #4caf50); color: white; }
     .score-value { font-size: 2.5rem; line-height: 1; }
     .score-label { font-size: 0.9rem; opacity: 0.8; }
@@ -229,15 +202,20 @@
     .stat-card:hover { transform: translateY(-5px); }
     .stat-icon { font-size: 2rem; margin-bottom: 0.5rem; }
     .stat-value { font-size: 1.5rem; font-weight: bold; color: #333; }
- .stat-label { color: #666; font-size: 0.9rem; }
+    .stat-label { color: #666; font-size: 0.9rem; }
     .savings-card { background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border: none; }
     .savings-icon { font-size: 3rem; margin-bottom: 1rem; }
     .tip-card { background: #f8f9fa; border-radius: 12px; transition: all 0.2s; }
     .tip-card:hover { background: #e9ecef; transform: translateY(-2px); }
     .tip-icon { font-size: 1.5rem; }
-    .solar-card { background: linear-gradient(135deg, #fff9c4, #fff59d); border: none; }
-    .cta-card { background: linear-gradient(135deg, #e3f2fd, #bbdefb); border: none; }
     .emoji { font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif; }
+
+    /* Dark mode support */
+    [data-theme="dark"] .stat-value { color: #fff; }
+    [data-theme="dark"] .stat-label { color: #aaa; }
+    [data-theme="dark"] .tip-card { background: #2a2a2a; }
+    [data-theme="dark"] .tip-card:hover { background: #333; }
+    [data-theme="dark"] .savings-card { background: linear-gradient(135deg, #1b4332, #2d6a4f); }
 </style>
 
 @code {
@@ -245,38 +223,53 @@
     private EnergyProfile? profile;
     private List<EnergyTip>? tips;
     private WeatherData? weather;
+    private UserAccount? currentUser;
+    private bool isAuthenticated = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // Check authentication
+        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        
+        if (!isAuthenticated)
+        {
+            Navigation.NavigateTo("/landing");
+            return;
+        }
+
+        currentUser = await AuthService.GetCurrentUserAsync();
         await LoadDataAsync();
     }
 
     private async Task LoadDataAsync()
     {
         var readings = await P1SensorService.GetLatestReadingsAsync();
-   latestReading = readings.FirstOrDefault();
-   profile = await TipsService.AnalyzeConsumerProfileAsync("CONS-0001", readings);
+        latestReading = readings.FirstOrDefault();
+        
+        // Use the current user's consumer ID if available
+        var consumerId = currentUser != null ? $"USER-{currentUser.Id:D4}" : "CONS-0001";
+        profile = await TipsService.AnalyzeConsumerProfileAsync(consumerId, readings);
         tips = await TipsService.GetPersonalizedTipsAsync(profile);
-     weather = await WeatherService.GetCurrentWeatherAsync();
+        weather = await WeatherService.GetCurrentWeatherAsync();
     }
 
     private string GetScoreClass(int score)
     {
         if (score < 40) return "score-low";
         if (score < 70) return "score-medium";
-   return "score-high";
+        return "score-high";
     }
 
- private string GetTotalCost()
+    private string GetTotalCost()
     {
-   var total = (profile?.EstimatedMonthlyElectricityCost ?? 0) + (profile?.EstimatedMonthlyGasCost ?? 0);
+        var total = (profile?.EstimatedMonthlyElectricityCost ?? 0) + (profile?.EstimatedMonthlyGasCost ?? 0);
         return total.ToString("F0");
     }
 
     private string GetComparisonText(double percent)
     {
         var sign = percent > 0 ? "+" : "";
-    return $"{sign}{percent:F0}% t.o.v. gemiddeld";
+        return $"{sign}{percent:F0}% t.o.v. gemiddeld";
     }
 
     private double GetProgressWidth(double percent)
@@ -286,25 +279,17 @@
 
     private string GetTipIconHtml(string emoji)
     {
-    return emoji switch
+        return emoji switch
         {
-        _ when emoji.Contains("\U0001F321") || emoji == "🌡️" => "&#x1F321;&#xFE0F;",
-     _ when emoji.Contains("\U0001F4F1") || emoji == "📱" => "&#x1F4F1;",
-         _ when emoji.Contains("\U0001F527") || emoji == "🔧" => "&#x1F527;",
+            _ when emoji.Contains("\U0001F321") || emoji == "🌡️" => "&#x1F321;&#xFE0F;",
+            _ when emoji.Contains("\U0001F4F1") || emoji == "📱" => "&#x1F4F1;",
+            _ when emoji.Contains("\U0001F527") || emoji == "🔧" => "&#x1F527;",
             _ when emoji.Contains("\U0001F3E0") || emoji == "🏠" => "&#x1F3E0;",
-            _ when emoji.Contains("\U0001F6AA") || emoji == "🚪" => "&#x1F6AA;",
-        _ when emoji.Contains("\U0001FA9F") || emoji == "🪟" => "&#x1FA9F;",
+            _ when emoji.Contains("\U0001FA9F") || emoji == "🪟" => "&#x1FA9F;",
             _ when emoji.Contains("\u2600") || emoji == "☀️" => "&#x2600;&#xFE0F;",
             _ when emoji.Contains("\U0001F50B") || emoji == "🔋" => "&#x1F50B;",
-   _ when emoji.Contains("\U0001F9CA") || emoji == "🧊" => "&#x1F9CA;",
-          _ when emoji.Contains("\U0001F50C") || emoji == "🔌" => "&#x1F50C;",
-            _ when emoji.Contains("\U0001F455") || emoji == "👕" => "&#x1F455;",
-    _ when emoji.Contains("\U0001F4A1") || emoji == "💡" => "&#x1F4A1;",
-          _ when emoji.Contains("\U0001F6BF") || emoji == "🚿" => "&#x1F6BF;",
-            _ when emoji.Contains("\U0001F4CA") || emoji == "📊" => "&#x1F4CA;",
-       _ when emoji.Contains("\U0001F4C8") || emoji == "📈" => "&#x1F4C8;",
-    _ when emoji.Contains("\u23F0") || emoji == "⏰" => "&#x23F0;",
- _ => "&#x1F4A1;"
+            _ when emoji.Contains("\U0001F4A1") || emoji == "💡" => "&#x1F4A1;",
+            _ => "&#x1F4A1;"
         };
-}
+    }
 }
