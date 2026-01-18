@@ -20,42 +20,71 @@ builder.Services.AddSession(options =>
     options.Cookie.Name = ".EindhovenEnergie.Session";  // Custom name (security through obscurity)
 });
 
-// Add HttpContextAccessor for accessing session in services
 builder.Services.AddHttpContextAccessor();
-
-// Add Data Protection for secure cookie encryption
 builder.Services.AddDataProtection();
 
-// ONLY Azure MySQL In-App - NO Docker, NO local MySQL complexity
+// Get MySQL connection string from Azure MySQL In-App
 var connectionString = Environment.GetEnvironmentVariable("MYSQLCONNSTR_localdb");
 
-// Development fallback ONLY
+// Log connection string status
+Console.WriteLine($"?? MYSQLCONNSTR_localdb present: {!string.IsNullOrEmpty(connectionString)}");
+
+// Parse Azure MySQL In-App connection string format
+// Azure format: Database=localdb;Data Source=127.0.0.1:port;User Id=user;Password=pass
+if (!string.IsNullOrEmpty(connectionString))
+{
+    // Azure MySQL In-App uses a specific format that needs parsing
+    Console.WriteLine("?? Parsing Azure MySQL connection string...");
+    
+    // The connection string from Azure should work directly with Pomelo
+    // But we need to ensure it's in the right format
+    if (!connectionString.Contains("Server=") && connectionString.Contains("Data Source="))
+    {
+        // Convert Azure format to standard MySQL format
+        connectionString = connectionString
+            .Replace("Data Source=", "Server=")
+            .Replace(";Port=", ";Port="); // Keep port if separate
+    }
+}
+
+// Development fallback
 if (string.IsNullOrEmpty(connectionString) && builder.Environment.IsDevelopment())
 {
     connectionString = "Server=localhost;Port=3306;Database=EindhovenEnergy_Dev;User=root;Password=;";
+    Console.WriteLine("?? Using development database connection");
 }
 
-// Configure database ONLY if we have a connection string
+// Always register DbContext (even without connection string, for DI purposes)
+var serverVersion = new MySqlServerVersion(new Version(5, 7, 9));
+
 if (!string.IsNullOrEmpty(connectionString))
 {
-    try
+    Console.WriteLine($"? Database connection string configured");
+    
+    builder.Services.AddDbContext<EnergyDbContext>(options =>
     {
-        // Azure MySQL In-App uses MySQL 5.7.9
-        var serverVersion = new MySqlServerVersion(new Version(5, 7, 9));
-        
-        builder.Services.AddDbContext<EnergyDbContext>(options =>
+        options.UseMySql(connectionString, serverVersion, mySqlOptions =>
         {
-            options.UseMySql(connectionString, serverVersion, mySqlOptions =>
-            {
-                mySqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
-                mySqlOptions.CommandTimeout(30);
-            });
+            mySqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(10), errorNumbersToAdd: null);
+            mySqlOptions.CommandTimeout(60);
         });
-    }
-    catch (Exception ex)
+        
+        // Enable detailed errors in development
+        if (builder.Environment.IsDevelopment())
+        {
+            options.EnableDetailedErrors();
+            options.EnableSensitiveDataLogging();
+        }
+    });
+}
+else
+{
+    // Register a placeholder DbContext that will fail gracefully
+    Console.WriteLine("?? No database connection string - using in-memory fallback");
+    builder.Services.AddDbContext<EnergyDbContext>(options =>
     {
-        Console.WriteLine($"Database configuration failed: {ex.Message}. App will start without database.");
-    }
+        options.UseInMemoryDatabase("EindhovenEnergyFallback");
+    });
 }
 
 // Register services
@@ -76,27 +105,36 @@ builder.Services.AddHttpClient<IWeatherService, OpenMeteoWeatherService>(client 
 
 var app = builder.Build();
 
-// Simple database initialization and seeding
-if (!string.IsNullOrEmpty(connectionString))
+// Database initialization and seeding
+try
 {
-    try
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<EnergyDbContext>();
+    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    
+    Console.WriteLine("?? Testing database connection...");
+    var canConnect = await dbContext.Database.CanConnectAsync();
+    Console.WriteLine($"?? Database connection result: {canConnect}");
+    
+    if (canConnect)
     {
-        using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<EnergyDbContext>();
-        var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+        Console.WriteLine("?? Ensuring database is created...");
+        await dbContext.Database.EnsureCreatedAsync();
         
-        var canConnect = await dbContext.Database.CanConnectAsync();
-        if (canConnect)
-        {
-            await dbContext.Database.EnsureCreatedAsync();
-            await seeder.SeedAsync();
-            Console.WriteLine("? Database initialized and seeded with mock data");
-        }
+        Console.WriteLine("?? Running database seeder...");
+        await seeder.SeedAsync();
+        
+        Console.WriteLine("? Database initialized and seeded successfully!");
     }
-    catch (Exception ex)
+    else
     {
-        Console.WriteLine($"? Database initialization skipped: {ex.Message}");
+        Console.WriteLine("?? Cannot connect to database - seeding skipped");
     }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"? Database initialization error: {ex.Message}");
+    Console.WriteLine($"   Stack: {ex.StackTrace?.Split('\n').FirstOrDefault()}");
 }
 
 // Configure middleware
@@ -109,12 +147,10 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
-
-// Add session middleware (must be before routing)
 app.UseSession();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-Console.WriteLine("? Application starting with secure authentication support...");
+Console.WriteLine("?? Application starting...");
 app.Run();

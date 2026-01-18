@@ -7,11 +7,6 @@ using System.Security.Cryptography;
 
 namespace urban_city_power_managment.Web.Services
 {
-    /// <summary>
-    /// Authentication service for user registration and login
-    /// Uses BCrypt for secure password hashing with salt rotation
-    /// Sessions are secured with cryptographic tokens
-    /// </summary>
     public interface IAuthService
     {
         Task<(bool Success, string Message, UserAccount? User)> RegisterAsync(RegistrationModel model);
@@ -34,11 +29,7 @@ namespace urban_city_power_managment.Web.Services
         private readonly INetbeheerderService _netbeheerderService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        // BCrypt work factor (12 = ~250ms to hash, secure against brute force)
-        // Each hash includes unique salt - no need for separate salt storage
         private const int BCRYPT_WORK_FACTOR = 12;
-        
-        // Session keys with cryptographic prefix for added security
         private const string USER_SESSION_KEY = "SecureAuth_User_v1";
         private const string SESSION_TOKEN_KEY = "SecureAuth_Token_v1";
 
@@ -58,29 +49,24 @@ namespace urban_city_power_managment.Web.Services
         {
             try
             {
-                // Validate age (must be 18+)
                 if (!model.IsAtLeast18YearsOld())
                 {
                     return (false, "Je moet minimaal 18 jaar oud zijn om te registreren.", null);
                 }
 
-                // Validate password strength with enhanced requirements
                 var (passwordValid, passwordErrors) = ValidatePasswordStrength(model.Password);
                 if (!passwordValid)
                 {
                     return (false, $"Wachtwoord voldoet niet aan de eisen: {string.Join(", ", passwordErrors)}", null);
                 }
 
-                // Check if email already exists
                 if (await EmailExistsAsync(model.Email))
                 {
                     return (false, "Dit e-mailadres is al geregistreerd.", null);
                 }
 
-                // Get netbeheerder for the user's area
                 var netbeheerder = await _netbeheerderService.GetNetbeheerderByPostalCodeAsync(model.PostalCode);
 
-                // Create new user account with secure password hash
                 var user = new UserAccount
                 {
                     FirstName = SanitizeInput(model.FirstName),
@@ -92,7 +78,7 @@ namespace urban_city_power_managment.Web.Services
                     Street = model.Street,
                     City = model.City,
                     Email = model.Email.ToLower().Trim(),
-                    PasswordHash = HashPassword(model.Password), // BCrypt with unique salt per user
+                    PasswordHash = HashPassword(model.Password),
                     HasSmartMeter = model.HasSmartMeter ?? false,
                     NetbeheerderId = netbeheerder?.Id,
                     NetbeheerderName = netbeheerder?.Name,
@@ -104,17 +90,15 @@ namespace urban_city_power_managment.Web.Services
                 _dbContext.Users.Add(user);
                 await _dbContext.SaveChangesAsync();
 
-                // Auto-login after registration with secure session
                 await SetCurrentUserAsync(user);
 
-                _logger.LogInformation("New user registered: {Email} at {Time}", 
-                    MaskEmail(user.Email), DateTime.UtcNow);
+                _logger.LogInformation("New user registered: {Email}", MaskEmail(user.Email));
 
                 return (true, "Account succesvol aangemaakt!", user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error registering user");
+                _logger.LogError(ex, "Error registering user: {Message}", ex.Message);
                 return (false, "Er is een fout opgetreden bij het registreren. Probeer het later opnieuw.", null);
             }
         }
@@ -123,6 +107,8 @@ namespace urban_city_power_managment.Web.Services
         {
             try
             {
+                _logger.LogInformation("Login attempt for email: {Email}", MaskEmail(model.Email));
+                
                 // Add small delay to prevent timing attacks
                 await Task.Delay(RandomNumberGenerator.GetInt32(50, 150));
 
@@ -130,37 +116,39 @@ namespace urban_city_power_managment.Web.Services
 
                 if (user == null)
                 {
-                    // Don't reveal that email doesn't exist (timing attack prevention)
-                    _logger.LogWarning("Login attempt for non-existent email");
+                    _logger.LogWarning("Login failed: User not found for email {Email}", MaskEmail(model.Email));
                     return (false, "Ongeldige e-mail of wachtwoord.", null);
                 }
 
                 if (!user.IsActive)
                 {
-                    _logger.LogWarning("Login attempt for deactivated account: {UserId}", user.Id);
+                    _logger.LogWarning("Login failed: Account deactivated for user {UserId}", user.Id);
                     return (false, "Dit account is gedeactiveerd.", null);
                 }
 
-                // BCrypt.Verify handles the salt internally - secure comparison
                 if (!VerifyPassword(model.Password, user.PasswordHash))
                 {
-                    _logger.LogWarning("Failed login attempt for user: {UserId}", user.Id);
+                    _logger.LogWarning("Login failed: Invalid password for user {UserId}", user.Id);
                     return (false, "Ongeldige e-mail of wachtwoord.", null);
                 }
 
-                // Update last login timestamp
                 await UpdateLastLoginAsync(user.Id);
-
-                // Store user in secure session with cryptographic token
                 await SetCurrentUserAsync(user);
 
-                _logger.LogInformation("User logged in: {UserId} at {Time}", user.Id, DateTime.UtcNow);
+                _logger.LogInformation("Login successful for user {UserId}", user.Id);
 
                 return (true, "Inloggen gelukt!", user);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login");
+                _logger.LogError(ex, "Login error: {Message}", ex.Message);
+                
+                // Provide more specific error message for database issues
+                if (ex.Message.Contains("connect") || ex.Message.Contains("database") || ex.Message.Contains("MySQL"))
+                {
+                    return (false, "Database verbinding niet beschikbaar. Probeer het later opnieuw.", null);
+                }
+                
                 return (false, "Er is een fout opgetreden bij het inloggen. Probeer het later opnieuw.", null);
             }
         }
@@ -170,7 +158,6 @@ namespace urban_city_power_managment.Web.Services
             var session = _httpContextAccessor.HttpContext?.Session;
             if (session != null)
             {
-                // Clear all auth-related session data
                 session.Remove(USER_SESSION_KEY);
                 session.Remove(SESSION_TOKEN_KEY);
                 session.Clear();
@@ -183,7 +170,6 @@ namespace urban_city_power_managment.Web.Services
             var session = _httpContextAccessor.HttpContext?.Session;
             if (session == null) return null;
 
-            // Verify session token exists
             var sessionToken = session.GetString(SESSION_TOKEN_KEY);
             if (string.IsNullOrEmpty(sessionToken)) return null;
 
@@ -195,10 +181,8 @@ namespace urban_city_power_managment.Web.Services
                 var userInfo = JsonSerializer.Deserialize<SecureUserSessionInfo>(userJson);
                 if (userInfo == null) return null;
 
-                // Verify token matches
                 if (userInfo.SessionToken != sessionToken) return null;
 
-                // Get fresh user data from database
                 return await GetUserByIdAsync(userInfo.UserId);
             }
             catch
@@ -218,7 +202,6 @@ namespace urban_city_power_managment.Web.Services
             var session = _httpContextAccessor.HttpContext?.Session;
             if (session != null)
             {
-                // Generate cryptographically secure session token
                 var sessionToken = GenerateSecureToken();
 
                 var userInfo = new SecureUserSessionInfo
@@ -230,16 +213,12 @@ namespace urban_city_power_managment.Web.Services
                     CreatedAt = DateTime.UtcNow.Ticks
                 };
 
-                // Store token separately for validation
                 session.SetString(SESSION_TOKEN_KEY, sessionToken);
                 session.SetString(USER_SESSION_KEY, JsonSerializer.Serialize(userInfo));
                 await Task.CompletedTask;
             }
         }
 
-        /// <summary>
-        /// Generate cryptographically secure random token
-        /// </summary>
         private static string GenerateSecureToken()
         {
             var bytes = new byte[32];
@@ -248,9 +227,6 @@ namespace urban_city_power_managment.Web.Services
             return Convert.ToBase64String(bytes);
         }
 
-        /// <summary>
-        /// Validate password meets security requirements
-        /// </summary>
         private static (bool IsValid, List<string> Errors) ValidatePasswordStrength(string password)
         {
             var errors = new List<string>();
@@ -279,7 +255,6 @@ namespace urban_city_power_managment.Web.Services
             if (!password.Any(c => "!@#$%^&*()_+-=[]{}|;':\",./<>?".Contains(c)))
                 errors.Add("Minimaal één speciaal teken");
 
-            // Check for common weak passwords
             var weakPasswords = new[] { "password", "123456", "qwerty", "welkom", "wachtwoord" };
             if (weakPasswords.Any(w => password.ToLower().Contains(w)))
                 errors.Add("Wachtwoord is te eenvoudig");
@@ -287,9 +262,6 @@ namespace urban_city_power_managment.Web.Services
             return (errors.Count == 0, errors);
         }
 
-        /// <summary>
-        /// Sanitize user input to prevent XSS
-        /// </summary>
         private static string SanitizeInput(string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
@@ -300,9 +272,6 @@ namespace urban_city_power_managment.Web.Services
                 .Replace("'", "&#x27;");
         }
 
-        /// <summary>
-        /// Mask email for logging (privacy)
-        /// </summary>
         private static string MaskEmail(string email)
         {
             if (string.IsNullOrEmpty(email)) return "***";
@@ -318,14 +287,30 @@ namespace urban_city_power_managment.Web.Services
             if (string.IsNullOrWhiteSpace(email))
                 return false;
 
-            return await _dbContext.Users
-                .AnyAsync(u => u.Email == email.ToLower().Trim());
+            try
+            {
+                return await _dbContext.Users
+                    .AnyAsync(u => u.Email == email.ToLower().Trim());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking email existence");
+                return false;
+            }
         }
 
         public async Task<UserAccount?> GetUserByIdAsync(int userId)
         {
-            return await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Id == userId);
+            try
+            {
+                return await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user by id: {UserId}", userId);
+                return null;
+            }
         }
 
         public async Task<UserAccount?> GetUserByEmailAsync(string email)
@@ -333,8 +318,16 @@ namespace urban_city_power_managment.Web.Services
             if (string.IsNullOrWhiteSpace(email))
                 return null;
 
-            return await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Email == email.ToLower().Trim());
+            try
+            {
+                return await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.Email == email.ToLower().Trim());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user by email");
+                return null;
+            }
         }
 
         public async Task<bool> UpdateLastLoginAsync(int userId)
@@ -352,33 +345,20 @@ namespace urban_city_power_managment.Web.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating last login for user: {UserId}", userId);
+                _logger.LogError(ex, "Error updating last login");
                 return false;
             }
         }
 
-        /// <summary>
-        /// Hash password using BCrypt with automatic salt generation
-        /// Each call generates a unique salt, making rainbow table attacks impossible
-        /// Work factor of 12 = ~250ms hash time, secure against brute force
-        /// </summary>
         public string HashPassword(string password)
         {
-            // BCrypt automatically generates a unique 128-bit salt per hash
-            // The salt is embedded in the hash output, no separate storage needed
             return BCrypt.Net.BCrypt.HashPassword(password, BCRYPT_WORK_FACTOR);
         }
 
-        /// <summary>
-        /// Verify password against BCrypt hash
-        /// BCrypt extracts the salt from the stored hash and re-hashes for comparison
-        /// This is timing-safe to prevent timing attacks
-        /// </summary>
         public bool VerifyPassword(string password, string hash)
         {
             try
             {
-                // BCrypt.Verify is timing-safe
                 return BCrypt.Net.BCrypt.Verify(password, hash);
             }
             catch (Exception ex)
@@ -388,9 +368,6 @@ namespace urban_city_power_managment.Web.Services
             }
         }
 
-        /// <summary>
-        /// Secure session info with token validation
-        /// </summary>
         private class SecureUserSessionInfo
         {
             public int UserId { get; set; }
