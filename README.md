@@ -7,7 +7,9 @@ A modern Blazor Server application for monitoring residential energy consumption
 ![MySQL](https://img.shields.io/badge/Database-MySQL-orange)
 ![Azure](https://img.shields.io/badge/Deployed-Azure-0078D4)
 
-## ?? Features
+---
+
+## Features
 
 - **Real-time Dashboard** - Live energy consumption and solar return monitoring
 - **Energy Analytics** - Detailed usage statistics with charts and comparisons
@@ -17,7 +19,9 @@ A modern Blazor Server application for monitoring residential energy consumption
 - **Dark Mode** - Full dark theme with green accent styling
 - **Bilingual** - Dutch (NL) and English (EN) support
 
-## ?? Quick Start
+---
+
+## Quick Start
 
 ### Prerequisites
 - .NET 9 SDK
@@ -38,7 +42,9 @@ Update `appsettings.json` with your MySQL connection string:
 }
 ```
 
-## ??? Tech Stack
+---
+
+## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
@@ -49,7 +55,9 @@ Update `appsettings.json` with your MySQL connection string:
 | Weather | Open-Meteo API |
 | Hosting | Azure App Service |
 
-## ?? Project Structure
+---
+
+## Project Structure
 
 ```
 urban_city_power_managment.Web/
@@ -62,17 +70,23 @@ urban_city_power_managment.Web/
 ??? wwwroot/             # Static assets
 ```
 
-## ?? Deployment
+---
+
+## Deployment
 
 The application is deployed to Azure App Service with MySQL In-App database.
 
 **Live URL:** [Eindhoven Energie](https://urbancitypowermanagmentweb20260114230645-ejhra4hkghhga3e4.italynorth-01.azurewebsites.net)
 
-## ?? Team
+---
+
+## Team
 
 Fontys ICT - Group Project Team
 
-## ?? License
+---
+
+## License
 
 Educational purposes only.
 
