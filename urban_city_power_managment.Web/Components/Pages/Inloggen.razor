@@ -9,9 +9,9 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white text-center py-4">
-                    <h2 class="mb-0">?? Inloggen</h2>
+            <div class="card login-card shadow-lg border-0">
+                <div class="card-header text-white text-center py-4">
+                    <h2 class="mb-0"><i class="bi bi-box-arrow-in-right me-2"></i>Inloggen</h2>
                     <p class="mb-0 opacity-75">Welkom terug!</p>
                 </div>
                 <div class="card-body p-4">
@@ -27,7 +27,7 @@
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
                         <div class="alert alert-success">
-                            ? @successMessage
+                            <i class="bi bi-check-circle me-2"></i>@successMessage
                         </div>
                     }
 
@@ -38,7 +38,7 @@
                             <label class="form-label">E-mailadres</label>
                             <input type="email" class="form-control" 
                                    @bind="model.Email" 
-                                   placeholder="jan.devries@example.nl" />
+                                   placeholder="uw.email@voorbeeld.nl" />
                             <ValidationMessage For="@(() => model.Email)" />
                         </div>
 
@@ -49,7 +49,7 @@
                                        @bind="model.Password" 
                                        placeholder="Je wachtwoord" />
                                 <button class="btn btn-outline-secondary" type="button" @onclick="TogglePassword">
-                                    @(showPassword ? "??" : "???")
+                                    <i class="bi @(showPassword ? "bi-eye-slash" : "bi-eye")"></i>
                                 </button>
                             </div>
                             <ValidationMessage For="@(() => model.Password)" />
@@ -71,7 +71,7 @@
                             }
                             else
                             {
-                                <text>?? Inloggen</text>
+                                <i class="bi bi-box-arrow-in-right me-2"></i><text>Inloggen</text>
                             }
                         </button>
                     </EditForm>
@@ -85,60 +85,76 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Demo accounts info -->
-            <div class="card mt-4 border-info">
-                <div class="card-header bg-info text-white">
-                    <h6 class="mb-0">?? Demo Accounts</h6>
-                </div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">Test de applicatie met een demo account:</p>
-                    <div class="bg-light p-2 rounded">
-                        <code class="d-block">Email: jan.devries@example.nl</code>
-                        <code class="d-block">Wachtwoord: Password123!</code>
-                    </div>
-                    <p class="small text-muted mt-2 mb-0">
-                        <em>Er zijn 10 demo accounts beschikbaar. Alle wachtwoorden zijn: <strong>Password123!</strong></em>
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
 <style>
+    .login-card {
+        background-color: #ffffff;
+    }
+    
+    .login-card .card-header {
+        background: linear-gradient(135deg, #154273, #01689b);
+        border-bottom: none;
+    }
+    
+    .login-card .card-body {
+        background-color: #ffffff;
+    }
+
     /* Dark mode support for login page */
-    [data-theme="dark"] .card {
+    [data-theme="dark"] .login-card {
         background-color: #1e1e1e;
         border-color: #333;
     }
     
-    [data-theme="dark"] .card-header.bg-primary {
-        background: linear-gradient(135deg, #154273, #01689b) !important;
+    [data-theme="dark"] .login-card .card-header {
+        background: linear-gradient(135deg, #154273, #01689b);
     }
     
-    [data-theme="dark"] .card-body {
-        color: #fff;
+    [data-theme="dark"] .login-card .card-body {
+        background-color: #1e1e1e;
+        color: #ffffff;
     }
     
-    [data-theme="dark"] .form-control {
+    [data-theme="dark"] .login-card .form-control {
         background-color: #2a2a2a;
         border-color: #444;
-        color: #fff;
+        color: #ffffff;
     }
     
-    [data-theme="dark"] .form-control:focus {
+    [data-theme="dark"] .login-card .form-control:focus {
         background-color: #2a2a2a;
         border-color: #01689b;
+        color: #ffffff;
+        box-shadow: 0 0 0 0.25rem rgba(1, 104, 155, 0.25);
+    }
+    
+    [data-theme="dark"] .login-card .form-control::placeholder {
+        color: #888;
+    }
+    
+    [data-theme="dark"] .login-card .btn-outline-secondary {
+        color: #aaa;
+        border-color: #444;
+    }
+    
+    [data-theme="dark"] .login-card .btn-outline-secondary:hover {
+        background-color: #333;
         color: #fff;
     }
     
-    [data-theme="dark"] .bg-light {
-        background-color: #2a2a2a !important;
+    [data-theme="dark"] .login-card .text-muted {
+        color: #aaa !important;
     }
     
-    [data-theme="dark"] .text-muted {
-        color: #aaa !important;
+    [data-theme="dark"] .login-card hr {
+        border-color: #444;
+    }
+    
+    [data-theme="dark"] .login-card .form-check-label {
+        color: #ccc;
     }
 </style>
 
