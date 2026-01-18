@@ -1,0 +1,200 @@
+@page "/cookies"
+
+<PageTitle>Cookiebeleid - Eindhoven Energie</PageTitle>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="mb-4">?? Cookiebeleid</h1>
+            <p class="lead">
+                Eindhoven Energie maakt gebruik van cookies om uw ervaring te verbeteren en onze diensten te optimaliseren.
+            </p>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Wat zijn cookies?</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Cookies zijn kleine tekstbestanden die op uw apparaat worden opgeslagen wanneer u onze website bezoekt. 
+                        Ze helpen ons om de website goed te laten werken, de beveiliging te verbeteren en te begrijpen hoe 
+                        u onze website gebruikt.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Essentiële cookies (Altijd actief)</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Deze cookies zijn noodzakelijk voor de basisfunctionaliteit van de website. Zonder deze cookies 
+                        kan de website niet goed functioneren.
+                    </p>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Cookie</th>
+                                <th>Doel</th>
+                                <th>Bewaartermijn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>.EindhovenEnergie.Session</code></td>
+                                <td>Sessie-identificatie voor ingelogde gebruikers</td>
+                                <td>2 uur</td>
+                            </tr>
+                            <tr>
+                                <td><code>.AspNetCore.Antiforgery.*</code></td>
+                                <td>Beveiliging tegen CSRF-aanvallen</td>
+                                <td>Sessie</td>
+                            </tr>
+                            <tr>
+                                <td><code>cookieConsent</code></td>
+                                <td>Opslaan van uw cookievoorkeuren</td>
+                                <td>1 jaar</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Analytische cookies (Optioneel)</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Deze cookies helpen ons te begrijpen hoe bezoekers onze website gebruiken. 
+                        Alle verzamelde gegevens zijn geanonimiseerd.
+                    </p>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Cookie</th>
+                                <th>Doel</th>
+                                <th>Bewaartermijn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>cookieAnalytics</code></td>
+                                <td>Uw voorkeur voor analytische cookies</td>
+                                <td>1 jaar</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-muted small">
+                        <i class="bi bi-info-circle"></i> 
+                        We gebruiken momenteel geen externe analytics tools zoals Google Analytics.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">Diagnostische cookies (Optioneel)</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Deze cookies helpen ons technische problemen op te sporen en op te lossen, 
+                        zodat we de betrouwbaarheid van onze diensten kunnen verbeteren.
+                    </p>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Cookie</th>
+                                <th>Doel</th>
+                                <th>Bewaartermijn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>cookieDiagnostics</code></td>
+                                <td>Uw voorkeur voor diagnostische cookies</td>
+                                <td>1 jaar</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Uw rechten</h5>
+                </div>
+                <div class="card-body">
+                    <p>U heeft het recht om:</p>
+                    <ul>
+                        <li>Te weten welke cookies wij gebruiken</li>
+                        <li>Uw toestemming op elk moment in te trekken</li>
+                        <li>Alleen essentiële cookies te accepteren</li>
+                        <li>Uw browser zo in te stellen dat cookies worden geblokkeerd</li>
+                    </ul>
+                    <p>
+                        U kunt uw cookievoorkeuren op elk moment wijzigen door op de onderstaande knop te klikken:
+                    </p>
+                    <button class="btn btn-primary" onclick="localStorage.removeItem('cookieConsent'); location.reload();">
+                        <i class="bi bi-gear me-2"></i>Cookievoorkeuren wijzigen
+                    </button>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Wettelijke basis</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Dit cookiebeleid is opgesteld in overeenstemming met:
+                    </p>
+                    <ul>
+                        <li><strong>AVG/GDPR</strong> - Algemene Verordening Gegevensbescherming</li>
+                        <li><strong>Telecommunicatiewet</strong> - Artikel 11.7a (Nederlandse cookiewet)</li>
+                        <li><strong>ePrivacy Richtlijn</strong> - EU Richtlijn 2002/58/EG</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Contact</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        Voor vragen over ons cookiebeleid kunt u contact opnemen via:
+                    </p>
+                    <ul>
+                        <li><strong>E-mail:</strong> privacy@eindhoven-energie.nl</li>
+                        <li><strong>Adres:</strong> Stadhuisplein 1, 5611 EM Eindhoven</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p class="text-muted mt-4">
+                <small>Laatst bijgewerkt: januari 2026</small>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    [data-theme="dark"] .card {
+        background-color: #1e1e1e;
+        border-color: #333;
+    }
+    
+    [data-theme="dark"] .card-header {
+        border-bottom-color: #333;
+    }
+    
+    [data-theme="dark"] .table {
+        color: #fff;
+    }
+    
+    [data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+</style>

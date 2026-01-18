@@ -1,5 +1,7 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using urban_city_power_managment.Web.Components.Layout
+
+<!DOCTYPE html>
+<html lang="nl">
 
 <head>
     <meta charset="utf-8" />
@@ -15,6 +17,10 @@
 
 <body>
     <Routes @rendermode="InteractiveServer" />
+    
+    <!-- Cookie Consent Banner (Dutch GDPR/AVG compliance) -->
+    <CookieConsent @rendermode="InteractiveServer" />
+    
     <script src="_framework/blazor.web.js"></script>
     <script>
         // Initialize theme from localStorage on page load

@@ -3,209 +3,213 @@
 @using urban_city_power_managment.Web.Services
 @inject IP1SensorService P1SensorService
 @inject IEnergyTipsService TipsService
+@inject AppStateService AppState
+@implements IDisposable
 
-<PageTitle>Mijn Energie - Eindhoven Energie</PageTitle>
+<PageTitle>@(AppState.IsEnglish ? "My Energy" : "Mijn Energie") - Eindhoven Energie</PageTitle>
 
 <div class="container-fluid">
-<div class="row mb-4">
-      <div class="col">
-   <h1><span class="emoji">&#x1F4CA;</span> Mijn Energie</h1>
-     <p class="lead">Gedetailleerd overzicht van je energieverbruik</p>
-    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <h1><span class="emoji">&#x1F4CA;</span> @(AppState.IsEnglish ? "My Energy" : "Mijn Energie")</h1>
+            <p class="lead">@(AppState.IsEnglish ? "Detailed overview of your energy usage" : "Gedetailleerd overzicht van je energieverbruik")</p>
+        </div>
     </div>
 
-    <div class="card mb-4">
-     <div class="card-body">
-  <div class="btn-group" role="group">
-      <button class="btn @GetPeriodClass("dag")" @onclick="@(() => SetPeriod("dag"))">Vandaag</button>
-         <button class="btn @GetPeriodClass("week")" @onclick="@(() => SetPeriod("week"))">Week</button>
-  <button class="btn @GetPeriodClass("maand")" @onclick="@(() => SetPeriod("maand"))">Maand</button>
-         <button class="btn @GetPeriodClass("jaar")" @onclick="@(() => SetPeriod("jaar"))">Jaar</button>
-       </div>
- </div>
+    <div class="card mb-4 period-card">
+        <div class="card-body">
+            <div class="btn-group" role="group">
+                <button class="btn @GetPeriodClass("dag")" @onclick="@(() => SetPeriod("dag"))">@(AppState.IsEnglish ? "Today" : "Vandaag")</button>
+                <button class="btn @GetPeriodClass("week")" @onclick="@(() => SetPeriod("week"))">@(AppState.IsEnglish ? "Week" : "Week")</button>
+                <button class="btn @GetPeriodClass("maand")" @onclick="@(() => SetPeriod("maand"))">@(AppState.IsEnglish ? "Month" : "Maand")</button>
+                <button class="btn @GetPeriodClass("jaar")" @onclick="@(() => SetPeriod("jaar"))">@(AppState.IsEnglish ? "Year" : "Jaar")</button>
+            </div>
+        </div>
     </div>
 
     <div class="row mb-4">
-   <div class="col-md-6">
-        <div class="card h-100">
-   <div class="card-header bg-primary text-white">
-     <h5 class="mb-0"><span class="emoji">&#x26A1;</span> Elektriciteit</h5>
+        <div class="col-md-6">
+            <div class="card h-100 energy-card">
+                <div class="card-header electricity-header">
+                    <h5 class="mb-0"><span class="emoji">&#x26A1;</span> @(AppState.IsEnglish ? "Electricity" : "Elektriciteit")</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <span class="detail-label">@(AppState.IsEnglish ? "Current usage" : "Huidig verbruik")</span>
+                                <span class="detail-value">@(latestReading?.CurrentPowerConsumption.ToString("F3") ?? "0.000") kW</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="detail-item">
+                                <span class="detail-label">@(AppState.IsEnglish ? "Current return" : "Huidige teruglevering")</span>
+                                <span class="detail-value text-success">@(latestReading?.CurrentPowerReturn.ToString("F3") ?? "0.000") kW</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h6>@(AppState.IsEnglish ? "Meter readings" : "Meterstanden")</h6>
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <small class="meter-label">@(AppState.IsEnglish ? "Tariff 1 (off-peak)" : "Tarief 1 (dal)")</small>
+                            <p class="mb-0"><strong>@(latestReading?.ElectricityDeliveredTariff1.ToString("F3") ?? "0.000") kWh</strong></p>
+                        </div>
+                        <div class="col-6">
+                            <small class="meter-label">@(AppState.IsEnglish ? "Tariff 2 (peak)" : "Tarief 2 (piek)")</small>
+                            <p class="mb-0"><strong>@(latestReading?.ElectricityDeliveredTariff2.ToString("F3") ?? "0.000") kWh</strong></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <small class="meter-label">@(AppState.IsEnglish ? "Return T1" : "Teruglevering T1")</small>
+                            <p class="mb-0 text-success"><strong>@(latestReading?.ElectricityReturnedTariff1.ToString("F3") ?? "0.000") kWh</strong></p>
+                        </div>
+                        <div class="col-6">
+                            <small class="meter-label">@(AppState.IsEnglish ? "Return T2" : "Teruglevering T2")</small>
+                            <p class="mb-0 text-success"><strong>@(latestReading?.ElectricityReturnedTariff2.ToString("F3") ?? "0.000") kWh</strong></p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="tariff-indicator p-3 rounded @GetTariffClass() text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>@(AppState.IsEnglish ? "Current tariff" : "Huidig tarief")</span>
+                            <strong>@GetTariffText()</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    <div class="card-body">
-   <div class="row mb-3">
-     <div class="col-6">
-   <div class="detail-item">
-   <span class="detail-label">Huidig verbruik</span>
-         <span class="detail-value">@(latestReading?.CurrentPowerConsumption.ToString("F3") ?? "0.000") kW</span>
- </div>
-</div>
- <div class="col-6">
-   <div class="detail-item">
- <span class="detail-label">Huidige teruglevering</span>
-  <span class="detail-value text-success">@(latestReading?.CurrentPowerReturn.ToString("F3") ?? "0.000") kW</span>
-          </div>
-       </div>
- </div>
 
-    <hr />
+        <div class="col-md-6">
+            <div class="card h-100 energy-card">
+                <div class="card-header gas-header">
+                    <h5 class="mb-0"><span class="emoji">&#x1F525;</span> Gas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="detail-item mb-4">
+                        <span class="detail-label">@(AppState.IsEnglish ? "Total meter reading" : "Totale meterstand")</span>
+                        <span class="detail-value">@(latestReading?.GasConsumption.ToString("F3") ?? "0.000") m³</span>
+                    </div>
 
-<h6>Meterstanden</h6>
-  <div class="row mb-2">
-     <div class="col-6">
-         <small class="text-muted">Tarief 1 (dal)</small>
-       <p class="mb-0"><strong>@(latestReading?.ElectricityDeliveredTariff1.ToString("F3") ?? "0.000") kWh</strong></p>
-          </div>
-       <div class="col-6">
-        <small class="text-muted">Tarief 2 (piek)</small>
-      <p class="mb-0"><strong>@(latestReading?.ElectricityDeliveredTariff2.ToString("F3") ?? "0.000") kWh</strong></p>
-         </div>
-          </div>
-         <div class="row mb-3">
-        <div class="col-6">
-      <small class="text-muted">Teruglevering T1</small>
-    <p class="mb-0 text-success"><strong>@(latestReading?.ElectricityReturnedTariff1.ToString("F3") ?? "0.000") kWh</strong></p>
-     </div>
-         <div class="col-6">
-     <small class="text-muted">Teruglevering T2</small>
-    <p class="mb-0 text-success"><strong>@(latestReading?.ElectricityReturnedTariff2.ToString("F3") ?? "0.000") kWh</strong></p>
-       </div>
-       </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="stat-box p-3 rounded">
+                                <small class="stat-label">@(AppState.IsEnglish ? "Est. daily usage" : "Geschat dagverbruik")</small>
+                                <strong class="stat-value">@GetDailyGas() m³</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-box p-3 rounded">
+                                <small class="stat-label">@(AppState.IsEnglish ? "Est. monthly usage" : "Geschat maandverbruik")</small>
+                                <strong class="stat-value">@(profile?.AverageMonthlyGasM3.ToString("F0") ?? "0") m³</strong>
+                            </div>
+                        </div>
+                    </div>
 
-     <hr />
+                    <div class="alert @GetGasAlertClass()">
+                        @if (profile?.GasComparedToAveragePercent > 10)
+                        {
+                            <strong><span class="emoji">&#x26A0;&#xFE0F;</span> @(AppState.IsEnglish ? $"Your gas usage is {profile?.GasComparedToAveragePercent:F0}% higher than average" : $"Je gasverbruik is {profile?.GasComparedToAveragePercent:F0}% hoger dan gemiddeld")</strong>
+                            <p class="mb-0 small">@(AppState.IsEnglish ? "Consider better insulation or a heat pump." : "Overweeg betere isolatie of een warmtepomp.")</p>
+                        }
+                        else
+                        {
+                            <strong><span class="emoji">&#x2705;</span> @(AppState.IsEnglish ? "Your gas usage is good!" : "Je gasverbruik is goed!")</strong>
+                            <p class="mb-0 small">@(AppState.IsEnglish ? "You use less gas than average." : "Je verbruikt minder gas dan gemiddeld.")</p>
+                        }
+                    </div>
 
-       <div class="tariff-indicator p-3 rounded @GetTariffClass() text-white">
-      <div class="d-flex justify-content-between align-items-center">
-      <span>Huidig tarief</span>
-     <strong>@GetTariffText()</strong>
-           </div>
-  </div>
-   </div>
-  </div>
-     </div>
-
-  <div class="col-md-6">
-     <div class="card h-100">
-   <div class="card-header bg-warning">
-  <h5 class="mb-0"><span class="emoji">&#x1F525;</span> Gas</h5>
- </div>
-     <div class="card-body">
-      <div class="detail-item mb-4">
-  <span class="detail-label">Totale meterstand</span>
-        <span class="detail-value">@(latestReading?.GasConsumption.ToString("F3") ?? "0.000") m³</span>
-       </div>
-
-     <div class="row mb-3">
-  <div class="col-6">
-     <div class="stat-box p-3 bg-light rounded">
-    <small class="text-muted d-block">Geschat dagverbruik</small>
-      <strong>@GetDailyGas() m³</strong>
- </div>
-     </div>
-        <div class="col-6">
-      <div class="stat-box p-3 bg-light rounded">
-      <small class="text-muted d-block">Geschat maandverbruik</small>
-         <strong>@(profile?.AverageMonthlyGasM3.ToString("F0") ?? "0") m³</strong>
- </div>
-  </div>
-  </div>
-
-       <div class="alert @GetGasAlertClass()">
-  @if (profile?.GasComparedToAveragePercent > 10)
-   {
-       <strong><span class="emoji">&#x26A0;&#xFE0F;</span> Je gasverbruik is @(profile?.GasComparedToAveragePercent.ToString("F0"))% hoger dan gemiddeld</strong>
-         <p class="mb-0 small">Overweeg betere isolatie of een warmtepomp.</p>
- }
-     else
-       {
-      <strong><span class="emoji">&#x2705;</span> Je gasverbruik is goed!</strong>
-        <p class="mb-0 small">Je verbruikt minder gas dan gemiddeld.</p>
-          }
-             </div>
-
-         @if (latestReading?.GasTimestamp != null)
-       {
-   <small class="text-muted">
-   Laatste gasmeting: @latestReading.GasTimestamp.Value.ToString("dd-MM-yyyy HH:mm")
-        </small>
-    }
-    </div>
-      </div>
-        </div>
-    </div>
-
-    <div class="card mb-4">
- <div class="card-header">
- <h5 class="mb-0"><span class="emoji">&#x1F4B0;</span> Geschatte Kosten</h5>
- </div>
-     <div class="card-body">
-        <div class="row">
-     <div class="col-md-4">
-     <div class="cost-card p-4 text-center bg-light rounded">
-<h6 class="text-muted">Elektriciteit</h6>
- <h3>&#x20AC;@(profile?.EstimatedMonthlyElectricityCost.ToString("F2") ?? "0.00")</h3>
-    <small class="text-muted">per maand (geschat)</small>
-         </div>
-          </div>
-    <div class="col-md-4">
-    <div class="cost-card p-4 text-center bg-light rounded">
-        <h6 class="text-muted">Gas</h6>
-  <h3>&#x20AC;@(profile?.EstimatedMonthlyGasCost.ToString("F2") ?? "0.00")</h3>
-  <small class="text-muted">per maand (geschat)</small>
- </div>
-          </div>
-     <div class="col-md-4">
-      <div class="cost-card p-4 text-center bg-primary text-white rounded">
-         <h6>Totaal</h6>
-    <h3>&#x20AC;@GetTotalCost()</h3>
-      <small>per maand (geschat)</small>
-        </div>
- </div>
-   </div>
-     <p class="text-muted mt-3 small">
-       * Gebaseerd op gemiddelde energieprijzen 2024: &#x20AC;0.28/kWh elektriciteit, &#x20AC;1.30/m³ gas
-       </p>
- </div>
-    </div>
-
-    <div class="card mb-4">
-  <div class="card-header">
-  <h5 class="mb-0"><span class="emoji">&#x1F50D;</span> Inzichten</h5>
-   </div>
-   <div class="card-body">
-     <div class="row">
-   @if (profile?.HasSolarPanels == true)
-  {
-       <div class="col-md-6 mb-3">
-       <div class="insight-card p-3 bg-success bg-opacity-10 rounded">
-     <h6><span class="emoji">&#x2600;&#xFE0F;</span> Zonnepanelen</h6>
-      <p class="mb-1">Je wekt gemiddeld <strong>@(profile.SolarProductionKwh.ToString("F0")) kWh</strong> per maand op.</p>
- <p class="mb-0 small text-muted">Eigen verbruik: @(profile.SelfConsumptionPercent.ToString("F0"))%</p>
-   </div>
-             </div>
-           }
-
-<div class="col-md-6 mb-3">
-       <div class="insight-card p-3 bg-info bg-opacity-10 rounded">
-       <h6><span class="emoji">&#x23F0;</span> Piekverbruik</h6>
-     <p class="mb-1">Je hoogste verbruik is rond <strong>@(profile?.PeakUsageTime.Hours ?? 18):00 uur</strong></p>
-      </div>
-</div>
-
-     <div class="col-md-6 mb-3">
-         <div class="insight-card p-3 bg-primary bg-opacity-10 rounded">
-      <h6><span class="emoji">&#x1F4A1;</span> Bespaarpotentieel</h6>
-     <p class="mb-1">Je kunt mogelijk <strong>&#x20AC;@(profile?.PotentialMonthlySavings.ToString("F0") ?? "0")/maand</strong> besparen</p>
-         <a href="/tips" class="btn btn-sm btn-primary">Bekijk tips</a>
-   </div>
-</div>
-        </div>
+                    @if (latestReading?.GasTimestamp != null)
+                    {
+                        <small class="last-reading">
+                            @(AppState.IsEnglish ? "Last gas reading:" : "Laatste gasmeting:") @latestReading.GasTimestamp.Value.ToString("dd-MM-yyyy HH:mm")
+                        </small>
+                    }
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="text-center text-muted mb-4">
-        <small>Laatste update: @(latestReading?.Timestamp.ToString("dd-MM-yyyy HH:mm:ss") ?? "Onbekend")</small>
-      <br />
- <small>Meter ID: @(latestReading?.MeterId ?? "Onbekend")</small>
+    <div class="card mb-4 cost-card-container">
+        <div class="card-header">
+            <h5 class="mb-0"><span class="emoji">&#x1F4B0;</span> @(AppState.IsEnglish ? "Estimated Costs" : "Geschatte Kosten")</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="cost-card p-4 text-center rounded">
+                        <h6 class="cost-label">@(AppState.IsEnglish ? "Electricity" : "Elektriciteit")</h6>
+                        <h3 class="cost-value">&#x20AC;@(profile?.EstimatedMonthlyElectricityCost.ToString("F2") ?? "0.00")</h3>
+                        <small class="cost-note">@(AppState.IsEnglish ? "per month (estimated)" : "per maand (geschat)")</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="cost-card p-4 text-center rounded">
+                        <h6 class="cost-label">Gas</h6>
+                        <h3 class="cost-value">&#x20AC;@(profile?.EstimatedMonthlyGasCost.ToString("F2") ?? "0.00")</h3>
+                        <small class="cost-note">@(AppState.IsEnglish ? "per month (estimated)" : "per maand (geschat)")</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="cost-card p-4 text-center bg-primary text-white rounded total-cost-card">
+                        <h6>@(AppState.IsEnglish ? "Total" : "Totaal")</h6>
+                        <h3>&#x20AC;@GetTotalCost()</h3>
+                        <small>@(AppState.IsEnglish ? "per month (estimated)" : "per maand (geschat)")</small>
+                    </div>
+                </div>
+            </div>
+            <p class="price-note mt-3 small">
+                @(AppState.IsEnglish 
+                    ? "* Based on average 2024 energy prices: €0.28/kWh electricity, €1.30/m³ gas" 
+                    : "* Gebaseerd op gemiddelde energieprijzen 2024: €0.28/kWh elektriciteit, €1.30/m³ gas")
+            </p>
+        </div>
+    </div>
+
+    <div class="card mb-4 insights-card">
+        <div class="card-header">
+            <h5 class="mb-0"><span class="emoji">&#x1F50D;</span> @(AppState.IsEnglish ? "Insights" : "Inzichten")</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @if (profile?.HasSolarPanels == true)
+                {
+                    <div class="col-md-6 mb-3">
+                        <div class="insight-card p-3 rounded solar-insight">
+                            <h6><span class="emoji">&#x2600;&#xFE0F;</span> @(AppState.IsEnglish ? "Solar panels" : "Zonnepanelen")</h6>
+                            <p class="mb-1">@(AppState.IsEnglish ? "You generate an average of" : "Je wekt gemiddeld") <strong>@(profile.SolarProductionKwh.ToString("F0")) kWh</strong> @(AppState.IsEnglish ? "per month." : "per maand op.")</p>
+                            <p class="mb-0 small insight-detail">@(AppState.IsEnglish ? "Self-consumption:" : "Eigen verbruik:") @(profile.SelfConsumptionPercent.ToString("F0"))%</p>
+                        </div>
+                    </div>
+                }
+
+                <div class="col-md-6 mb-3">
+                    <div class="insight-card p-3 rounded peak-insight">
+                        <h6><span class="emoji">&#x23F0;</span> @(AppState.IsEnglish ? "Peak usage" : "Piekverbruik")</h6>
+                        <p class="mb-1">@(AppState.IsEnglish ? "Your highest usage is around" : "Je hoogste verbruik is rond") <strong>@(profile?.PeakUsageTime.Hours ?? 18):00 @(AppState.IsEnglish ? "hour" : "uur")</strong></p>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <div class="insight-card p-3 rounded savings-insight">
+                        <h6><span class="emoji">&#x1F4A1;</span> @(AppState.IsEnglish ? "Savings potential" : "Bespaarpotentieel")</h6>
+                        <p class="mb-1">@(AppState.IsEnglish ? "You could save" : "Je kunt mogelijk") <strong>&#x20AC;@(profile?.PotentialMonthlySavings.ToString("F0") ?? "0")/@(AppState.IsEnglish ? "month" : "maand")</strong> @(AppState.IsEnglish ? "" : "besparen")</p>
+                        <a href="/tips" class="btn btn-sm btn-primary">@(AppState.IsEnglish ? "View tips" : "Bekijk tips")</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center last-update mb-4">
+        <small>@(AppState.IsEnglish ? "Last update:" : "Laatste update:") @(latestReading?.Timestamp.ToString("dd-MM-yyyy HH:mm:ss") ?? (AppState.IsEnglish ? "Unknown" : "Onbekend"))</small>
+        <br />
+        <small>@(AppState.IsEnglish ? "Meter ID:" : "Meter ID:") @(latestReading?.MeterId ?? (AppState.IsEnglish ? "Unknown" : "Onbekend"))</small>
     </div>
 </div>
 
@@ -214,10 +218,88 @@
     .detail-label { font-size: 0.9rem; color: #666; }
     .detail-value { font-size: 1.5rem; font-weight: bold; }
     .tariff-indicator { font-size: 1.1rem; }
-    .cost-card { transition: transform 0.2s; }
+    .cost-card { transition: transform 0.2s; background-color: #f8f9fa; }
     .cost-card:hover { transform: translateY(-5px); }
     .insight-card { border-left: 4px solid currentColor; }
     .emoji { font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif; }
+    
+    .electricity-header { background-color: #0d6efd !important; color: white !important; }
+    .gas-header { background-color: #ffc107 !important; color: #000 !important; }
+    
+    .stat-box { background-color: #f8f9fa; }
+    .stat-label { display: block; color: #6c757d; }
+    .stat-value { display: block; color: #333; }
+    
+    .meter-label { color: #6c757d; }
+    .cost-label { color: #6c757d; }
+    .cost-value { color: #333; }
+    .cost-note { color: #6c757d; }
+    .price-note { color: #6c757d; }
+    .last-reading { color: #6c757d; }
+    .last-update { color: #6c757d; }
+    .insight-detail { color: #6c757d; }
+    
+    .solar-insight { background-color: rgba(25, 135, 84, 0.1); border-left-color: #198754; }
+    .peak-insight { background-color: rgba(13, 202, 240, 0.1); border-left-color: #0dcaf0; }
+    .savings-insight { background-color: rgba(13, 110, 253, 0.1); border-left-color: #0d6efd; }
+
+    /* Dark mode */
+    [data-theme="dark"] .energy-card,
+    [data-theme="dark"] .period-card,
+    [data-theme="dark"] .cost-card-container,
+    [data-theme="dark"] .insights-card {
+        background-color: #1e1e1e !important;
+        border-color: #333 !important;
+    }
+
+    [data-theme="dark"] .energy-card .card-body,
+    [data-theme="dark"] .period-card .card-body,
+    [data-theme="dark"] .cost-card-container .card-body,
+    [data-theme="dark"] .insights-card .card-body {
+        background-color: #1e1e1e !important;
+    }
+
+    [data-theme="dark"] .detail-label,
+    [data-theme="dark"] .meter-label,
+    [data-theme="dark"] .stat-label,
+    [data-theme="dark"] .cost-label,
+    [data-theme="dark"] .cost-note,
+    [data-theme="dark"] .price-note,
+    [data-theme="dark"] .last-reading,
+    [data-theme="dark"] .last-update,
+    [data-theme="dark"] .insight-detail {
+        color: #aaa !important;
+    }
+
+    [data-theme="dark"] .detail-value,
+    [data-theme="dark"] .stat-value,
+    [data-theme="dark"] .cost-value {
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .stat-box {
+        background-color: #2a2a2a !important;
+    }
+
+    [data-theme="dark"] .cost-card:not(.total-cost-card) {
+        background-color: #2a2a2a !important;
+    }
+
+    [data-theme="dark"] .solar-insight {
+        background-color: rgba(25, 135, 84, 0.2) !important;
+    }
+
+    [data-theme="dark"] .peak-insight {
+        background-color: rgba(13, 202, 240, 0.2) !important;
+    }
+
+    [data-theme="dark"] .savings-insight {
+        background-color: rgba(13, 110, 253, 0.2) !important;
+    }
+
+    [data-theme="dark"] hr {
+        border-color: #444 !important;
+    }
 </style>
 
 @code {
@@ -226,26 +308,31 @@
     private EnergyProfile? profile;
     private List<P1SensorData>? readings;
 
-protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
     }
 
     private async Task LoadDataAsync()
-  {
+    {
         readings = await P1SensorService.GetLatestReadingsAsync();
         latestReading = readings.FirstOrDefault();
         profile = await TipsService.AnalyzeConsumerProfileAsync("CONS-0001", readings);
-}
+    }
 
- private void SetPeriod(string period)
+    private void SetPeriod(string period)
     {
-      selectedPeriod = period;
+        selectedPeriod = period;
     }
 
     private string GetPeriodClass(string period)
     {
-    return selectedPeriod == period ? "btn-primary" : "btn-outline-primary";
+        return selectedPeriod == period ? "btn-primary" : "btn-outline-primary";
     }
 
     private string GetTariffClass()
@@ -255,23 +342,30 @@ protected override async Task OnInitializedAsync()
 
     private string GetTariffText()
     {
+        if (AppState.IsEnglish)
+            return latestReading?.CurrentTariff == 1 ? "Off-peak (cheap)" : "Peak (expensive)";
         return latestReading?.CurrentTariff == 1 ? "Dal (goedkoop)" : "Piek (duurder)";
     }
 
     private string GetDailyGas()
-{
-     var daily = (profile?.AverageMonthlyGasM3 ?? 0) / 30;
-    return daily.ToString("F1");
+    {
+        var daily = (profile?.AverageMonthlyGasM3 ?? 0) / 30;
+        return daily.ToString("F1");
     }
 
     private string GetGasAlertClass()
     {
-   return profile?.GasComparedToAveragePercent > 10 ? "alert-warning" : "alert-success";
+        return profile?.GasComparedToAveragePercent > 10 ? "alert-warning" : "alert-success";
     }
 
     private string GetTotalCost()
     {
         var total = (profile?.EstimatedMonthlyElectricityCost ?? 0) + (profile?.EstimatedMonthlyGasCost ?? 0);
         return total.ToString("F2");
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
     }
 }

@@ -1,27 +1,27 @@
 .page {
     position: relative;
     display: flex;
-  flex-direction: column;
+    flex-direction: column;
     min-height: 100vh;
- }
+}
 
 main {
-  flex: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
 
 /* Rijksoverheid-style sidebar - Dutch Government Blue */
 .sidebar {
- background: linear-gradient(180deg, #154273 0%, #01689b 50%, #154273 100%);
+    background: linear-gradient(180deg, #154273 0%, #01689b 50%, #154273 100%);
 }
 
 /* Header styling */
 .top-header {
     background-color: #154273;
     color: white;
- padding: 0.75rem 1.5rem;
- display: flex;
+    padding: 0.75rem 1.5rem;
+    display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 3px solid #ffb612;
@@ -52,26 +52,26 @@ main {
     border-bottom: 1px solid #d6d5d5;
     justify-content: flex-end;
     height: 3.5rem;
- display: flex;
- align-items: center;
+    display: flex;
+    align-items: center;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-      white-space: nowrap;
-        margin-left: 1.5rem;
+.top-row ::deep a, .top-row ::deep .btn-link {
+    white-space: nowrap;
+    margin-left: 1.5rem;
     text-decoration: none;
-    }
+}
 
- .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
+.top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+    text-decoration: underline;
+}
 
-    .top-row ::deep a:first-child {
-     overflow: hidden;
-        text-overflow: ellipsis;
-    }
+.top-row ::deep a:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
- /* Footer */
+/* Footer */
 .footer {
     background-color: #154273;
     color: white;
@@ -80,8 +80,8 @@ main {
 }
 
 .footer-content {
- display: flex;
- justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
     max-width: 1400px;
     margin: 0 auto;
@@ -118,7 +118,7 @@ main {
 }
 
 .stat-card:hover {
- transform: translateY(-3px);
+    transform: translateY(-3px);
     box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
@@ -141,9 +141,9 @@ main {
 
 /* Weather widget */
 .weather-widget .card {
- background: linear-gradient(135deg, #01689b 0%, #154273 100%);
+    background: linear-gradient(135deg, #01689b 0%, #154273 100%);
     border: none;
-border-radius: 12px;
+    border-radius: 12px;
 }
 
 /* Card improvements */
@@ -201,10 +201,84 @@ border-radius: 12px;
     color: #000;
 }
 
+/* ========================================
+   DARK MODE - MAIN LAYOUT ELEMENTS
+   ======================================== */
+:global([data-theme="dark"]) .page {
+    background-color: #0d1117 !important;
+}
+
+:global([data-theme="dark"]) main {
+    background-color: #0d1117 !important;
+}
+
+:global([data-theme="dark"]) .content {
+    background-color: #0d1117 !important;
+    color: #4ade80 !important;
+}
+
+:global([data-theme="dark"]) article {
+    background-color: #0d1117 !important;
+    color: #4ade80 !important;
+}
+
+:global([data-theme="dark"]) .sidebar {
+    background: linear-gradient(180deg, #0d1117 0%, #161b22 50%, #0d1117 100%) !important;
+    border-right: 1px solid #30363d !important;
+}
+
+:global([data-theme="dark"]) .top-header {
+    background-color: #161b22 !important;
+    border-bottom: 3px solid #22c55e !important;
+}
+
+:global([data-theme="dark"]) .footer {
+    background-color: #161b22 !important;
+    border-top: 1px solid #30363d !important;
+    color: #4ade80 !important;
+}
+
+:global([data-theme="dark"]) .footer-links a {
+    color: #4ade80 !important;
+}
+
+:global([data-theme="dark"]) .footer-links a:hover {
+    color: #86efac !important;
+}
+
+:global([data-theme="dark"]) .top-row {
+    background-color: #161b22 !important;
+    border-bottom-color: #30363d !important;
+}
+
+:global([data-theme="dark"]) .stat-value {
+    color: #4ade80 !important;
+}
+
+:global([data-theme="dark"]) .stat-label {
+    color: #6ee7b7 !important;
+}
+
+:global([data-theme="dark"]) .card {
+    background-color: #161b22 !important;
+    border-color: #30363d !important;
+    color: #4ade80 !important;
+}
+
+:global([data-theme="dark"]) .card-header {
+    background-color: #1c2128 !important;
+    border-bottom-color: #30363d !important;
+    color: #4ade80 !important;
+}
+
+:global([data-theme="dark"]) .table thead th {
+    color: #4ade80 !important;
+}
+
 /* Responsive */
 @media (max-width: 640.98px) {
     .top-row {
-   justify-content: space-between;
+        justify-content: space-between;
     }
 
     .top-row ::deep a, .top-row ::deep .btn-link {
@@ -218,64 +292,69 @@ border-radius: 12px;
     }
 
     .top-header .header-right {
-    flex-direction: column;
-  gap: 0.25rem;
+        flex-direction: column;
+        gap: 0.25rem;
     }
 
     .footer-content {
-  flex-direction: column;
-      text-align: center;
-  gap: 0.5rem;
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
     }
 }
 
 @media (min-width: 641px) {
     .page {
- flex-direction: row;
-  }
+        flex-direction: row;
+    }
 
     .sidebar {
-    width: 250px;
-     height: 100vh;
+        width: 250px;
+        height: 100vh;
         position: sticky;
         top: 0;
     }
 
     .top-row {
- position: sticky;
-     top: 0;
-     z-index: 1;
+        position: sticky;
+        top: 0;
+        z-index: 1;
     }
 
     .top-row.auth ::deep a:first-child {
-flex: 1;
-      text-align: right;
+        flex: 1;
+        text-align: right;
         width: 0;
-  }
+    }
 
     .top-row, article {
-   padding-left: 2rem !important;
-      padding-right: 1.5rem !important;
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
     }
 }
 
 #blazor-error-ui {
-  color-scheme: light only;
+    color-scheme: light only;
     background: lightyellow;
     bottom: 0;
-  box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
     display: none;
     left: 0;
     padding: 0.6rem 1.25rem 0.7rem 1.25rem;
     position: fixed;
-  width: 100%;
+    width: 100%;
     z-index: 1000;
 }
 
-    #blazor-error-ui .dismiss {
-cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-     top: 0.5rem;
-    }
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+:global([data-theme="dark"]) #blazor-error-ui {
+    background: #1c2128 !important;
+    color: #f87171 !important;
+}

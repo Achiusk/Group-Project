@@ -3,23 +3,25 @@
 @using urban_city_power_managment.Web.Services
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
+@inject AppStateService AppState
+@implements IDisposable
 
-<PageTitle>Inloggen - Mijn Energie</PageTitle>
+<PageTitle>@(AppState.IsEnglish ? "Login" : "Inloggen") - Mijn Energie</PageTitle>
 
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
             <div class="card login-card shadow-lg border-0">
                 <div class="card-header text-white text-center py-4">
-                    <h2 class="mb-0"><i class="bi bi-box-arrow-in-right me-2"></i>Inloggen</h2>
-                    <p class="mb-0 opacity-75">Welkom terug!</p>
+                    <h2 class="mb-0"><i class="bi bi-box-arrow-in-right me-2"></i>@(AppState.IsEnglish ? "Login" : "Inloggen")</h2>
+                    <p class="mb-0 opacity-75">@(AppState.IsEnglish ? "Welcome back!" : "Welkom terug!")</p>
                 </div>
                 <div class="card-body p-4">
                     
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <strong>Fout:</strong> @errorMessage
+                            <strong>@(AppState.IsEnglish ? "Error:" : "Fout:")</strong> @errorMessage
                             <button type="button" class="btn-close" @onclick="ClearError"></button>
                         </div>
                     }
@@ -35,19 +37,19 @@
                         <DataAnnotationsValidator />
                         
                         <div class="mb-3">
-                            <label class="form-label">E-mailadres</label>
+                            <label class="form-label">@(AppState.IsEnglish ? "Email address" : "E-mailadres")</label>
                             <input type="email" class="form-control" 
                                    @bind="model.Email" 
-                                   placeholder="uw.email@voorbeeld.nl" />
+                                   placeholder="@(AppState.IsEnglish ? "your.email@example.com" : "uw.email@voorbeeld.nl")" />
                             <ValidationMessage For="@(() => model.Email)" />
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Wachtwoord</label>
+                            <label class="form-label">@(AppState.IsEnglish ? "Password" : "Wachtwoord")</label>
                             <div class="input-group">
                                 <input type="@(showPassword ? "text" : "password")" class="form-control" 
                                        @bind="model.Password" 
-                                       placeholder="Je wachtwoord" />
+                                       placeholder="@(AppState.IsEnglish ? "Your password" : "Je wachtwoord")" />
                                 <button class="btn btn-outline-secondary" type="button" @onclick="TogglePassword">
                                     <i class="bi @(showPassword ? "bi-eye-slash" : "bi-eye")"></i>
                                 </button>
@@ -58,20 +60,20 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input" id="rememberMe" @bind="model.RememberMe" />
-                                <label class="form-check-label" for="rememberMe">Onthoud mij</label>
+                                <label class="form-check-label" for="rememberMe">@(AppState.IsEnglish ? "Remember me" : "Onthoud mij")</label>
                             </div>
-                            <a href="#" class="text-decoration-none small">Wachtwoord vergeten?</a>
+                            <a href="#" class="text-decoration-none small forgot-link">@(AppState.IsEnglish ? "Forgot password?" : "Wachtwoord vergeten?")</a>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 btn-lg" disabled="@isLoggingIn">
                             @if (isLoggingIn)
                             {
                                 <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-                                <text>Bezig met inloggen...</text>
+                                <text>@(AppState.IsEnglish ? "Logging in..." : "Bezig met inloggen...")</text>
                             }
                             else
                             {
-                                <i class="bi bi-box-arrow-in-right me-2"></i><text>Inloggen</text>
+                                <i class="bi bi-box-arrow-in-right me-2"></i><text>@(AppState.IsEnglish ? "Login" : "Inloggen")</text>
                             }
                         </button>
                     </EditForm>
@@ -79,8 +81,8 @@
                     <hr class="my-4" />
 
                     <div class="text-center">
-                        <p class="text-muted mb-0">
-                            Nog geen account? <a href="/registreren" class="fw-bold">Registreer hier</a>
+                        <p class="register-link mb-0">
+                            @(AppState.IsEnglish ? "No account yet?" : "Nog geen account?") <a href="/registreren" class="fw-bold">@(AppState.IsEnglish ? "Register here" : "Registreer hier")</a>
                         </p>
                     </div>
                 </div>
@@ -103,10 +105,13 @@
         background-color: #ffffff;
     }
 
+    .forgot-link { color: #0d6efd; }
+    .register-link { color: #6c757d; }
+
     /* Dark mode support for login page */
     [data-theme="dark"] .login-card {
-        background-color: #1e1e1e;
-        border-color: #333;
+        background-color: #1e1e1e !important;
+        border-color: #333 !important;
     }
     
     [data-theme="dark"] .login-card .card-header {
@@ -114,47 +119,55 @@
     }
     
     [data-theme="dark"] .login-card .card-body {
-        background-color: #1e1e1e;
-        color: #ffffff;
+        background-color: #1e1e1e !important;
+        color: #ffffff !important;
     }
     
     [data-theme="dark"] .login-card .form-control {
-        background-color: #2a2a2a;
-        border-color: #444;
-        color: #ffffff;
+        background-color: #2a2a2a !important;
+        border-color: #444 !important;
+        color: #ffffff !important;
     }
     
     [data-theme="dark"] .login-card .form-control:focus {
-        background-color: #2a2a2a;
-        border-color: #01689b;
-        color: #ffffff;
+        background-color: #2a2a2a !important;
+        border-color: #01689b !important;
+        color: #ffffff !important;
         box-shadow: 0 0 0 0.25rem rgba(1, 104, 155, 0.25);
     }
     
     [data-theme="dark"] .login-card .form-control::placeholder {
-        color: #888;
+        color: #888 !important;
     }
     
     [data-theme="dark"] .login-card .btn-outline-secondary {
-        color: #aaa;
-        border-color: #444;
+        color: #aaa !important;
+        border-color: #444 !important;
     }
     
     [data-theme="dark"] .login-card .btn-outline-secondary:hover {
-        background-color: #333;
-        color: #fff;
+        background-color: #333 !important;
+        color: #fff !important;
     }
     
-    [data-theme="dark"] .login-card .text-muted {
+    [data-theme="dark"] .login-card .register-link {
         color: #aaa !important;
     }
     
     [data-theme="dark"] .login-card hr {
-        border-color: #444;
+        border-color: #444 !important;
     }
     
     [data-theme="dark"] .login-card .form-check-label {
-        color: #ccc;
+        color: #ccc !important;
+    }
+
+    [data-theme="dark"] .login-card .form-label {
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .forgot-link {
+        color: #4a9eff !important;
     }
 </style>
 
@@ -164,6 +177,11 @@
     private bool isLoggingIn = false;
     private string errorMessage = string.Empty;
     private string successMessage = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -177,7 +195,9 @@
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
         if (uri.Query.Contains("registered=true"))
         {
-            successMessage = "Je account is aangemaakt! Je kunt nu inloggen.";
+            successMessage = AppState.IsEnglish 
+                ? "Your account has been created! You can now log in." 
+                : "Je account is aangemaakt! Je kunt nu inloggen.";
         }
     }
 
@@ -202,21 +222,26 @@
 
             if (success && user != null)
             {
-                // Redirect to dashboard on successful login
-                Navigation.NavigateTo("/dashboard", forceLoad: true);
+                // Navigate without forceLoad - the auth state provider will notify components
+                Navigation.NavigateTo("/dashboard");
             }
             else
             {
                 errorMessage = message;
+                isLoggingIn = false;
             }
         }
         catch (Exception)
         {
-            errorMessage = "Er is een fout opgetreden. Probeer het later opnieuw.";
-        }
-        finally
-        {
+            errorMessage = AppState.IsEnglish 
+                ? "An error occurred. Please try again later." 
+                : "Er is een fout opgetreden. Probeer het later opnieuw.";
             isLoggingIn = false;
         }
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
     }
 }

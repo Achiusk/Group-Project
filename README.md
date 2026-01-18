@@ -1,140 +1,87 @@
-# Mijn Energie - Consumer Energy Advisor
+# Eindhoven Energie - Smart Energy Management
 
-A Blazor Server web application for Dutch consumers to monitor their energy consumption through smart meters (P1 sensors).
+A modern Blazor Server application for monitoring residential energy consumption via P1 smart meters.
 
 ![.NET 9](https://img.shields.io/badge/.NET-9.0-purple)
 ![Blazor Server](https://img.shields.io/badge/Blazor-Server-blue)
 ![MySQL](https://img.shields.io/badge/Database-MySQL-orange)
+![Azure](https://img.shields.io/badge/Deployed-Azure-0078D4)
 
-## Features
+## ?? Features
 
-### Consumer Features
-- **Dashboard** - Overview of energy consumption and solar return
-- **Mijn Energie** - Detailed energy usage statistics
-- **Bespaartips** - Personalized energy saving tips
-- **Leveranciers** - Energy supplier directory and comparison
-- **Weer** - Weather information with energy impact analysis
-- **Instellingen** - User settings with dark mode and language switch (NL/EN)
+- **Real-time Dashboard** - Live energy consumption and solar return monitoring
+- **Energy Analytics** - Detailed usage statistics with charts and comparisons
+- **Saving Tips** - Personalized recommendations based on consumption patterns
+- **Supplier Directory** - Find and compare local energy service providers
+- **Weather Integration** - Weather forecasts with energy impact analysis
+- **Dark Mode** - Full dark theme with green accent styling
+- **Bilingual** - Dutch (NL) and English (EN) support
 
-### User Management
-- User registration with validation:
-  - Names: A-Z letters only (no numbers or aliases)
-  - Age: Must be 18+ years old
-  - Dutch postal code lookup with automatic address fill
-  - Smart meter detection with Netbeheerder contact info
-  - Secure password with BCrypt hashing
-- User login with remember me option
-
-### Technical Features
-- MySQL database integration (Pomelo Entity Framework)
-- Dutch address lookup by postal code + house number
-- Automatic Netbeheerder detection (Enexis, Liander, Stedin, etc.)
-- Real-time weather data from Open-Meteo API
-- Dark mode with localStorage persistence
-- Dutch/English language switching
-
-## Tech Stack
-
-- **Framework**: Blazor Server (.NET 9)
-- **Database**: MySQL with Pomelo EF Core 8.0
-- **Authentication**: BCrypt password hashing
-- **Styling**: Bootstrap 5
-- **Weather API**: Open-Meteo (free, no API key required)
-
-## Project Structure
-
-```
-urban_city_power_managment.Web/
-|-- Components/
-|   |-- Layout/
-|   |   +-- NavMenu.razor
-|   +-- Pages/
-|     |-- Home.razor (Dashboard)
-|       |-- MijnEnergie.razor
-| |-- Tips.razor
-|    |-- Leveranciers.razor
-|       |-- Weather.razor
-|       |-- Instellingen.razor
-|       |-- Registreren.razor
-|       +-- Inloggen.razor
-|-- Data/
-|   +-- EnergyDbContext.cs
-|-- Models/
-|   |-- EnergyModels.cs
-|   +-- UserModels.cs
-|-- Services/
-|   |-- AuthService.cs
-|   |-- NetbeheerderService.cs
-| |-- PostalCodeService.cs
-|   |-- P1SensorService.cs
-|   |-- VendorService.cs
-|   |-- EnergyTipsService.cs
-|   |-- PowerGenerationService.cs
-|   +-- OpenMeteoWeatherService.cs
-+-- Program.cs
-```
-
-## Getting Started
+## ?? Quick Start
 
 ### Prerequisites
 - .NET 9 SDK
-- MySQL Server 8.0+
+- MySQL Server 8.0+ (or use Docker)
 
-### Configuration
-
-1. Update `appsettings.json` with your MySQL connection:
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Port=3306;Database=EindhovenEnergy;User=root;Password=your_password;"
-  }
-}
-```
-
-2. Run migrations:
+### Run with Docker (Recommended)
 ```bash
-dotnet ef migrations add InitialCreate
-dotnet ef database update
+docker-compose up -d
 ```
+Access at: http://localhost:8080
 
-3. Run the application:
+### Run Locally
 ```bash
 dotnet run --project urban_city_power_managment.Web
 ```
 
-## Dutch Grid Operators (Netbeheerders)
+### Demo Credentials
+| Email | Password |
+|-------|----------|
+| jan.devries@example.nl | Password123! |
 
-The app automatically detects the user's grid operator based on postal code:
+*10 demo accounts available - all use the same password*
 
-| Operator | Regions |
-|----------|---------|
-| Enexis | Noord-Brabant, Limburg, Groningen, Drenthe |
-| Liander | Noord-Holland, Gelderland, Flevoland |
-| Stedin | Zuid-Holland, Utrecht |
-| Westland Infra | Westland |
-| Coteq | Twente |
-| Rendo | Parts of Drenthe/Overijssel |
+## ??? Tech Stack
 
-## Pages
+| Component | Technology |
+|-----------|------------|
+| Framework | Blazor Server (.NET 9) |
+| Database | MySQL + Pomelo EF Core |
+| Auth | BCrypt password hashing |
+| UI | Bootstrap 5 |
+| Weather | Open-Meteo API |
+| Hosting | Azure App Service |
 
-| Page | Route | Description |
-|------|-------|-------------|
-| Dashboard | `/` | Energy overview |
-| Mijn Energie | `/mijn-energie` | Detailed consumption |
-| Bespaartips | `/tips` | Energy saving tips |
-| Leveranciers | `/leveranciers` | Supplier comparison |
-| Weer | `/weer` | Weather and energy impact |
-| Instellingen | `/instellingen` | Settings (dark mode, language) |
-| Registreren | `/registreren` | User registration |
-| Inloggen | `/inloggen` | User login |
+## ?? Project Structure
 
-## Authors
+```
+urban_city_power_managment.Web/
+??? Components/
+?   ??? Layout/          # MainLayout, NavMenu
+?   ??? Pages/           # All application pages
+??? Data/                # EF Core DbContext
+??? Models/              # Data models
+??? Services/            # Business logic
+??? wwwroot/             # Static assets
+```
 
-- Group Project Team - Fontys ICT
+## ?? Deployment
 
-## License
+### Azure App Service
+The application is deployed to Azure with MySQL In-App database.
 
-This project is for educational purposes.
+**Live URL:** [Azure Deployment](https://urbancitypowermanagmentweb20260114230645-ejhra4hkghhga3e4.italynorth-01.azurewebsites.net)
+
+### Docker
+See [DOCKER.md](DOCKER.md) for detailed Docker deployment instructions.
+
+## ?? Team
+
+Fontys ICT - Group Project Team
+
+## ?? License
+
+Educational purposes only.
 
 ---
 

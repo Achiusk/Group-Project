@@ -28,6 +28,7 @@ namespace urban_city_power_managment.Web.Services
         private readonly ILogger<AuthService> _logger;
         private readonly INetbeheerderService _netbeheerderService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CustomAuthStateProvider _authStateProvider;
 
         private const int BCRYPT_WORK_FACTOR = 12;
         private const string USER_SESSION_KEY = "SecureAuth_User_v1";
@@ -37,12 +38,14 @@ namespace urban_city_power_managment.Web.Services
             EnergyDbContext dbContext,
             ILogger<AuthService> logger,
             INetbeheerderService netbeheerderService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            CustomAuthStateProvider authStateProvider)
         {
             _dbContext = dbContext;
             _logger = logger;
             _netbeheerderService = netbeheerderService;
             _httpContextAccessor = httpContextAccessor;
+            _authStateProvider = authStateProvider;
         }
 
         public async Task<(bool Success, string Message, UserAccount? User)> RegisterAsync(RegistrationModel model)
@@ -90,7 +93,9 @@ namespace urban_city_power_managment.Web.Services
                 _dbContext.Users.Add(user);
                 await _dbContext.SaveChangesAsync();
 
+                // Set session and notify auth state provider
                 await SetCurrentUserAsync(user);
+                _authStateProvider.MarkUserAsAuthenticated(user);
 
                 _logger.LogInformation("New user registered: {Email}", MaskEmail(user.Email));
 
@@ -134,6 +139,9 @@ namespace urban_city_power_managment.Web.Services
 
                 await UpdateLastLoginAsync(user.Id);
                 await SetCurrentUserAsync(user);
+                
+                // Notify auth state provider - this is the key fix!
+                _authStateProvider.MarkUserAsAuthenticated(user);
 
                 _logger.LogInformation("Login successful for user {UserId}", user.Id);
 
@@ -143,7 +151,6 @@ namespace urban_city_power_managment.Web.Services
             {
                 _logger.LogError(ex, "Login error: {Message}", ex.Message);
                 
-                // Provide more specific error message for database issues
                 if (ex.Message.Contains("connect") || ex.Message.Contains("database") || ex.Message.Contains("MySQL"))
                 {
                     return (false, "Database verbinding niet beschikbaar. Probeer het later opnieuw.", null);
@@ -161,12 +168,24 @@ namespace urban_city_power_managment.Web.Services
                 session.Remove(USER_SESSION_KEY);
                 session.Remove(SESSION_TOKEN_KEY);
                 session.Clear();
-                await Task.CompletedTask;
             }
+            
+            // Notify auth state provider
+            _authStateProvider.MarkUserAsLoggedOut();
+            
+            await Task.CompletedTask;
         }
 
         public async Task<UserAccount?> GetCurrentUserAsync()
         {
+            // First check if auth state provider has user
+            var userId = _authStateProvider.GetCurrentUserId();
+            if (userId.HasValue)
+            {
+                return await GetUserByIdAsync(userId.Value);
+            }
+
+            // Fallback to session check
             var session = _httpContextAccessor.HttpContext?.Session;
             if (session == null) return null;
 
@@ -183,7 +202,15 @@ namespace urban_city_power_managment.Web.Services
 
                 if (userInfo.SessionToken != sessionToken) return null;
 
-                return await GetUserByIdAsync(userInfo.UserId);
+                var user = await GetUserByIdAsync(userInfo.UserId);
+                
+                // Restore auth state if session is valid but auth state was lost
+                if (user != null && !_authStateProvider.IsAuthenticated)
+                {
+                    _authStateProvider.MarkUserAsAuthenticated(user);
+                }
+                
+                return user;
             }
             catch
             {
@@ -193,6 +220,13 @@ namespace urban_city_power_managment.Web.Services
 
         public async Task<bool> IsAuthenticatedAsync()
         {
+            // First check auth state provider (faster, no DB call)
+            if (_authStateProvider.IsAuthenticated)
+            {
+                return true;
+            }
+            
+            // Fallback to full check
             var user = await GetCurrentUserAsync();
             return user != null;
         }

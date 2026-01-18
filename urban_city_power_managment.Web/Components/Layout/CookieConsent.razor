@@ -1,0 +1,339 @@
+@inject IJSRuntime JSRuntime
+
+@if (showBanner)
+{
+    <div class="cookie-banner">
+        <div class="cookie-content">
+            <div class="cookie-text">
+                <h4><i class="bi bi-cookie me-2"></i>Cookies</h4>
+                <p>
+                    Wij gebruiken cookies om je ervaring te verbeteren. Essentiële cookies zijn nodig voor de werking van de website. 
+                    Analytische cookies helpen ons de website te verbeteren.
+                </p>
+                <p class="cookie-details">
+                    <i class="bi bi-shield-lock me-1"></i><a href="/privacy" target="_blank">Privacybeleid</a> | 
+                    <i class="bi bi-file-text me-1"></i><a href="/cookies" target="_blank">Cookiebeleid</a>
+                </p>
+            </div>
+            <div class="cookie-actions">
+                <button class="btn btn-outline-light btn-sm" @onclick="AcceptEssentialOnly">
+                    <i class="bi bi-shield-check me-1"></i>Alleen essentieel
+                </button>
+                <button class="btn btn-warning btn-sm" @onclick="AcceptAll">
+                    <i class="bi bi-check-all me-1"></i>Alles accepteren
+                </button>
+                <button class="btn btn-link btn-sm text-light" @onclick="ShowSettings">
+                    <i class="bi bi-gear me-1"></i>Instellingen
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showSettings)
+{
+    <div class="cookie-modal-backdrop" @onclick="CloseSettings">
+        <div class="cookie-modal" @onclick:stopPropagation="true">
+            <div class="cookie-modal-header">
+                <h4><i class="bi bi-cookie me-2"></i>Cookie-instellingen</h4>
+                <button type="button" class="btn-close btn-close-white" @onclick="CloseSettings"></button>
+            </div>
+            <div class="cookie-modal-body">
+                <div class="cookie-category">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6><i class="bi bi-shield-fill-check text-success me-2"></i>Essentiële cookies</h6>
+                            <small class="text-muted">Noodzakelijk voor de werking van de website</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" checked disabled>
+                            <label class="form-check-label text-muted">Altijd aan</label>
+                        </div>
+                    </div>
+                    <p class="small mt-2">
+                        Deze cookies zijn nodig voor basisfuncties zoals inloggen, sessies en beveiliging. 
+                        Ze kunnen niet worden uitgeschakeld.
+                    </p>
+                </div>
+
+                <hr />
+
+                <div class="cookie-category">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6><i class="bi bi-graph-up text-info me-2"></i>Analytische cookies</h6>
+                            <small class="text-muted">Helpen ons de website te verbeteren</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="analyticsToggle" @bind="analyticsEnabled">
+                        </div>
+                    </div>
+                    <p class="small mt-2">
+                        Deze cookies verzamelen informatie over hoe bezoekers de website gebruiken, 
+                        zoals welke pagina's het meest worden bezocht. Alle informatie is anoniem.
+                    </p>
+                </div>
+
+                <hr />
+
+                <div class="cookie-category">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6><i class="bi bi-wrench text-warning me-2"></i>Diagnostische cookies</h6>
+                            <small class="text-muted">Helpen ons technische problemen op te lossen</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="diagnosticsToggle" @bind="diagnosticsEnabled">
+                        </div>
+                    </div>
+                    <p class="small mt-2">
+                        Deze cookies helpen ons bij het identificeren en oplossen van technische problemen 
+                        om de betrouwbaarheid van de website te verbeteren.
+                    </p>
+                </div>
+            </div>
+            <div class="cookie-modal-footer">
+                <button class="btn btn-outline-secondary" @onclick="CloseSettings">
+                    <i class="bi bi-x-lg me-1"></i>Annuleren
+                </button>
+                <button class="btn btn-primary" @onclick="SaveSettings">
+                    <i class="bi bi-check-lg me-1"></i>Voorkeuren opslaan
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .cookie-banner {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #154273 0%, #01689b 100%);
+        color: white;
+        padding: 1.5rem;
+        z-index: 9999;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .cookie-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .cookie-text {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .cookie-text h4 {
+        margin-bottom: 0.5rem;
+    }
+
+    .cookie-text p {
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .cookie-details a {
+        color: #ffb612;
+        text-decoration: none;
+    }
+
+    .cookie-details a:hover {
+        text-decoration: underline;
+    }
+
+    .cookie-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .cookie-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .cookie-modal {
+        background: white;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .cookie-modal-header {
+        background: linear-gradient(135deg, #154273 0%, #01689b 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .cookie-modal-header h4 {
+        margin: 0;
+    }
+
+    .cookie-modal-body {
+        padding: 1.5rem;
+    }
+
+    .cookie-category h6 {
+        margin-bottom: 0.25rem;
+        color: #154273;
+    }
+
+    .cookie-modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #dee2e6;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+
+    /* Dark mode support */
+    [data-theme="dark"] .cookie-modal {
+        background: #1e1e1e;
+        color: #fff;
+    }
+
+    [data-theme="dark"] .cookie-category h6 {
+        color: #ffb612;
+    }
+
+    [data-theme="dark"] .cookie-modal-footer {
+        border-top-color: #333;
+    }
+
+    [data-theme="dark"] .text-muted {
+        color: #aaa !important;
+    }
+
+    /* Mobile responsive */
+    @@media (max-width: 768px) {
+        .cookie-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .cookie-actions {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .cookie-actions .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+    }
+</style>
+
+@code {
+    private bool showBanner = false;
+    private bool showSettings = false;
+    private bool analyticsEnabled = false;
+    private bool diagnosticsEnabled = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                // Check if user has already made a choice
+                var consent = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "cookieConsent");
+                
+                if (string.IsNullOrEmpty(consent))
+                {
+                    showBanner = true;
+                    StateHasChanged();
+                }
+                else
+                {
+                    // Load saved preferences
+                    var analytics = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "cookieAnalytics");
+                    var diagnostics = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "cookieDiagnostics");
+                    
+                    analyticsEnabled = analytics == "true";
+                    diagnosticsEnabled = diagnostics == "true";
+                }
+            }
+            catch
+            {
+                // localStorage not available
+                showBanner = true;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task AcceptAll()
+    {
+        analyticsEnabled = true;
+        diagnosticsEnabled = true;
+        await SaveConsent();
+    }
+
+    private async Task AcceptEssentialOnly()
+    {
+        analyticsEnabled = false;
+        diagnosticsEnabled = false;
+        await SaveConsent();
+    }
+
+    private void ShowSettings()
+    {
+        showSettings = true;
+    }
+
+    private void CloseSettings()
+    {
+        showSettings = false;
+    }
+
+    private async Task SaveSettings()
+    {
+        await SaveConsent();
+        showSettings = false;
+    }
+
+    private async Task SaveConsent()
+    {
+        try
+        {
+            var consentDate = DateTime.UtcNow.ToString("o");
+            
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "cookieConsent", consentDate);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "cookieAnalytics", analyticsEnabled.ToString().ToLower());
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "cookieDiagnostics", diagnosticsEnabled.ToString().ToLower());
+            
+            showBanner = false;
+            StateHasChanged();
+        }
+        catch
+        {
+            // Handle error silently
+        }
+    }
+}

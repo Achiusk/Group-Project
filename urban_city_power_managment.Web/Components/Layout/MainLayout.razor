@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @inject IJSRuntime JS
+@inject AppStateService AppState
+@implements IDisposable
+@using urban_city_power_managment.Web.Services
 
 <div class="page">
     <div class="sidebar">
@@ -9,17 +12,17 @@
     <main>
         <div class="top-header">
             <div class="header-left">
-                <span class="app-title">Stedelijk Energiebeheer Eindhoven</span>
+                <span class="app-title">@(AppState.IsEnglish ? "Eindhoven Urban Energy Management" : "Stedelijk Energiebeheer Eindhoven")</span>
             </div>
             <div class="header-right">
                 <!-- Dark Mode Toggle -->
-                <button class="header-btn" @onclick="ToggleDarkMode" title="@(isDarkMode ? "Lichte modus" : "Donkere modus")">
-                    <i class="bi @(isDarkMode ? "bi-sun-fill" : "bi-moon-fill")"></i>
+                <button class="header-btn" @onclick="ToggleDarkMode" title="@(AppState.IsDarkMode ? (AppState.IsEnglish ? "Light mode" : "Lichte modus") : (AppState.IsEnglish ? "Dark mode" : "Donkere modus"))">
+                    <i class="bi @(AppState.IsDarkMode ? "bi-sun-fill" : "bi-moon-fill")"></i>
                 </button>
                 
                 <!-- Language Toggle -->
-                <button class="header-btn" @onclick="ToggleLanguage" title="@(isEnglish ? "Nederlands" : "English")">
-                    <span class="lang-badge">@(isEnglish ? "EN" : "NL")</span>
+                <button class="header-btn" @onclick="ToggleLanguage" title="@(AppState.IsEnglish ? "Nederlands" : "English")">
+                    <span class="lang-badge">@(AppState.IsEnglish ? "EN" : "NL")</span>
                 </button>
                 
                 <span class="header-divider">|</span>
@@ -34,11 +37,11 @@
 
         <footer class="footer">
             <div class="footer-content">
-                <span>© @DateTime.Now.Year Gemeente Eindhoven - Stedelijk Energiebeheer</span>
+                <span>© @DateTime.Now.Year @(AppState.IsEnglish ? "Municipality of Eindhoven - Urban Energy Management" : "Gemeente Eindhoven - Stedelijk Energiebeheer")</span>
                 <span class="footer-links">
                     <a href="/privacy">Privacy</a> | 
                     <a href="/contact">Contact</a> | 
-                    <a href="/help">Help</a>
+                    <a href="/cookies">Cookies</a>
                 </span>
             </div>
         </footer>
@@ -46,7 +49,7 @@
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
-    Er is een fout opgetreden. <a href="." class="reload">Pagina herladen</a>
+    @(AppState.IsEnglish ? "An error occurred." : "Er is een fout opgetreden.") <a href="." class="reload">@(AppState.IsEnglish ? "Reload page" : "Pagina herladen")</a>
 </div>
 
 <style>
@@ -83,13 +86,12 @@
 </style>
 
 @code {
-    private bool isDarkMode = true;
-    private bool isEnglish = false;
     private string currentDateTime = "";
     private System.Threading.Timer? clockTimer;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
+        AppState.OnChange += StateHasChanged;
         UpdateDateTime();
     }
 
@@ -97,16 +99,16 @@
     {
         if (firstRender)
         {
-            // Load saved preferences
             try
             {
+                // Load saved preferences from localStorage
                 var theme = await JS.InvokeAsync<string>("localStorage.getItem", "theme");
-                isDarkMode = theme != "light";
+                AppState.IsDarkMode = theme != "light";
                 
                 var lang = await JS.InvokeAsync<string>("localStorage.getItem", "language");
-                isEnglish = lang == "en";
+                AppState.IsEnglish = lang == "en";
                 
-                // Apply theme
+                // Apply theme to DOM
                 await ApplyTheme();
                 
                 // Start real-time clock
@@ -124,7 +126,7 @@
 
     private void UpdateDateTime()
     {
-        var culture = isEnglish 
+        var culture = AppState.IsEnglish 
             ? new System.Globalization.CultureInfo("en-US") 
             : new System.Globalization.CultureInfo("nl-NL");
         currentDateTime = DateTime.Now.ToString("dddd d MMMM yyyy HH:mm:ss", culture);
@@ -132,25 +134,27 @@
 
     private async Task ToggleDarkMode()
     {
-        isDarkMode = !isDarkMode;
+        AppState.IsDarkMode = !AppState.IsDarkMode;
         await ApplyTheme();
-        await JS.InvokeVoidAsync("localStorage.setItem", "theme", isDarkMode ? "dark" : "light");
+        await JS.InvokeVoidAsync("localStorage.setItem", "theme", AppState.IsDarkMode ? "dark" : "light");
     }
 
     private async Task ToggleLanguage()
     {
-        isEnglish = !isEnglish;
-        await JS.InvokeVoidAsync("localStorage.setItem", "language", isEnglish ? "en" : "nl");
+        AppState.IsEnglish = !AppState.IsEnglish;
+        await JS.InvokeVoidAsync("localStorage.setItem", "language", AppState.IsEnglish ? "en" : "nl");
         UpdateDateTime();
     }
 
     private async Task ApplyTheme()
     {
-        await JS.InvokeVoidAsync("eval", $"document.documentElement.setAttribute('data-theme', '{(isDarkMode ? "dark" : "light")}')");
+        var theme = AppState.IsDarkMode ? "dark" : "light";
+        await JS.InvokeVoidAsync("eval", $"document.documentElement.setAttribute('data-theme', '{theme}')");
     }
 
     public void Dispose()
     {
+        AppState.OnChange -= StateHasChanged;
         clockTimer?.Dispose();
     }
 }

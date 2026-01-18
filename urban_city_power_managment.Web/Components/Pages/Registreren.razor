@@ -6,23 +6,25 @@
 @inject IPostalCodeService PostalCodeService
 @inject INetbeheerderService NetbeheerderService
 @inject NavigationManager Navigation
+@inject AppStateService AppState
+@implements IDisposable
 
-<PageTitle>Registreren - Mijn Energie</PageTitle>
+<PageTitle>@(AppState.IsEnglish ? "Register" : "Registreren") - Mijn Energie</PageTitle>
 
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card register-card shadow-lg border-0">
                 <div class="card-header text-white text-center py-4">
-                    <h2 class="mb-0"><i class="bi bi-person-plus me-2"></i>Account Aanmaken</h2>
-                    <p class="mb-0 opacity-75">Registreer om je energieverbruik te monitoren</p>
+                    <h2 class="mb-0"><i class="bi bi-person-plus me-2"></i>@(AppState.IsEnglish ? "Create Account" : "Account Aanmaken")</h2>
+                    <p class="mb-0 opacity-75">@(AppState.IsEnglish ? "Register to monitor your energy usage" : "Registreer om je energieverbruik te monitoren")</p>
                 </div>
                 <div class="card-body p-4">
     
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <strong><i class="bi bi-exclamation-triangle me-2"></i>Fout:</strong> @errorMessage
+                            <strong><i class="bi bi-exclamation-triangle me-2"></i>@(AppState.IsEnglish ? "Error:" : "Fout:")</strong> @errorMessage
                             <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
                         </div>
                     }
@@ -30,9 +32,9 @@
                     @if (registrationSuccess)
                     {
                         <div class="alert alert-success text-center py-4">
-                            <h4><i class="bi bi-check-circle me-2"></i>Registratie Succesvol!</h4>
-                            <p>Je account is aangemaakt. Je kunt nu inloggen.</p>
-                            <a href="/inloggen" class="btn btn-success btn-lg mt-2">Naar Inloggen</a>
+                            <h4><i class="bi bi-check-circle me-2"></i>@(AppState.IsEnglish ? "Registration Successful!" : "Registratie Succesvol!")</h4>
+                            <p>@(AppState.IsEnglish ? "Your account has been created. You can now log in." : "Je account is aangemaakt. Je kunt nu inloggen.")</p>
+                            <a href="/inloggen" class="btn btn-success btn-lg mt-2">@(AppState.IsEnglish ? "Go to Login" : "Naar Inloggen")</a>
                         </div>
                     }
                     else
@@ -58,43 +60,36 @@
                             @if (currentStep == 1)
                             {
                                 <div class="step-content">
-                                    <h4 class="mb-4"><i class="bi bi-person me-2"></i>Persoonlijke Gegevens</h4>
+                                    <h4 class="mb-4"><i class="bi bi-person me-2"></i>@(AppState.IsEnglish ? "Personal Details" : "Persoonlijke Gegevens")</h4>
                                     
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">Voornaam *</label>
-                                            <input type="text" class="form-control @(GetFieldClass(nameof(model.FirstName)))" 
-                                                   @bind="model.FirstName" placeholder="Jan" />
+                                            <label class="form-label">@(AppState.IsEnglish ? "First Name" : "Voornaam") *</label>
+                                            <input type="text" class="form-control" @bind="model.FirstName" placeholder="Jan" />
                                             <ValidationMessage For="@(() => model.FirstName)" />
-                                            <small class="text-muted">Alleen letters (A-Z), geen cijfers of symbolen</small>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label">Achternaam *</label>
-                                            <input type="text" class="form-control @(GetFieldClass(nameof(model.LastName)))" 
-                                                   @bind="model.LastName" placeholder="de Vries" />
+                                            <label class="form-label">@(AppState.IsEnglish ? "Last Name" : "Achternaam") *</label>
+                                            <input type="text" class="form-control" @bind="model.LastName" placeholder="de Vries" />
                                             <ValidationMessage For="@(() => model.LastName)" />
-                                            <small class="text-muted">Alleen letters (A-Z), geen cijfers of symbolen</small>
                                         </div>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label">Geboortedatum *</label>
-                                        <input type="date" class="form-control @(GetFieldClass(nameof(model.DateOfBirth)))" 
-                                               @bind="model.DateOfBirth" max="@maxBirthDate" />
+                                        <label class="form-label">@(AppState.IsEnglish ? "Date of Birth" : "Geboortedatum") *</label>
+                                        <input type="date" class="form-control" @bind="model.DateOfBirth" max="@maxBirthDate" />
                                         <ValidationMessage For="@(() => model.DateOfBirth)" />
                                         @if (model.DateOfBirth.HasValue && !model.IsAtLeast18YearsOld())
                                         {
                                             <div class="text-danger mt-1">
-                                                <small><i class="bi bi-exclamation-circle me-1"></i>Je moet minimaal 18 jaar oud zijn</small>
+                                                <small><i class="bi bi-exclamation-circle me-1"></i>@(AppState.IsEnglish ? "You must be at least 18 years old" : "Je moet minimaal 18 jaar oud zijn")</small>
                                             </div>
                                         }
-                                        <small class="text-muted">Format: dd/mm/jjjj - Je moet minimaal 18 jaar oud zijn</small>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label">E-mailadres *</label>
-                                        <input type="email" class="form-control @(GetFieldClass(nameof(model.Email)))" 
-                                               @bind="model.Email" placeholder="jan.devries@email.nl" />
+                                        <label class="form-label">@(AppState.IsEnglish ? "Email Address" : "E-mailadres") *</label>
+                                        <input type="email" class="form-control" @bind="model.Email" placeholder="jan.devries@email.nl" />
                                         <ValidationMessage For="@(() => model.Email)" />
                                     </div>
                                 </div>
@@ -104,33 +99,22 @@
                             @if (currentStep == 2)
                             {
                                 <div class="step-content">
-                                    <h4 class="mb-4"><i class="bi bi-house me-2"></i>Adresgegevens</h4>
-                                    <p class="text-muted mb-4">Voer je postcode en huisnummer in, wij zoeken je adres automatisch op.</p>
+                                    <h4 class="mb-4"><i class="bi bi-house me-2"></i>@(AppState.IsEnglish ? "Address Details" : "Adresgegevens")</h4>
                                     
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Postcode *</label>
-                                            <input type="text" class="form-control @(GetFieldClass(nameof(model.PostalCode)))" 
-                                                   @bind="model.PostalCode" 
-                                                   @bind:after="LookupAddress"
-                                                   placeholder="5611 AA" 
-                                                   maxlength="7" />
+                                            <label class="form-label">@(AppState.IsEnglish ? "Postal Code" : "Postcode") *</label>
+                                            <input type="text" class="form-control" @bind="model.PostalCode" @bind:after="LookupAddress" placeholder="5611 AA" maxlength="7" />
                                             <ValidationMessage For="@(() => model.PostalCode)" />
-                                            <small class="text-muted">Bijv. 5611 AA</small>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Huisnummer *</label>
-                                            <input type="text" class="form-control @(GetFieldClass(nameof(model.HouseNumber)))" 
-                                                   @bind="model.HouseNumber" 
-                                                   @bind:after="LookupAddress"
-                                                   placeholder="123" />
+                                            <label class="form-label">@(AppState.IsEnglish ? "House Number" : "Huisnummer") *</label>
+                                            <input type="text" class="form-control" @bind="model.HouseNumber" @bind:after="LookupAddress" placeholder="123" />
                                             <ValidationMessage For="@(() => model.HouseNumber)" />
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label">Toevoeging</label>
-                                            <input type="text" class="form-control" 
-                                                   @bind="model.HouseNumberAddition" 
-                                                   placeholder="A, bis, etc." />
+                                            <label class="form-label">@(AppState.IsEnglish ? "Addition" : "Toevoeging")</label>
+                                            <input type="text" class="form-control" @bind="model.HouseNumberAddition" placeholder="A, bis, etc." />
                                         </div>
                                     </div>
 
@@ -138,23 +122,16 @@
                                     {
                                         <div class="text-center py-3">
                                             <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                            <span class="ms-2">Adres opzoeken...</span>
+                                            <span class="ms-2">@(AppState.IsEnglish ? "Looking up address..." : "Adres opzoeken...")</span>
                                         </div>
                                     }
 
                                     @if (!string.IsNullOrEmpty(model.Street))
                                     {
                                         <div class="alert alert-success">
-                                            <strong><i class="bi bi-check-circle me-2"></i>Adres gevonden:</strong><br />
+                                            <strong><i class="bi bi-check-circle me-2"></i>@(AppState.IsEnglish ? "Address found:" : "Adres gevonden:")</strong><br />
                                             @model.Street @model.HouseNumber@(model.HouseNumberAddition)<br />
                                             @model.PostalCode.ToUpper() @model.City
-                                        </div>
-                                    }
-                                    else if (addressLookupFailed)
-                                    {
-                                        <div class="alert alert-warning">
-                                            <strong><i class="bi bi-exclamation-triangle me-2"></i>Adres niet gevonden</strong><br />
-                                            Controleer je postcode en huisnummer.
                                         </div>
                                     }
                                 </div>
@@ -164,58 +141,26 @@
                             @if (currentStep == 3)
                             {
                                 <div class="step-content">
-                                    <h4 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>Slimme Meter</h4>
-                                    <p class="mb-4">Heb je een slimme meter? Dit is nodig om je energieverbruik automatisch te kunnen monitoren.</p>
+                                    <h4 class="mb-4"><i class="bi bi-speedometer2 me-2"></i>@(AppState.IsEnglish ? "Smart Meter" : "Slimme Meter")</h4>
                                     
                                     <div class="row justify-content-center mb-4">
                                         <div class="col-md-5">
-                                            <div class="card smart-meter-option @(model.HasSmartMeter == true ? "selected" : "")" 
-                                                 @onclick="() => SelectSmartMeter(true)">
+                                            <div class="card smart-meter-option @(model.HasSmartMeter == true ? "selected" : "")" @onclick="() => SelectSmartMeter(true)">
                                                 <div class="card-body text-center py-4">
                                                     <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
-                                                    <h5 class="mt-3">Ja, ik heb een slimme meter</h5>
-                                                    <p class="text-muted small mb-0">Je kunt direct beginnen met monitoren</p>
+                                                    <h5 class="mt-3">@(AppState.IsEnglish ? "Yes, I have a smart meter" : "Ja, ik heb een slimme meter")</h5>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-5">
-                                            <div class="card smart-meter-option @(model.HasSmartMeter == false ? "selected" : "")" 
-                                                 @onclick="() => SelectSmartMeter(false)">
+                                            <div class="card smart-meter-option @(model.HasSmartMeter == false ? "selected" : "")" @onclick="() => SelectSmartMeter(false)">
                                                 <div class="card-body text-center py-4">
                                                     <i class="bi bi-x-circle-fill text-secondary" style="font-size: 3rem;"></i>
-                                                    <h5 class="mt-3">Nee, ik heb geen slimme meter</h5>
-                                                    <p class="text-muted small mb-0">Je kunt er één aanvragen</p>
+                                                    <h5 class="mt-3">@(AppState.IsEnglish ? "No, I don't have a smart meter" : "Nee, ik heb geen slimme meter")</h5>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    @if (model.HasSmartMeter == false && netbeheerder != null)
-                                    {
-                                        <div class="alert alert-info">
-                                            <h5><i class="bi bi-info-circle me-2"></i>Vraag een slimme meter aan bij je netbeheerder</h5>
-                                            <div class="row align-items-center mt-3">
-                                                <div class="col-md-2 text-center">
-                                                    <div class="netbeheerder-logo">
-                                                        <strong>@netbeheerder.Name</strong>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <p class="mb-1"><strong>@netbeheerder.Name</strong></p>
-                                                    <p class="mb-1"><i class="bi bi-telephone me-1"></i>@netbeheerder.PhoneNumber</p>
-                                                    <p class="mb-0"><i class="bi bi-globe me-1"></i><a href="@netbeheerder.Website" target="_blank">@netbeheerder.Website</a></p>
-                                                </div>
-                                                <div class="col-md-4 text-end">
-                                                    <a href="@netbeheerder.SmartMeterRequestUrl" target="_blank" class="btn btn-primary">
-                                                        Slimme meter aanvragen <i class="bi bi-arrow-right"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                            <p class="mt-3 mb-0 text-muted small">
-                                                Je kunt je account wel aanmaken. Zodra je een slimme meter hebt, kun je deze koppelen.
-                                            </p>
-                                        </div>
-                                    }
                                 </div>
                             }
 
@@ -223,71 +168,37 @@
                             @if (currentStep == 4)
                             {
                                 <div class="step-content">
-                                    <h4 class="mb-4"><i class="bi bi-shield-lock me-2"></i>Wachtwoord</h4>
-                                    <p class="mb-4">Kies een sterk wachtwoord om je account te beveiligen.</p>
+                                    <h4 class="mb-4"><i class="bi bi-shield-lock me-2"></i>@(AppState.IsEnglish ? "Password" : "Wachtwoord")</h4>
                                     
                                     <div class="mb-3">
-                                        <label class="form-label">Wachtwoord *</label>
+                                        <label class="form-label">@(AppState.IsEnglish ? "Password" : "Wachtwoord") *</label>
                                         <div class="input-group">
-                                            <input type="@(showPassword ? "text" : "password")" 
-                                                   class="form-control @(GetFieldClass(nameof(model.Password)))" 
-                                                   @bind="model.Password" 
-                                                   @bind:after="CheckPasswordStrength"
-                                                   placeholder="Minimaal 8 karakters" />
+                                            <input type="@(showPassword ? "text" : "password")" class="form-control" @bind="model.Password" @bind:after="CheckPasswordStrength" placeholder="@(AppState.IsEnglish ? "Minimum 8 characters" : "Minimaal 8 karakters")" />
                                             <button class="btn btn-outline-secondary" type="button" @onclick="TogglePassword">
                                                 <i class="bi @(showPassword ? "bi-eye-slash" : "bi-eye")"></i>
                                             </button>
                                         </div>
                                         <ValidationMessage For="@(() => model.Password)" />
                                         
-                                        <!-- Password Strength Indicator -->
                                         <div class="password-strength mt-2">
                                             <div class="progress" style="height: 8px;">
-                                                <div class="progress-bar @GetPasswordStrengthClass()" 
-                                                     style="width: @GetPasswordStrengthWidth()%"></div>
+                                                <div class="progress-bar @GetPasswordStrengthClass()" style="width: @GetPasswordStrengthWidth()%"></div>
                                             </div>
-                                            <small class="@GetPasswordStrengthTextClass()">
-                                                @GetPasswordStrengthText()
-                                            </small>
-                                        </div>
-                                        
-                                        <!-- Password Requirements -->
-                                        <div class="password-requirements mt-2">
-                                            <small class="d-block @(HasLowercase ? "text-success" : "text-muted")">
-                                                <i class="bi @(HasLowercase ? "bi-check" : "bi-circle")"></i> Minimaal één kleine letter (a-z)
-                                            </small>
-                                            <small class="d-block @(HasUppercase ? "text-success" : "text-muted")">
-                                                <i class="bi @(HasUppercase ? "bi-check" : "bi-circle")"></i> Minimaal één hoofdletter (A-Z)
-                                            </small>
-                                            <small class="d-block @(HasNumber ? "text-success" : "text-muted")">
-                                                <i class="bi @(HasNumber ? "bi-check" : "bi-circle")"></i> Minimaal één cijfer (0-9)
-                                            </small>
-                                            <small class="d-block @(HasSpecial ? "text-success" : "text-muted")">
-                                                <i class="bi @(HasSpecial ? "bi-check" : "bi-circle")"></i> Minimaal één speciaal teken (!@@#$%^&*)
-                                            </small>
-                                            <small class="d-block @(HasMinLength ? "text-success" : "text-muted")">
-                                                <i class="bi @(HasMinLength ? "bi-check" : "bi-circle")"></i> Minimaal 8 karakters
-                                            </small>
+                                            <small class="@GetPasswordStrengthTextClass()">@GetPasswordStrengthText()</small>
                                         </div>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label">Bevestig Wachtwoord *</label>
-                                        <input type="password" class="form-control @(GetFieldClass(nameof(model.ConfirmPassword)))" 
-                                               @bind="model.ConfirmPassword" 
-                                               placeholder="Herhaal je wachtwoord" />
+                                        <label class="form-label">@(AppState.IsEnglish ? "Confirm Password" : "Bevestig Wachtwoord") *</label>
+                                        <input type="password" class="form-control" @bind="model.ConfirmPassword" placeholder="@(AppState.IsEnglish ? "Repeat your password" : "Herhaal je wachtwoord")" />
                                         <ValidationMessage For="@(() => model.ConfirmPassword)" />
-                                        @if (!string.IsNullOrEmpty(model.ConfirmPassword) && model.Password != model.ConfirmPassword)
-                                        {
-                                            <small class="text-danger"><i class="bi bi-exclamation-circle me-1"></i>Wachtwoorden komen niet overeen</small>
-                                        }
                                     </div>
 
                                     <div class="mb-3 form-check">
                                         <input type="checkbox" class="form-check-input" id="acceptTerms" @bind="model.AcceptTerms" />
                                         <label class="form-check-label" for="acceptTerms">
-                                            Ik ga akkoord met de <a href="/voorwaarden" target="_blank">algemene voorwaarden</a> 
-                                            en het <a href="/privacy" target="_blank">privacybeleid</a> *
+                                            @(AppState.IsEnglish ? "I agree to the" : "Ik ga akkoord met de") <a href="/voorwaarden" target="_blank">@(AppState.IsEnglish ? "terms and conditions" : "algemene voorwaarden")</a> 
+                                            @(AppState.IsEnglish ? "and" : "en het") <a href="/privacy" target="_blank">@(AppState.IsEnglish ? "privacy policy" : "privacybeleid")</a> *
                                         </label>
                                     </div>
                                 </div>
@@ -295,27 +206,24 @@
 
                             <!-- Navigation Buttons -->
                             <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                                <button type="button" class="btn btn-outline-secondary" 
-                                        @onclick="PreviousStep" disabled="@(currentStep == 1)">
-                                    <i class="bi bi-arrow-left me-1"></i> Vorige
+                                <button type="button" class="btn btn-outline-secondary" @onclick="PreviousStep" disabled="@(currentStep == 1)">
+                                    <i class="bi bi-arrow-left me-1"></i> @(AppState.IsEnglish ? "Previous" : "Vorige")
                                 </button>
                                 
                                 @if (currentStep < 4)
                                 {
-                                    <button type="button" class="btn btn-primary" 
-                                            @onclick="NextStep" disabled="@(!CanProceedToNextStep())">
-                                        Volgende <i class="bi bi-arrow-right ms-1"></i>
+                                    <button type="button" class="btn btn-primary" @onclick="NextStep" disabled="@(!CanProceedToNextStep())">
+                                        @(AppState.IsEnglish ? "Next" : "Volgende") <i class="bi bi-arrow-right ms-1"></i>
                                     </button>
                                 }
                                 else
                                 {
-                                    <button type="submit" class="btn btn-success btn-lg" 
-                                            disabled="@(!CanSubmit() || isSubmitting)">
+                                    <button type="submit" class="btn btn-success btn-lg" disabled="@(!CanSubmit() || isSubmitting)">
                                         @if (isSubmitting)
                                         {
                                             <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                                         }
-                                        Account Aanmaken
+                                        @(AppState.IsEnglish ? "Create Account" : "Account Aanmaken")
                                     </button>
                                 }
                             </div>
@@ -323,7 +231,7 @@
                     }
                 </div>
                 <div class="card-footer text-center py-3">
-                    Al een account? <a href="/inloggen" class="fw-bold">Inloggen</a>
+                    @(AppState.IsEnglish ? "Already have an account?" : "Al een account?") <a href="/inloggen" class="fw-bold">@(AppState.IsEnglish ? "Login" : "Inloggen")</a>
                 </div>
             </div>
         </div>
@@ -331,178 +239,41 @@
 </div>
 
 <style>
-    .register-card {
-        background-color: #ffffff;
-    }
+    .register-card { background-color: #ffffff; }
+    .register-card .card-header { background: linear-gradient(135deg, #154273, #01689b); border-bottom: none; }
+    .register-card .card-body { background-color: #ffffff; }
+    .register-card .card-footer { background-color: #f8f9fa; }
+    .step-indicator { padding: 0 20px; }
+    .step { flex: 1; text-align: center; position: relative; }
+    .step:not(:last-child)::after { content: ''; position: absolute; top: 15px; left: 50%; width: 100%; height: 2px; background: #dee2e6; z-index: 0; }
+    .step.completed:not(:last-child)::after { background: #198754; }
+    .step-circle { width: 35px; height: 35px; border-radius: 50%; background: #dee2e6; color: #6c757d; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; position: relative; z-index: 1; }
+    .step.active .step-circle { background: #0d6efd; color: white; }
+    .step.completed .step-circle { background: #198754; color: white; }
+    .step-label { font-size: 0.8rem; color: #6c757d; margin-top: 5px; }
+    .step.active .step-label { color: #0d6efd; font-weight: 500; }
+    .smart-meter-option { cursor: pointer; transition: all 0.2s; border: 2px solid #dee2e6; }
+    .smart-meter-option:hover { border-color: #0d6efd; transform: translateY(-2px); }
+    .smart-meter-option.selected { border-color: #0d6efd; background: #e7f1ff; }
     
-    .register-card .card-header {
-        background: linear-gradient(135deg, #154273, #01689b);
-        border-bottom: none;
-    }
-    
-    .register-card .card-body {
-        background-color: #ffffff;
-    }
-    
-    .register-card .card-footer {
-        background-color: #f8f9fa;
-    }
-    
-    .step-indicator {
-        padding: 0 20px;
-    }
-    .step {
-        flex: 1;
-        text-align: center;
-        position: relative;
-    }
-    .step:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        top: 15px;
-        left: 50%;
-        width: 100%;
-        height: 2px;
-        background: #dee2e6;
-        z-index: 0;
-    }
-    .step.completed:not(:last-child)::after {
-        background: #198754;
-    }
-    .step-circle {
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        background: #dee2e6;
-        color: #6c757d;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        position: relative;
-        z-index: 1;
-    }
-    .step.active .step-circle {
-        background: #0d6efd;
-        color: white;
-    }
-    .step.completed .step-circle {
-        background: #198754;
-        color: white;
-    }
-    .step-label {
-        font-size: 0.8rem;
-        color: #6c757d;
-        margin-top: 5px;
-    }
-    .step.active .step-label {
-        color: #0d6efd;
-        font-weight: 500;
-    }
-    .smart-meter-option {
-        cursor: pointer;
-        transition: all 0.2s;
-        border: 2px solid #dee2e6;
-    }
-    .smart-meter-option:hover {
-        border-color: #0d6efd;
-        transform: translateY(-2px);
-    }
-    .smart-meter-option.selected {
-        border-color: #0d6efd;
-        background: #e7f1ff;
-    }
-    .netbeheerder-logo {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-    }
-    .password-strength .progress {
-        background: #e9ecef;
-    }
-    
-    /* Dark mode support */
-    [data-theme="dark"] .register-card {
-        background-color: #1e1e1e;
-        border-color: #333;
-    }
-    
-    [data-theme="dark"] .register-card .card-header {
-        background: linear-gradient(135deg, #154273, #01689b);
-    }
-    
-    [data-theme="dark"] .register-card .card-body {
-        background-color: #1e1e1e;
-        color: #ffffff;
-    }
-    
-    [data-theme="dark"] .register-card .card-footer {
-        background-color: #2a2a2a;
-        border-top-color: #333;
-        color: #ccc;
-    }
-    
-    [data-theme="dark"] .register-card .form-control {
-        background-color: #2a2a2a;
-        border-color: #444;
-        color: #ffffff;
-    }
-    
-    [data-theme="dark"] .register-card .form-control:focus {
-        background-color: #2a2a2a;
-        border-color: #01689b;
-        color: #ffffff;
-        box-shadow: 0 0 0 0.25rem rgba(1, 104, 155, 0.25);
-    }
-    
-    [data-theme="dark"] .register-card .form-control::placeholder {
-        color: #888;
-    }
-    
-    [data-theme="dark"] .register-card .btn-outline-secondary {
-        color: #aaa;
-        border-color: #444;
-    }
-    
-    [data-theme="dark"] .register-card .btn-outline-secondary:hover {
-        background-color: #333;
-        color: #fff;
-    }
-    
-    [data-theme="dark"] .register-card .text-muted {
-        color: #aaa !important;
-    }
-    
-    [data-theme="dark"] .register-card .border-top {
-        border-top-color: #444 !important;
-    }
-    
-    [data-theme="dark"] .smart-meter-option {
-        background-color: #2a2a2a;
-        border-color: #444;
-    }
-    
-    [data-theme="dark"] .smart-meter-option:hover {
-        border-color: #01689b;
-    }
-    
-    [data-theme="dark"] .smart-meter-option.selected {
-        border-color: #01689b;
-        background-color: rgba(1, 104, 155, 0.2);
-    }
-    
-    [data-theme="dark"] .netbeheerder-logo {
-        background-color: #333;
-    }
-    
-    [data-theme="dark"] .step-circle {
-        background: #444;
-        color: #aaa;
-    }
-    
-    [data-theme="dark"] .step:not(:last-child)::after {
-        background: #444;
-    }
+    /* Dark mode */
+    [data-theme="dark"] .register-card { background-color: #1e1e1e !important; border-color: #333 !important; }
+    [data-theme="dark"] .register-card .card-body { background-color: #1e1e1e !important; color: #ffffff !important; }
+    [data-theme="dark"] .register-card .card-footer { background-color: #2a2a2a !important; border-top-color: #333 !important; color: #ccc !important; }
+    [data-theme="dark"] .register-card .form-control { background-color: #2a2a2a !important; border-color: #444 !important; color: #ffffff !important; }
+    [data-theme="dark"] .register-card .form-control:focus { background-color: #2a2a2a !important; border-color: #01689b !important; }
+    [data-theme="dark"] .register-card .form-control::placeholder { color: #888 !important; }
+    [data-theme="dark"] .register-card .btn-outline-secondary { color: #aaa !important; border-color: #444 !important; }
+    [data-theme="dark"] .register-card .btn-outline-secondary:hover { background-color: #333 !important; color: #fff !important; }
+    [data-theme="dark"] .register-card .border-top { border-top-color: #444 !important; }
+    [data-theme="dark"] .smart-meter-option { background-color: #2a2a2a !important; border-color: #444 !important; }
+    [data-theme="dark"] .smart-meter-option:hover { border-color: #01689b !important; }
+    [data-theme="dark"] .smart-meter-option.selected { border-color: #01689b !important; background-color: rgba(1, 104, 155, 0.2) !important; }
+    [data-theme="dark"] .step-circle { background: #444 !important; color: #aaa !important; }
+    [data-theme="dark"] .step:not(:last-child)::after { background: #444 !important; }
+    [data-theme="dark"] .step-label { color: #aaa !important; }
+    [data-theme="dark"] .form-label { color: #fff !important; }
+    [data-theme="dark"] .form-check-label { color: #ccc !important; }
 </style>
 
 @code {
@@ -518,215 +289,107 @@
   
     private string maxBirthDate => DateTime.Today.AddYears(-18).ToString("yyyy-MM-dd");
     
-    // Password validation flags
     private bool HasLowercase => !string.IsNullOrEmpty(model.Password) && model.Password.Any(char.IsLower);
     private bool HasUppercase => !string.IsNullOrEmpty(model.Password) && model.Password.Any(char.IsUpper);
     private bool HasNumber => !string.IsNullOrEmpty(model.Password) && model.Password.Any(char.IsDigit);
     private bool HasSpecial => !string.IsNullOrEmpty(model.Password) && model.Password.Any(c => "!@#$%^&*()_+-=[]{}|;':\",./<>?".Contains(c));
     private bool HasMinLength => !string.IsNullOrEmpty(model.Password) && model.Password.Length >= 8;
 
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        // Check if already logged in
         if (await AuthService.IsAuthenticatedAsync())
         {
             Navigation.NavigateTo("/dashboard");
         }
     }
 
-    private string GetStepLabel(int step) => step switch
-    {
-        1 => "Gegevens",
-        2 => "Adres",
-        3 => "Meter",
-        4 => "Wachtwoord",
-        _ => ""
-    };
-
-    private string GetFieldClass(string fieldName)
-    {
-        return "";
-    }
+    private string GetStepLabel(int step) => AppState.IsEnglish 
+        ? step switch { 1 => "Details", 2 => "Address", 3 => "Meter", 4 => "Password", _ => "" }
+        : step switch { 1 => "Gegevens", 2 => "Adres", 3 => "Meter", 4 => "Wachtwoord", _ => "" };
 
     private async Task LookupAddress()
     {
-        if (string.IsNullOrWhiteSpace(model.PostalCode) || model.PostalCode.Length < 6 ||
-            string.IsNullOrWhiteSpace(model.HouseNumber))
-            return;
-
+        if (string.IsNullOrWhiteSpace(model.PostalCode) || model.PostalCode.Length < 6 || string.IsNullOrWhiteSpace(model.HouseNumber)) return;
         isLookingUpAddress = true;
         addressLookupFailed = false;
         StateHasChanged();
-
         try
         {
-            var address = await PostalCodeService.LookupAddressAsync(
-                model.PostalCode, 
-                model.HouseNumber, 
-                model.HouseNumberAddition);
-
+            var address = await PostalCodeService.LookupAddressAsync(model.PostalCode, model.HouseNumber, model.HouseNumberAddition);
             if (address != null)
             {
                 model.Street = address.Street;
                 model.City = address.City;
                 model.PostalCode = address.PostalCode;
-                
                 netbeheerder = await NetbeheerderService.GetNetbeheerderByPostalCodeAsync(model.PostalCode);
             }
-            else
-            {
-                addressLookupFailed = true;
-                model.Street = string.Empty;
-                model.City = string.Empty;
-            }
+            else { addressLookupFailed = true; model.Street = string.Empty; model.City = string.Empty; }
         }
-        catch
-        {
-            addressLookupFailed = true;
-        }
-        finally
-        {
-            isLookingUpAddress = false;
-        }
+        catch { addressLookupFailed = true; }
+        finally { isLookingUpAddress = false; }
     }
 
-    private void SelectSmartMeter(bool hasSmartMeter)
-    {
-        model.HasSmartMeter = hasSmartMeter;
-    }
+    private void SelectSmartMeter(bool hasSmartMeter) { model.HasSmartMeter = hasSmartMeter; }
+    private void CheckPasswordStrength() { StateHasChanged(); }
+    private void TogglePassword() { showPassword = !showPassword; }
 
-    private void CheckPasswordStrength()
+    private string GetPasswordStrengthClass() => model.GetPasswordStrength() switch
     {
-        StateHasChanged();
-    }
+        PasswordStrength.Weak => "bg-danger", PasswordStrength.Fair => "bg-warning",
+        PasswordStrength.Good => "bg-info", PasswordStrength.Strong => "bg-success", _ => "bg-secondary"
+    };
 
-    private void TogglePassword()
+    private int GetPasswordStrengthWidth() => model.GetPasswordStrength() switch
     {
-        showPassword = !showPassword;
-    }
+        PasswordStrength.Weak => 25, PasswordStrength.Fair => 50, PasswordStrength.Good => 75, PasswordStrength.Strong => 100, _ => 0
+    };
 
-    private string GetPasswordStrengthClass()
-    {
-        var strength = model.GetPasswordStrength();
-        return strength switch
-        {
-            PasswordStrength.Weak => "bg-danger",
-            PasswordStrength.Fair => "bg-warning",
-            PasswordStrength.Good => "bg-info",
-            PasswordStrength.Strong => "bg-success",
-            _ => "bg-secondary"
-        };
-    }
+    private string GetPasswordStrengthText() => AppState.IsEnglish
+        ? model.GetPasswordStrength() switch { PasswordStrength.Weak => "Weak", PasswordStrength.Fair => "Fair", PasswordStrength.Good => "Good", PasswordStrength.Strong => "Strong!", _ => "" }
+        : model.GetPasswordStrength() switch { PasswordStrength.Weak => "Zwak", PasswordStrength.Fair => "Matig", PasswordStrength.Good => "Goed", PasswordStrength.Strong => "Sterk!", _ => "" };
 
-    private int GetPasswordStrengthWidth()
+    private string GetPasswordStrengthTextClass() => model.GetPasswordStrength() switch
     {
-        var strength = model.GetPasswordStrength();
-        return strength switch
-        {
-            PasswordStrength.Weak => 25,
-            PasswordStrength.Fair => 50,
-            PasswordStrength.Good => 75,
-            PasswordStrength.Strong => 100,
-            _ => 0
-        };
-    }
+        PasswordStrength.Weak => "text-danger", PasswordStrength.Fair => "text-warning",
+        PasswordStrength.Good => "text-info", PasswordStrength.Strong => "text-success", _ => "text-muted"
+    };
 
-    private string GetPasswordStrengthText()
+    private bool CanProceedToNextStep() => currentStep switch
     {
-        var strength = model.GetPasswordStrength();
-        return strength switch
-        {
-            PasswordStrength.Weak => "Zwak wachtwoord",
-            PasswordStrength.Fair => "Matig wachtwoord",
-            PasswordStrength.Good => "Goed wachtwoord",
-            PasswordStrength.Strong => "Sterk wachtwoord!",
-            _ => ""
-        };
-    }
-
-    private string GetPasswordStrengthTextClass()
-    {
-        var strength = model.GetPasswordStrength();
-        return strength switch
-        {
-            PasswordStrength.Weak => "text-danger",
-            PasswordStrength.Fair => "text-warning",
-            PasswordStrength.Good => "text-info",
-            PasswordStrength.Strong => "text-success",
-            _ => "text-muted"
-        };
-    }
-
-    private bool CanProceedToNextStep()
-    {
-        return currentStep switch
-        {
-            1 => !string.IsNullOrWhiteSpace(model.FirstName) &&
-                 !string.IsNullOrWhiteSpace(model.LastName) &&
-                 model.DateOfBirth.HasValue &&
-                 model.IsAtLeast18YearsOld() &&
-                 !string.IsNullOrWhiteSpace(model.Email),
-            2 => !string.IsNullOrWhiteSpace(model.PostalCode) &&
-                 !string.IsNullOrWhiteSpace(model.HouseNumber) &&
-                 !string.IsNullOrWhiteSpace(model.Street),
-            3 => model.HasSmartMeter.HasValue,
-            _ => true
-        };
-    }
+        1 => !string.IsNullOrWhiteSpace(model.FirstName) && !string.IsNullOrWhiteSpace(model.LastName) && model.DateOfBirth.HasValue && model.IsAtLeast18YearsOld() && !string.IsNullOrWhiteSpace(model.Email),
+        2 => !string.IsNullOrWhiteSpace(model.PostalCode) && !string.IsNullOrWhiteSpace(model.HouseNumber) && !string.IsNullOrWhiteSpace(model.Street),
+        3 => model.HasSmartMeter.HasValue,
+        _ => true
+    };
 
     private bool CanSubmit()
     {
         var (passwordValid, _) = model.ValidatePassword();
-        return CanProceedToNextStep() &&
-               passwordValid &&
-               model.Password == model.ConfirmPassword &&
-               model.AcceptTerms;
+        return CanProceedToNextStep() && passwordValid && model.Password == model.ConfirmPassword && model.AcceptTerms;
     }
 
-    private void NextStep()
-    {
-        if (CanProceedToNextStep() && currentStep < 4)
-        {
-            currentStep++;
-        }
-    }
-
-    private void PreviousStep()
-    {
-        if (currentStep > 1)
-        {
-            currentStep--;
-        }
-    }
+    private void NextStep() { if (CanProceedToNextStep() && currentStep < 4) currentStep++; }
+    private void PreviousStep() { if (currentStep > 1) currentStep--; }
 
     private async Task HandleRegistration()
     {
-        if (!CanSubmit())
-            return;
-
+        if (!CanSubmit()) return;
         isSubmitting = true;
         errorMessage = string.Empty;
-
         try
         {
             var (success, message, user) = await AuthService.RegisterAsync(model);
-
-            if (success)
-            {
-                Navigation.NavigateTo("/dashboard", forceLoad: true);
-            }
-            else
-            {
-                errorMessage = message;
-            }
+            if (success) { Navigation.NavigateTo("/dashboard", forceLoad: true); }
+            else { errorMessage = message; }
         }
-        catch
-        {
-            errorMessage = "Er is een onverwachte fout opgetreden. Probeer het later opnieuw.";
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
+        catch { errorMessage = AppState.IsEnglish ? "An unexpected error occurred. Please try again later." : "Er is een onverwachte fout opgetreden. Probeer het later opnieuw."; }
+        finally { isSubmitting = false; }
     }
+
+    public void Dispose() { AppState.OnChange -= StateHasChanged; }
 }

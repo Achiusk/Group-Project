@@ -1,13 +1,17 @@
 ﻿@using urban_city_power_managment.Web.Services
 @using urban_city_power_managment.Web.Models
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject AppStateService AppState
+@implements IDisposable
 
 <div class="sidebar">
     <div class="sidebar-header">
         <a href="/" class="brand">
             <span class="brand-icon">⚡</span>
-            <span class="brand-text">Mijn Energie</span>
+            <span class="brand-text">@(AppState.IsEnglish ? "My Energy" : "Mijn Energie")</span>
         </a>
     </div>
 
@@ -24,25 +28,25 @@
                 <li class="nav-item">
                     <NavLink class="nav-link" href="mijn-energie">
                         <span class="nav-icon">📊</span>
-                        <span class="nav-text">Mijn Energie</span>
+                        <span class="nav-text">@(AppState.IsEnglish ? "My Energy" : "Mijn Energie")</span>
                     </NavLink>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="tips">
                         <span class="nav-icon">💡</span>
-                        <span class="nav-text">Bespaartips</span>
+                        <span class="nav-text">@(AppState.IsEnglish ? "Saving Tips" : "Bespaartips")</span>
                     </NavLink>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="leveranciers">
                         <span class="nav-icon">🏢</span>
-                        <span class="nav-text">Leveranciers</span>
+                        <span class="nav-text">@(AppState.IsEnglish ? "Suppliers" : "Leveranciers")</span>
                     </NavLink>
                 </li>
                 <li class="nav-item">
                     <NavLink class="nav-link" href="weer">
                         <span class="nav-icon">🌤️</span>
-                        <span class="nav-text">Weer</span>
+                        <span class="nav-text">@(AppState.IsEnglish ? "Weather" : "Weer")</span>
                     </NavLink>
                 </li>
             }
@@ -65,7 +69,7 @@
                 <li class="nav-item">
                     <NavLink class="nav-link" href="instellingen">
                         <span class="nav-icon">⚙️</span>
-                        <span class="nav-text">Instellingen</span>
+                        <span class="nav-text">@(AppState.IsEnglish ? "Settings" : "Instellingen")</span>
                     </NavLink>
                 </li>
             </ul>
@@ -84,18 +88,18 @@
                     <small class="user-email">@currentUser.Email</small>
                 </div>
             </div>
-            <button class="btn btn-outline-light btn-sm w-100" @onclick="HandleLogout">
-                🚪 Uitloggen
+            <button class="btn btn-logout btn-sm w-100" @onclick="HandleLogout">
+                🚪 @(AppState.IsEnglish ? "Logout" : "Uitloggen")
             </button>
         }
         else
         {
             <div class="auth-buttons">
-                <a href="/inloggen" class="btn btn-outline-light btn-sm w-100 mb-2">
-                    🔐 Inloggen
+                <a href="/inloggen" class="btn btn-login btn-sm w-100 mb-2">
+                    🔐 @(AppState.IsEnglish ? "Login" : "Inloggen")
                 </a>
-                <a href="/registreren" class="btn btn-warning btn-sm w-100">
-                    📝 Registreren
+                <a href="/registreren" class="btn btn-register btn-sm w-100">
+                    📝 @(AppState.IsEnglish ? "Register" : "Registreren")
                 </a>
             </div>
         }
@@ -238,6 +242,112 @@
         font-size: 0.85rem;
     }
 
+    .btn-logout {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.5);
+        color: white;
+    }
+
+    .btn-logout:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    .btn-login {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.5);
+        color: white;
+    }
+
+    .btn-login:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    .btn-register {
+        background-color: #ffb612;
+        border-color: #ffb612;
+        color: #000;
+    }
+
+    .btn-register:hover {
+        background-color: #e5a410;
+        border-color: #e5a410;
+        color: #000;
+    }
+
+    /* DARK MODE SIDEBAR */
+    :global([data-theme="dark"]) .sidebar {
+        background: linear-gradient(180deg, #0d1117 0%, #161b22 50%, #0d1117 100%) !important;
+        border-right: 1px solid #30363d !important;
+    }
+
+    :global([data-theme="dark"]) .sidebar-header {
+        border-bottom-color: #30363d !important;
+    }
+
+    :global([data-theme="dark"]) .brand {
+        color: #4ade80 !important;
+    }
+
+    :global([data-theme="dark"]) .nav-link {
+        color: #6ee7b7 !important;
+    }
+
+    :global([data-theme="dark"]) .nav-link:hover {
+        background: rgba(34, 197, 94, 0.1) !important;
+        color: #4ade80 !important;
+    }
+
+    :global([data-theme="dark"]) .nav-link.active {
+        background: rgba(34, 197, 94, 0.2) !important;
+        color: #4ade80 !important;
+    }
+
+    :global([data-theme="dark"]) .nav-divider {
+        background: #30363d !important;
+    }
+
+    :global([data-theme="dark"]) .sidebar-footer {
+        border-top-color: #30363d !important;
+    }
+
+    :global([data-theme="dark"]) .user-avatar {
+        background: rgba(34, 197, 94, 0.2) !important;
+        color: #4ade80 !important;
+    }
+
+    :global([data-theme="dark"]) .user-name {
+        color: #4ade80 !important;
+    }
+
+    :global([data-theme="dark"]) .user-email {
+        color: #6ee7b7 !important;
+    }
+
+    :global([data-theme="dark"]) .btn-logout,
+    :global([data-theme="dark"]) .btn-login {
+        border-color: #4ade80 !important;
+        color: #4ade80 !important;
+    }
+
+    :global([data-theme="dark"]) .btn-logout:hover,
+    :global([data-theme="dark"]) .btn-login:hover {
+        background: rgba(34, 197, 94, 0.1) !important;
+        color: #4ade80 !important;
+    }
+
+    :global([data-theme="dark"]) .btn-register {
+        background-color: #22c55e !important;
+        border-color: #22c55e !important;
+        color: #0d1117 !important;
+    }
+
+    :global([data-theme="dark"]) .btn-register:hover {
+        background-color: #16a34a !important;
+        border-color: #16a34a !important;
+    }
+
     @@media (max-width: 768px) {
         .sidebar {
             width: 70px;
@@ -277,25 +387,41 @@
     private bool isAuthenticated = false;
     private UserAccount? currentUser;
 
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+        AuthStateProvider.AuthenticationStateChanged += OnAuthStateChanged;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await CheckAuthenticationAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private async void OnAuthStateChanged(Task<AuthenticationState> task)
     {
-        if (!firstRender)
+        var authState = await task;
+        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+        
+        if (isAuthenticated)
         {
-            // Refresh auth state on navigation
-            await CheckAuthenticationAsync();
+            currentUser = await AuthService.GetCurrentUserAsync();
         }
+        else
+        {
+            currentUser = null;
+        }
+        
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task CheckAuthenticationAsync()
     {
         try
         {
-            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+            
             if (isAuthenticated)
             {
                 currentUser = await AuthService.GetCurrentUserAsync();
@@ -315,6 +441,12 @@
         isAuthenticated = false;
         currentUser = null;
         Navigation.NavigateTo("/landing", forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+        AuthStateProvider.AuthenticationStateChanged -= OnAuthStateChanged;
     }
 }
 

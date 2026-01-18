@@ -1,242 +1,249 @@
 @page "/instellingen"
+@using urban_city_power_managment.Web.Services
+@using urban_city_power_managment.Web.Models
 @inject IJSRuntime JSRuntime
+@inject AppStateService AppState
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@implements IDisposable
 
-<PageTitle>@(isEnglish ? "Settings" : "Instellingen") - Mijn Energie</PageTitle>
+<PageTitle>@(AppState.IsEnglish ? "Settings" : "Instellingen") - Mijn Energie</PageTitle>
 
-<div class="container-fluid @(isDarkMode ? "dark-mode" : "")">
-  <div class="row mb-4">
+@if (!isAuthenticated)
+{
+    <div class="text-center py-5">
+        <p>@(AppState.IsEnglish ? "Loading..." : "Laden...")</p>
+    </div>
+}
+else
+{
+<div class="container-fluid">
+    <div class="row mb-4">
         <div class="col">
-       <h1><span class="icon">&#x2699;&#xFE0F;</span> @(isEnglish ? "Settings" : "Instellingen")</h1>
-  <p class="lead">@(isEnglish ? "Manage your account and preferences" : "Beheer je account en voorkeuren")</p>
+            <h1><span class="icon">&#x2699;&#xFE0F;</span> @(AppState.IsEnglish ? "Settings" : "Instellingen")</h1>
+            <p class="lead">@(AppState.IsEnglish ? "Manage your account and preferences" : "Beheer je account en voorkeuren")</p>
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-8">
             <!-- App Settings (Dark Mode & Language) -->
-  <div class="card mb-4">
-    <div class="card-header">
- <h5 class="mb-0"><span class="icon">&#x1F3A8;</span> @(isEnglish ? "App Settings" : "App Instellingen")</h5>
-            </div>
-        <div class="card-body">
-           <div class="row">
-   <div class="col-md-6">
-           <div class="setting-item d-flex justify-content-between align-items-center p-3 rounded mb-3">
- <div>
-      <strong><span class="icon">&#x1F319;</span> @(isEnglish ? "Dark Mode" : "Donkere Modus")</strong>
-           <p class="text-muted small mb-0">@(isEnglish ? "Easier on the eyes at night" : "Prettiger voor je ogen 's nachts")</p>
-           </div>
-  <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="darkModeToggle" 
-         checked="@isDarkMode" @onchange="ToggleDarkMode" />
-     </div>
- </div>
-              </div>
-          <div class="col-md-6">
-     <div class="setting-item d-flex justify-content-between align-items-center p-3 rounded mb-3">
-              <div>
-             <strong><span class="icon">&#x1F310;</span> @(isEnglish ? "Language" : "Taal")</strong>
-              <p class="text-muted small mb-0">@(isEnglish ? "Choose your language" : "Kies je taal")</p>
-          </div>
-           <div class="btn-group" role="group">
-         <button type="button" class="btn btn-sm @(!isEnglish ? "btn-primary" : "btn-outline-primary")" 
- @onclick="() => SetLanguage(false)">NL</button>
-   <button type="button" class="btn btn-sm @(isEnglish ? "btn-primary" : "btn-outline-primary")" 
-     @onclick="() => SetLanguage(true)">EN</button>
-  </div>
-     </div>
-   </div>
-      </div>
-     </div>
-   </div>
-
-    <!-- Profile Settings -->
-  <div class="card mb-4">
-        <div class="card-header">
-        <h5 class="mb-0"><span class="icon">&#x1F464;</span> @(isEnglish ? "My Profile" : "Mijn Profiel")</h5>
-          </div>
-         <div class="card-body">
-           <div class="row mb-3">
-     <div class="col-md-6">
-   <label class="form-label">@(isEnglish ? "Name" : "Naam")</label>
-<input type="text" class="form-control" value="Jan de Vries" />
-      </div>
-<div class="col-md-6">
-       <label class="form-label">@(isEnglish ? "Email" : "E-mailadres")</label>
-      <input type="email" class="form-control" value="jan.devries@email.nl" />
-        </div>
-    </div>
-           <div class="row mb-3">
-             <div class="col-md-6">
-          <label class="form-label">@(isEnglish ? "Address" : "Adres")</label>
-       <input type="text" class="form-control" value="Strijpsestraat 1" />
-          </div>
-   <div class="col-md-3">
-       <label class="form-label">@(isEnglish ? "Postal Code" : "Postcode")</label>
-         <input type="text" class="form-control" value="5616 AA" />
-         </div>
-    <div class="col-md-3">
-              <label class="form-label">@(isEnglish ? "City" : "Plaats")</label>
-      <input type="text" class="form-control" value="Eindhoven" readonly />
-</div>
-   </div>
-        <button class="btn btn-primary">@(isEnglish ? "Save" : "Opslaan")</button>
-     </div>
-            </div>
-
-        <!-- Meter Settings -->
-  <div class="card mb-4">
-       <div class="card-header">
-            <h5 class="mb-0"><span class="icon">&#x1F4CA;</span> @(isEnglish ? "My Smart Meter" : "Mijn Slimme Meter")</h5>
-   </div>
-      <div class="card-body">
-                    <div class="row mb-3">
-   <div class="col-md-6">
-          <label class="form-label">Meter ID</label>
-        <input type="text" class="form-control" value="E0000001" readonly />
-       <small class="text-muted">@(isEnglish ? "Your unique meter identification" : "Dit is je unieke meter identificatie")</small>
- </div>
-               <div class="col-md-6">
-         <label class="form-label">@(isEnglish ? "Meter Type" : "Type meter")</label>
-    <input type="text" class="form-control" value="DSMR 5.0" readonly />
-     </div>
-      </div>
-      <div class="alert alert-info">
-     <strong><span class="icon">&#x1F50C;</span> @(isEnglish ? "P1 Port" : "P1 Poort")</strong><br />
-           @(isEnglish 
-    ? "Your smart meter has a P1 port that allows us to read your consumption. This data is stored securely and used only for you."
-          : "Je slimme meter heeft een P1 poort waarmee we je verbruik kunnen uitlezen. Deze data wordt veilig opgeslagen en alleen voor jou gebruikt.")
- </div>
-        </div>
-         </div>
-
-   <!-- Notification Settings -->
-       <div class="card mb-4">
-         <div class="card-header">
- <h5 class="mb-0"><span class="icon">&#x1F514;</span> @(isEnglish ? "Notifications" : "Meldingen")</h5>
-     </div>
+            <div class="card mb-4 settings-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="icon">&#x1F3A8;</span> @(AppState.IsEnglish ? "App Settings" : "App Instellingen")</h5>
+                </div>
                 <div class="card-body">
-      <div class="form-check form-switch mb-3">
-         <input class="form-check-input" type="checkbox" id="notifyHighUsage" checked>
-     <label class="form-check-label" for="notifyHighUsage">
- @(isEnglish ? "Warn on high consumption" : "Waarschuw bij hoog verbruik")
-       </label>
-    </div>
-                    <div class="form-check form-switch mb-3">
-     <input class="form-check-input" type="checkbox" id="notifyTips" checked>
-      <label class="form-check-label" for="notifyTips">
-             @(isEnglish ? "Send me energy saving tips" : "Stuur me energiebespaartips")
-         </label>
-    </div>
-       <div class="form-check form-switch mb-3">
-     <input class="form-check-input" type="checkbox" id="notifyOffers">
-        <label class="form-check-label" for="notifyOffers">
-    @(isEnglish ? "Receive offers from suppliers" : "Ontvang aanbiedingen van leveranciers")
-    </label>
-               </div>
-           <div class="form-check form-switch mb-3">
-     <input class="form-check-input" type="checkbox" id="weeklyReport" checked>
-     <label class="form-check-label" for="weeklyReport">
-  @(isEnglish ? "Weekly usage report by email" : "Wekelijks verbruiksoverzicht per e-mail")
-          </label>
-            </div>
-              </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="setting-item d-flex justify-content-between align-items-center p-3 rounded mb-3">
+                                <div>
+                                    <strong><span class="icon">&#x1F319;</span> @(AppState.IsEnglish ? "Dark Mode" : "Donkere Modus")</strong>
+                                    <p class="setting-description small mb-0">@(AppState.IsEnglish ? "Easier on the eyes at night" : "Prettiger voor je ogen 's nachts")</p>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="darkModeToggle" 
+                                           checked="@AppState.IsDarkMode" @onchange="ToggleDarkMode" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="setting-item d-flex justify-content-between align-items-center p-3 rounded mb-3">
+                                <div>
+                                    <strong><span class="icon">&#x1F310;</span> @(AppState.IsEnglish ? "Language" : "Taal")</strong>
+                                    <p class="setting-description small mb-0">@(AppState.IsEnglish ? "Choose your language" : "Kies je taal")</p>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm @(!AppState.IsEnglish ? "btn-primary" : "btn-outline-primary")" 
+                                            @onclick="() => SetLanguage(false)">NL</button>
+                                    <button type="button" class="btn btn-sm @(AppState.IsEnglish ? "btn-primary" : "btn-outline-primary")" 
+                                            @onclick="() => SetLanguage(true)">EN</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-   <!-- Privacy Settings -->
-     <div class="card mb-4">
-          <div class="card-header">
-          <h5 class="mb-0"><span class="icon">&#x1F512;</span> Privacy</h5>
-         </div>
-  <div class="card-body">
-             <div class="form-check form-switch mb-3">
-      <input class="form-check-input" type="checkbox" id="shareData" checked>
-     <label class="form-check-label" for="shareData">
-    @(isEnglish ? "Share anonymized data for neighborhood statistics" : "Deel geanonimiseerde data voor wijkstatistieken")
-          </label>
+            <!-- Profile Settings -->
+            <div class="card mb-4 settings-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="icon">&#x1F464;</span> @(AppState.IsEnglish ? "My Profile" : "Mijn Profiel")</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">@(AppState.IsEnglish ? "Name" : "Naam")</label>
+                            <input type="text" class="form-control" value="@(currentUser != null ? $"{currentUser.FirstName} {currentUser.LastName}" : "")" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">@(AppState.IsEnglish ? "Email" : "E-mailadres")</label>
+                            <input type="email" class="form-control" value="@(currentUser?.Email ?? "")" readonly />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">@(AppState.IsEnglish ? "Address" : "Adres")</label>
+                            <input type="text" class="form-control" value="@(currentUser?.Street ?? "") @(currentUser?.HouseNumber ?? "")" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">@(AppState.IsEnglish ? "Postal Code" : "Postcode")</label>
+                            <input type="text" class="form-control" value="@(currentUser?.PostalCode ?? "")" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">@(AppState.IsEnglish ? "City" : "Plaats")</label>
+                            <input type="text" class="form-control" value="@(currentUser?.City ?? "")" readonly />
+                        </div>
+                    </div>
+                </div>
             </div>
-         <div class="form-check form-switch mb-3">
-       <input class="form-check-input" type="checkbox" id="compareNeighbors" checked>
-      <label class="form-check-label" for="compareNeighbors">
-           @(isEnglish ? "Compare my usage with the neighborhood" : "Vergelijk mijn verbruik met de wijk")
-   </label>
-  </div>
-      <p class="text-muted small">
-      @(isEnglish 
-            ? "Your personal data is never shared with third parties."
-      : "Je persoonlijke gegevens worden nooit gedeeld met derden.")
-   <a href="#">@(isEnglish ? "Read our privacy policy" : "Lees ons privacybeleid")</a>
-              </p>
-          </div>
-  </div>
+
+            <!-- Meter Settings -->
+            <div class="card mb-4 settings-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="icon">&#x1F4CA;</span> @(AppState.IsEnglish ? "My Smart Meter" : "Mijn Slimme Meter")</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">@(AppState.IsEnglish ? "Smart Meter Status" : "Slimme Meter Status")</label>
+                            <input type="text" class="form-control" value="@(currentUser?.HasSmartMeter == true ? (AppState.IsEnglish ? "Connected" : "Gekoppeld") : (AppState.IsEnglish ? "Not connected" : "Niet gekoppeld"))" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">@(AppState.IsEnglish ? "Grid Operator" : "Netbeheerder")</label>
+                            <input type="text" class="form-control" value="@(currentUser?.NetbeheerderName ?? (AppState.IsEnglish ? "Unknown" : "Onbekend"))" readonly />
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong><span class="icon">&#x1F50C;</span> @(AppState.IsEnglish ? "P1 Port" : "P1 Poort")</strong><br />
+                        @(AppState.IsEnglish 
+                            ? "Your smart meter has a P1 port that allows us to read your consumption. This data is stored securely and used only for you."
+                            : "Je slimme meter heeft een P1 poort waarmee we je verbruik kunnen uitlezen. Deze data wordt veilig opgeslagen en alleen voor jou gebruikt.")
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="card mb-4 settings-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="icon">&#x1F514;</span> @(AppState.IsEnglish ? "Notifications" : "Meldingen")</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifyHighUsage" checked>
+                        <label class="form-check-label" for="notifyHighUsage">
+                            @(AppState.IsEnglish ? "Warn on high consumption" : "Waarschuw bij hoog verbruik")
+                        </label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifyTips" checked>
+                        <label class="form-check-label" for="notifyTips">
+                            @(AppState.IsEnglish ? "Send me energy saving tips" : "Stuur me energiebespaartips")
+                        </label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="weeklyReport" checked>
+                        <label class="form-check-label" for="weeklyReport">
+                            @(AppState.IsEnglish ? "Weekly usage report by email" : "Wekelijks verbruiksoverzicht per e-mail")
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="card mb-4 settings-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><span class="icon">&#x1F512;</span> Privacy</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="shareData" checked>
+                        <label class="form-check-label" for="shareData">
+                            @(AppState.IsEnglish ? "Share anonymized data for neighborhood statistics" : "Deel geanonimiseerde data voor wijkstatistieken")
+                        </label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="compareNeighbors" checked>
+                        <label class="form-check-label" for="compareNeighbors">
+                            @(AppState.IsEnglish ? "Compare my usage with the neighborhood" : "Vergelijk mijn verbruik met de wijk")
+                        </label>
+                    </div>
+                    <p class="privacy-note small">
+                        @(AppState.IsEnglish 
+                            ? "Your personal data is never shared with third parties."
+                            : "Je persoonlijke gegevens worden nooit gedeeld met derden.")
+                        <a href="/privacy">@(AppState.IsEnglish ? "Read our privacy policy" : "Lees ons privacybeleid")</a>
+                    </p>
+                </div>
+            </div>
         </div>
 
         <!-- Sidebar -->
-    <div class="col-md-4">
-   <!-- Quick Stats -->
-            <div class="card mb-4">
- <div class="card-header bg-primary text-white">
-      <h5 class="mb-0"><span class="icon">&#x1F4C8;</span> @(isEnglish ? "My Statistics" : "Mijn Statistieken")</h5>
-  </div>
-    <div class="card-body">
-        <div class="stat-item mb-3">
-       <small class="text-muted">@(isEnglish ? "Member since" : "Lid sinds")</small>
-      <p class="mb-0"><strong>@(isEnglish ? "January 2024" : "Januari 2024")</strong></p>
-          </div>
-          <div class="stat-item mb-3">
-     <small class="text-muted">@(isEnglish ? "Total savings" : "Totale besparing")</small>
-   <p class="mb-0 text-success"><strong>&#x20AC; 234,50</strong></p>
-      </div>
-    <div class="stat-item mb-3">
-  <small class="text-muted">@(isEnglish ? "Tips applied" : "Toegepaste tips")</small>
-   <p class="mb-0"><strong>8 @(isEnglish ? "of" : "van") 15</strong></p>
-   </div>
-   <div class="stat-item">
-      <small class="text-muted">@(isEnglish ? "Energy label" : "Energie label")</small>
-          <p class="mb-0"><span class="badge bg-success fs-5">B</span></p>
-     </div>
-        </div>
-          </div>
-
-       <!-- Solar Panel Status -->
-    <div class="card mb-4">
-    <div class="card-header bg-warning">
- <h5 class="mb-0"><span class="icon">&#x2600;&#xFE0F;</span> @(isEnglish ? "Solar Panels" : "Zonnepanelen")</h5>
-      </div>
-                <div class="card-body">
-              <div class="form-check form-switch mb-3">
-  <input class="form-check-input" type="checkbox" id="hasSolar" checked>
-          <label class="form-check-label" for="hasSolar">
-   @(isEnglish ? "I have solar panels" : "Ik heb zonnepanelen")
-        </label>
-</div>
-    <div class="mb-3">
-              <label class="form-label">@(isEnglish ? "Number of panels" : "Aantal panelen")</label>
-             <input type="number" class="form-control" value="12" />
-         </div>
-       <div class="mb-3">
-       <label class="form-label">@(isEnglish ? "Installation year" : "Installatie jaar")</label>
-   <input type="number" class="form-control" value="2022" />
+        <div class="col-md-4">
+            <!-- Quick Stats -->
+            <div class="card mb-4 stats-card">
+                <div class="card-header stats-header">
+                    <h5 class="mb-0"><span class="icon">&#x1F4C8;</span> @(AppState.IsEnglish ? "My Statistics" : "Mijn Statistieken")</h5>
                 </div>
-  </div>
-     </div>
+                <div class="card-body">
+                    <div class="stat-item mb-3">
+                        <small class="stat-label">@(AppState.IsEnglish ? "Member since" : "Lid sinds")</small>
+                        <p class="mb-0"><strong>@(currentUser?.CreatedAt.ToString("MMMM yyyy", AppState.IsEnglish ? new System.Globalization.CultureInfo("en-US") : new System.Globalization.CultureInfo("nl-NL")) ?? "-")</strong></p>
+                    </div>
+                    <div class="stat-item mb-3">
+                        <small class="stat-label">@(AppState.IsEnglish ? "Total savings" : "Totale besparing")</small>
+                        <p class="mb-0 text-success"><strong>&#x20AC; 234,50</strong></p>
+                    </div>
+                    <div class="stat-item mb-3">
+                        <small class="stat-label">@(AppState.IsEnglish ? "Tips applied" : "Toegepaste tips")</small>
+                        <p class="mb-0"><strong>8 @(AppState.IsEnglish ? "of" : "van") 15</strong></p>
+                    </div>
+                    <div class="stat-item">
+                        <small class="stat-label">@(AppState.IsEnglish ? "Energy label" : "Energie label")</small>
+                        <p class="mb-0"><span class="badge bg-success fs-5">B</span></p>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Help -->
-      <div class="card">
-    <div class="card-body text-center">
-        <h5>@(isEnglish ? "Need help?" : "Hulp nodig?")</h5>
-           <p class="text-muted small">@(isEnglish ? "Contact our customer service" : "Neem contact op met onze klantenservice")</p>
-       <a href="mailto:support@mijnenergie.nl" class="btn btn-outline-primary btn-sm mb-2 w-100">
-       <span class="icon">&#x1F4E7;</span> @(isEnglish ? "Email us" : "E-mail ons")
-        </a>
-       <a href="tel:0401234567" class="btn btn-outline-primary btn-sm w-100">
-                   <span class="icon">&#x1F4DE;</span> 040-123 4567
-      </a>
-      </div>
-          </div>
+            <!-- Solar Panel Status -->
+            <div class="card mb-4 solar-card">
+                <div class="card-header solar-header">
+                    <h5 class="mb-0"><span class="icon">&#x2600;&#xFE0F;</span> @(AppState.IsEnglish ? "Solar Panels" : "Zonnepanelen")</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="hasSolar" checked="@(currentUser?.HasSmartMeter == true)">
+                        <label class="form-check-label" for="hasSolar">
+                            @(AppState.IsEnglish ? "I have solar panels" : "Ik heb zonnepanelen")
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">@(AppState.IsEnglish ? "Number of panels" : "Aantal panelen")</label>
+                        <input type="number" class="form-control" value="12" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">@(AppState.IsEnglish ? "Installation year" : "Installatie jaar")</label>
+                        <input type="number" class="form-control" value="2022" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help -->
+            <div class="card help-card">
+                <div class="card-body text-center">
+                    <h5>@(AppState.IsEnglish ? "Need help?" : "Hulp nodig?")</h5>
+                    <p class="help-text small">@(AppState.IsEnglish ? "Contact our customer service" : "Neem contact op met onze klantenservice")</p>
+                    <a href="mailto:support@mijnenergie.nl" class="btn btn-outline-primary btn-sm mb-2 w-100">
+                        <span class="icon">&#x1F4E7;</span> @(AppState.IsEnglish ? "Email us" : "E-mail ons")
+                    </a>
+                    <a href="tel:0401234567" class="btn btn-outline-primary btn-sm w-100">
+                        <span class="icon">&#x1F4DE;</span> 040-123 4567
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+}
 
 <style>
     .icon {
@@ -244,7 +251,7 @@
     }
 
     .stat-item {
-    padding-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
         border-bottom: 1px solid #eee;
     }
     
@@ -258,134 +265,101 @@
         border: 1px solid #e9ecef;
     }
 
-    /* Dark Mode Styles */
-    .dark-mode {
-        background-color: #1a1a2e;
-      color: #eaeaea;
+    .setting-description { color: #6c757d; }
+    .stat-label { color: #6c757d; }
+    .privacy-note { color: #6c757d; }
+    .help-text { color: #6c757d; }
+
+    .stats-header {
+        background-color: #0d6efd !important;
+        color: white !important;
     }
 
-    .dark-mode .card {
- background-color: #16213e;
-        border-color: #0f3460;
-        color: #eaeaea;
+    .solar-header {
+        background-color: #ffc107 !important;
+        color: #000 !important;
     }
 
-    .dark-mode .card-header {
-        background-color: #0f3460 !important;
-        border-color: #0f3460;
-    color: #eaeaea;
+    /* Dark mode */
+    [data-theme="dark"] .settings-card,
+    [data-theme="dark"] .stats-card,
+    [data-theme="dark"] .solar-card,
+    [data-theme="dark"] .help-card {
+        background-color: #1e1e1e !important;
+        border-color: #333 !important;
     }
 
-    .dark-mode .card-header.bg-primary {
-        background-color: #1e3a5f !important;
+    [data-theme="dark"] .settings-card .card-header {
+        background-color: #2a2a2a !important;
+        border-bottom-color: #333 !important;
     }
 
-    .dark-mode .card-header.bg-warning {
-        background-color: #5c4d00 !important;
-        color: #ffc107 !important;
+    [data-theme="dark"] .setting-item {
+        background: #2a2a2a !important;
+        border-color: #444 !important;
     }
 
-    .dark-mode .form-control {
-        background-color: #1a1a2e;
-        border-color: #0f3460;
-        color: #eaeaea;
+    [data-theme="dark"] .setting-description,
+    [data-theme="dark"] .stat-label,
+    [data-theme="dark"] .privacy-note,
+    [data-theme="dark"] .help-text {
+        color: #aaa !important;
     }
 
-    .dark-mode .form-control:focus {
-        background-color: #1a1a2e;
-        border-color: #4a90d9;
-   color: #eaeaea;
+    [data-theme="dark"] .stat-item {
+        border-color: #333 !important;
     }
 
-    .dark-mode .form-control[readonly] {
-  background-color: #0f3460;
+    [data-theme="dark"] .form-check-label {
+        color: #fff !important;
     }
-
-    .dark-mode .text-muted {
-        color: #a0a0a0 !important;
-    }
-
-    .dark-mode .alert-info {
-        background-color: #1e3a5f;
-        border-color: #0f3460;
-color: #87ceeb;
-    }
-
-    .dark-mode .setting-item {
-        background: #0f3460;
-        border-color: #1e3a5f;
-    }
-
-    .dark-mode .stat-item {
-        border-color: #0f3460;
-    }
-
-    .dark-mode .btn-outline-primary {
-        color: #4a90d9;
-        border-color: #4a90d9;
-    }
-
-    .dark-mode .btn-outline-primary:hover {
-        background-color: #4a90d9;
-        color: #fff;
-    }
-
-    .dark-mode .form-check-input {
-        background-color: #0f3460;
-        border-color: #4a90d9;
-    }
-
-    .dark-mode .form-check-input:checked {
-        background-color: #4a90d9;
-    border-color: #4a90d9;
-  }
-
-    .dark-mode a {
-        color: #4a90d9;
- }
 </style>
 
 @code {
- private bool isDarkMode = false;
-    private bool isEnglish = false;
+    private bool isAuthenticated = false;
+    private UserAccount? currentUser;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (firstRender)
+        AppState.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        
+        if (!isAuthenticated)
         {
-            try
-    {
-          var darkModeSaved = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "darkMode");
-        var languageSaved = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "language");
-       
-     isDarkMode = darkModeSaved == "true";
-                isEnglish = languageSaved == "en";
-           StateHasChanged();
-   }
-          catch
-   {
-          // localStorage not available, use defaults
-          }
+            Navigation.NavigateTo("/landing");
+            return;
         }
+
+        currentUser = await AuthService.GetCurrentUserAsync();
     }
 
     private async Task ToggleDarkMode(ChangeEventArgs e)
     {
-        isDarkMode = (bool)(e.Value ?? false);
+        AppState.IsDarkMode = (bool)(e.Value ?? false);
         try
         {
-        await JSRuntime.InvokeVoidAsync("localStorage.setItem", "darkMode", isDarkMode.ToString().ToLower());
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "theme", AppState.IsDarkMode ? "dark" : "light");
+            await JSRuntime.InvokeVoidAsync("eval", $"document.documentElement.setAttribute('data-theme', '{(AppState.IsDarkMode ? "dark" : "light")}')");
         }
         catch { }
     }
 
     private async Task SetLanguage(bool english)
     {
-   isEnglish = english;
+        AppState.IsEnglish = english;
         try
         {
- await JSRuntime.InvokeVoidAsync("localStorage.setItem", "language", isEnglish ? "en" : "nl");
-   }
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "language", AppState.IsEnglish ? "en" : "nl");
+        }
         catch { }
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
     }
 }

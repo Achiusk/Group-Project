@@ -3,99 +3,101 @@
 @using urban_city_power_managment.Web.Services
 @inject IVendorService VendorService
 @inject NavigationManager Navigation
+@inject AppStateService AppState
+@implements IDisposable
 
-<PageTitle>Leveranciers & Vakmensen - Eindhoven Energie</PageTitle>
+<PageTitle>@(AppState.IsEnglish ? "Suppliers & Professionals" : "Leveranciers & Vakmensen") - Eindhoven Energie</PageTitle>
 
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
-   <h1><span class="emoji">&#x1F3E2;</span> Leveranciers & Vakmensen</h1>
-  <p class="lead">Vind betrouwbare bedrijven voor verduurzaming van je woning</p>
-  </div>
+            <h1><span class="emoji">&#x1F3E2;</span> @(AppState.IsEnglish ? "Suppliers & Professionals" : "Leveranciers & Vakmensen")</h1>
+            <p class="lead">@(AppState.IsEnglish ? "Find reliable companies for making your home more sustainable" : "Vind betrouwbare bedrijven voor verduurzaming van je woning")</p>
+        </div>
     </div>
 
-    <div class="card mb-4">
-<div class="card-body">
-      <div class="row align-items-center">
-    <div class="col-md-6 mb-3 mb-md-0">
-     <div class="input-group">
-   <span class="input-group-text"><span class="emoji">&#x1F50D;</span></span>
-         <input type="text" class="form-control" placeholder="Zoek op naam of dienst..." 
-        @bind="searchTerm" @bind:event="oninput" @onkeyup="Search" />
-</div>
-      </div>
-     <div class="col-md-6">
-       <select class="form-select" @onchange="OnCategoryChanged">
-     <option value="">Alle categorieen</option>
-    @foreach (var cat in categories)
-  {
-  <option value="@cat.Key" selected="@(selectedCategory == cat.Key)">@GetCategoryIcon(cat.Key) @cat.Value</option>
- }
-        </select>
-             </div>
-       </div>
+    <div class="card mb-4 search-card">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="input-group">
+                        <span class="input-group-text"><span class="emoji">&#x1F50D;</span></span>
+                        <input type="text" class="form-control" placeholder="@(AppState.IsEnglish ? "Search by name or service..." : "Zoek op naam of dienst...")" 
+                               @bind="searchTerm" @bind:event="oninput" @onkeyup="Search" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select" @onchange="OnCategoryChanged">
+                        <option value="">@(AppState.IsEnglish ? "All categories" : "Alle categorieën")</option>
+                        @foreach (var cat in GetCategories())
+                        {
+                            <option value="@cat.Key" selected="@(selectedCategory == cat.Key)">@GetCategoryIcon(cat.Key) @cat.Value</option>
+                        }
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 
     @if (selectedCategory == null && string.IsNullOrEmpty(searchTerm))
     {
         <div class="row mb-4">
-         @foreach (var cat in categories)
+            @foreach (var cat in GetCategories())
             {
-       <div class="col-md-3 col-6 mb-3">
-        <div class="card category-card h-100 @(selectedCategory == cat.Key ? "border-primary" : "")" 
-      @onclick="() => SelectCategory(cat.Key)" style="cursor: pointer;">
-       <div class="card-body text-center">
-           <span class="category-icon">@((MarkupString)GetCategoryIconHtml(cat.Key))</span>
-         <h6 class="mt-2 mb-0">@cat.Value</h6>
-          <small class="text-muted">@GetVendorCount(cat.Key) bedrijven</small>
-      </div>
-       </div>
-</div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="card category-card h-100 @(selectedCategory == cat.Key ? "border-primary" : "")" 
+                         @onclick="() => SelectCategory(cat.Key)" style="cursor: pointer;">
+                        <div class="card-body text-center">
+                            <span class="category-icon">@((MarkupString)GetCategoryIconHtml(cat.Key))</span>
+                            <h6 class="mt-2 mb-0 category-name">@cat.Value</h6>
+                            <small class="category-count">@GetVendorCount(cat.Key) @(AppState.IsEnglish ? "companies" : "bedrijven")</small>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
     }
 
     @if (selectedCategory == null && string.IsNullOrEmpty(searchTerm))
     {
-    <div class="mb-4">
-        <h4><span class="emoji">&#x2B50;</span> Aanbevolen partners</h4>
+        <div class="mb-4">
+            <h4><span class="emoji">&#x2B50;</span> @(AppState.IsEnglish ? "Recommended partners" : "Aanbevolen partners")</h4>
             <div class="row">
-     @foreach (var vendor in featuredVendors.Take(3))
-        {
-      <div class="col-md-4 mb-3">
-       <div class="card vendor-card featured h-100">
-             <div class="card-body">
- <div class="d-flex justify-content-between align-items-start mb-2">
-     <div class="d-flex align-items-center">
-       <span class="vendor-category-icon me-2">@((MarkupString)GetCategoryIconHtml(vendor.Category))</span>
-         <h5 class="card-title mb-0">@vendor.Name</h5>
-      </div>
-  <span class="badge bg-success">Geverifieerd</span>
-     </div>
-          <p class="text-muted small mb-2">@vendor.Description</p>
-         <div class="mb-2">
-       <span class="badge bg-primary">@GetCategoryName(vendor.Category)</span>
-      </div>
-          <div class="d-flex align-items-center mb-3">
-     <span class="text-warning me-1">&#x2605;</span>
-              <strong>@vendor.Rating.ToString("F1")</strong>
-    <small class="text-muted ms-1">(@vendor.ReviewCount reviews)</small>
-          </div>
-       <div class="d-flex gap-2">
-          @if (!string.IsNullOrEmpty(vendor.Website))
-     {
-    <a href="@vendor.Website" target="_blank" class="btn btn-outline-primary btn-sm">Website</a>
-   }
-        @if (vendor.OffersFreQuote)
-       {
-      <button class="btn btn-success btn-sm" @onclick="() => RequestQuote(vendor)">Offerte aanvragen</button>
-               }
-  </div>
-     </div>
- </div>
-   </div>
-     }
+                @foreach (var vendor in featuredVendors.Take(3))
+                {
+                    <div class="col-md-4 mb-3">
+                        <div class="card vendor-card featured h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="vendor-category-icon me-2">@((MarkupString)GetCategoryIconHtml(vendor.Category))</span>
+                                        <h5 class="card-title mb-0">@vendor.Name</h5>
+                                    </div>
+                                    <span class="badge bg-success">@(AppState.IsEnglish ? "Verified" : "Geverifieerd")</span>
+                                </div>
+                                <p class="vendor-description small mb-2">@vendor.Description</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-primary">@GetCategoryName(vendor.Category)</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <span class="text-warning me-1">&#x2605;</span>
+                                    <strong>@vendor.Rating.ToString("F1")</strong>
+                                    <small class="rating-count ms-1">(@vendor.ReviewCount @(AppState.IsEnglish ? "reviews" : "reviews"))</small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    @if (!string.IsNullOrEmpty(vendor.Website))
+                                    {
+                                        <a href="@vendor.Website" target="_blank" class="btn btn-outline-primary btn-sm">Website</a>
+                                    }
+                                    @if (vendor.OffersFreQuote)
+                                    {
+                                        <button class="btn btn-success btn-sm" @onclick="() => RequestQuote(vendor)">@(AppState.IsEnglish ? "Request quote" : "Offerte aanvragen")</button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     }
@@ -103,138 +105,138 @@
     <div class="row">
         @if (filteredVendors != null && filteredVendors.Any())
         {
-        @foreach (var vendor in filteredVendors)
-   {
-             <div class="col-md-6 mb-4">
-     <div class="card vendor-card h-100">
-         <div class="card-body">
-      <div class="row">
-         <div class="col-md-8">
-       <div class="d-flex align-items-start mb-2">
-      <span class="vendor-category-icon me-2">@((MarkupString)GetCategoryIconHtml(vendor.Category))</span>
-     <h5 class="card-title mb-0 me-2">@vendor.Name</h5>
-@if (vendor.IsVerified)
-           {
-               <span class="badge bg-success">&#x2713;</span>
-        }
-           </div>
-     <p class="text-muted small mb-2">@vendor.Description</p>
+            @foreach (var vendor in filteredVendors)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card vendor-card h-100">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-start mb-2">
+                                        <span class="vendor-category-icon me-2">@((MarkupString)GetCategoryIconHtml(vendor.Category))</span>
+                                        <h5 class="card-title mb-0 me-2">@vendor.Name</h5>
+                                        @if (vendor.IsVerified)
+                                        {
+                                            <span class="badge bg-success">&#x2713;</span>
+                                        }
+                                    </div>
+                                    <p class="vendor-description small mb-2">@vendor.Description</p>
 
-        <div class="mb-2">
-   <span class="badge bg-light text-dark">@((MarkupString)GetCategoryIconHtml(vendor.Category)) @GetCategoryName(vendor.Category)</span>
-      <span class="badge bg-light text-dark">@vendor.PriceRange</span>
-          </div>
+                                    <div class="mb-2">
+                                        <span class="badge bg-light text-dark">@((MarkupString)GetCategoryIconHtml(vendor.Category)) @GetCategoryName(vendor.Category)</span>
+                                        <span class="badge bg-light text-dark">@vendor.PriceRange</span>
+                                    </div>
 
-   <div class="services-list mb-2">
-      @foreach (var service in vendor.Services.Take(4))
-    {
-    <span class="badge bg-outline-secondary me-1 mb-1" style="border: 1px solid #ddd;">@service</span>
- }
-   </div>
-         </div>
-        <div class="col-md-4 text-md-end">
-  <div class="rating mb-2">
-            <span class="text-warning">&#x2605;</span>
-          <strong>@vendor.Rating.ToString("F1")</strong>
-          <small class="text-muted d-block">@vendor.ReviewCount reviews</small>
-    </div>
- <div class="contact-info small">
-           <p class="mb-1"><span class="emoji">&#x1F4DE;</span> @vendor.Phone</p>
-          <p class="mb-1"><span class="emoji">&#x1F4CD;</span> @vendor.City</p>
-     </div>
-   </div>
-     </div>
-      </div>
-          <div class="card-footer bg-transparent">
-          <div class="d-flex gap-2 flex-wrap">
-  @if (!string.IsNullOrEmpty(vendor.Phone))
-      {
-    <a href="tel:@vendor.Phone" class="btn btn-outline-secondary btn-sm"><span class="emoji">&#x1F4DE;</span> Bellen</a>
-        }
-              @if (!string.IsNullOrEmpty(vendor.Email))
-               {
-     <a href="mailto:@vendor.Email" class="btn btn-outline-secondary btn-sm"><span class="emoji">&#x2709;</span> E-mail</a>
-      }
-          @if (!string.IsNullOrEmpty(vendor.Website))
-           {
-            <a href="@vendor.Website" target="_blank" class="btn btn-outline-primary btn-sm"><span class="emoji">&#x1F310;</span> Website</a>
-         }
-   @if (vendor.OffersFreQuote)
-  {
-    <button class="btn btn-success btn-sm" @onclick="() => RequestQuote(vendor)">
-             Gratis offerte
-       </button>
-        }
-        </div>
-            </div>
-             </div>
-    </div>
-   }
-        }
-   else
-    {
-     <div class="col-12">
-            <div class="alert alert-info">
-   <h5>Geen leveranciers gevonden</h5>
-               <p class="mb-0">Probeer een andere zoekopdracht of categorie.</p>
-     </div>
-            </div>
-        }
-    </div>
-
-    <div class="card mt-4 mb-4 bg-light">
-        <div class="card-body">
-   <div class="row align-items-center">
-      <div class="col-md-8">
-    <h5><span class="emoji">&#x1F4A1;</span> Wist je dat?</h5>
-          <p class="mb-0">
-    Veel verduurzamingsmaatregelen komen in aanmerking voor subsidie via de <strong>ISDE regeling</strong> 
-      (warmtepompen, zonneboilers, isolatie) of de <strong>BTW-verlaging</strong> op zonnepanelen.
-         Vraag je leverancier naar de mogelijkheden!
- </p>
-    </div>
-          <div class="col-md-4 text-md-end">
-      <a href="https://www.rvo.nl/subsidies-financiering/isde" target="_blank" class="btn btn-outline-primary">
- Meer over subsidies
-        </a>
+                                    <div class="services-list mb-2">
+                                        @foreach (var service in vendor.Services.Take(4))
+                                        {
+                                            <span class="badge service-badge me-1 mb-1">@service</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <div class="rating mb-2">
+                                        <span class="text-warning">&#x2605;</span>
+                                        <strong>@vendor.Rating.ToString("F1")</strong>
+                                        <small class="rating-count d-block">@vendor.ReviewCount @(AppState.IsEnglish ? "reviews" : "reviews")</small>
+                                    </div>
+                                    <div class="contact-info small">
+                                        <p class="mb-1"><span class="emoji">&#x1F4DE;</span> @vendor.Phone</p>
+                                        <p class="mb-1"><span class="emoji">&#x1F4CD;</span> @vendor.City</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex gap-2 flex-wrap">
+                                @if (!string.IsNullOrEmpty(vendor.Phone))
+                                {
+                                    <a href="tel:@vendor.Phone" class="btn btn-outline-secondary btn-sm"><span class="emoji">&#x1F4DE;</span> @(AppState.IsEnglish ? "Call" : "Bellen")</a>
+                                }
+                                @if (!string.IsNullOrEmpty(vendor.Email))
+                                {
+                                    <a href="mailto:@vendor.Email" class="btn btn-outline-secondary btn-sm"><span class="emoji">&#x2709;</span> E-mail</a>
+                                }
+                                @if (!string.IsNullOrEmpty(vendor.Website))
+                                {
+                                    <a href="@vendor.Website" target="_blank" class="btn btn-outline-primary btn-sm"><span class="emoji">&#x1F310;</span> Website</a>
+                                }
+                                @if (vendor.OffersFreQuote)
+                                {
+                                    <button class="btn btn-success btn-sm" @onclick="() => RequestQuote(vendor)">
+                                        @(AppState.IsEnglish ? "Free quote" : "Gratis offerte")
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
                 </div>
-         </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h5>@(AppState.IsEnglish ? "No suppliers found" : "Geen leveranciers gevonden")</h5>
+                    <p class="mb-0">@(AppState.IsEnglish ? "Try a different search or category." : "Probeer een andere zoekopdracht of categorie.")</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="card mt-4 mb-4 info-card">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5><span class="emoji">&#x1F4A1;</span> @(AppState.IsEnglish ? "Did you know?" : "Wist je dat?")</h5>
+                    <p class="info-text mb-0">
+                        @(AppState.IsEnglish 
+                            ? "Many sustainability measures qualify for subsidies through the ISDE scheme (heat pumps, solar water heaters, insulation) or the VAT reduction on solar panels. Ask your supplier about the options!"
+                            : "Veel verduurzamingsmaatregelen komen in aanmerking voor subsidie via de ISDE regeling (warmtepompen, zonneboilers, isolatie) of de BTW-verlaging op zonnepanelen. Vraag je leverancier naar de mogelijkheden!")
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="https://www.rvo.nl/subsidies-financiering/isde" target="_blank" class="btn btn-outline-primary">
+                        @(AppState.IsEnglish ? "More about subsidies" : "Meer over subsidies")
+                    </a>
+                </div>
+            </div>
         </div>
-</div>
+    </div>
 </div>
 
 @if (showQuoteModal && selectedVendor != null)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
-    <div class="modal-dialog">
-            <div class="modal-content">
-        <div class="modal-header">
-         <h5 class="modal-title">@((MarkupString)GetCategoryIconHtml(selectedVendor.Category)) Offerte aanvragen bij @selectedVendor.Name</h5>
-    <button type="button" class="btn-close" @onclick="CloseQuoteModal"></button>
-     </div>
-         <div class="modal-body">
-      <div class="mb-3">
-  <label class="form-label">Je naam</label>
-       <input type="text" class="form-control" @bind="quoteName" />
-     </div>
-       <div class="mb-3">
-     <label class="form-label">E-mailadres</label>
-       <input type="email" class="form-control" @bind="quoteEmail" />
-     </div>
-   <div class="mb-3">
-             <label class="form-label">Telefoonnummer</label>
-       <input type="tel" class="form-control" @bind="quotePhone" />
-         </div>
-         <div class="mb-3">
-            <label class="form-label">Omschrijving van je project</label>
-      <textarea class="form-control" rows="3" @bind="quoteMessage"></textarea>
-       </div>
-</div>
-          <div class="modal-footer">
-               <button type="button" class="btn btn-secondary" @onclick="CloseQuoteModal">Annuleren</button>
-           <button type="button" class="btn btn-success" @onclick="SubmitQuote">Verstuur aanvraag</button>
-         </div>
-     </div>
+        <div class="modal-dialog">
+            <div class="modal-content quote-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">@((MarkupString)GetCategoryIconHtml(selectedVendor.Category)) @(AppState.IsEnglish ? "Request quote from" : "Offerte aanvragen bij") @selectedVendor.Name</h5>
+                    <button type="button" class="btn-close" @onclick="CloseQuoteModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">@(AppState.IsEnglish ? "Your name" : "Je naam")</label>
+                        <input type="text" class="form-control" @bind="quoteName" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">@(AppState.IsEnglish ? "Email address" : "E-mailadres")</label>
+                        <input type="email" class="form-control" @bind="quoteEmail" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">@(AppState.IsEnglish ? "Phone number" : "Telefoonnummer")</label>
+                        <input type="tel" class="form-control" @bind="quotePhone" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">@(AppState.IsEnglish ? "Description of your project" : "Omschrijving van je project")</label>
+                        <textarea class="form-control" rows="3" @bind="quoteMessage"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseQuoteModal">@(AppState.IsEnglish ? "Cancel" : "Annuleren")</button>
+                    <button type="button" class="btn btn-success" @onclick="SubmitQuote">@(AppState.IsEnglish ? "Submit request" : "Verstuur aanvraag")</button>
+                </div>
+            </div>
         </div>
     </div>
 }
@@ -248,6 +250,65 @@
     .vendor-card:hover { box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
     .vendor-card.featured { border: 2px solid var(--bs-success); }
     .emoji { font-family: "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif; }
+    
+    .category-name { color: #333; }
+    .category-count { color: #6c757d; }
+    .vendor-description { color: #6c757d; }
+    .rating-count { color: #6c757d; }
+    .info-text { color: #6c757d; }
+    .service-badge { border: 1px solid #ddd; background-color: transparent; color: #333; }
+
+    /* Dark mode */
+    [data-theme="dark"] .search-card,
+    [data-theme="dark"] .category-card,
+    [data-theme="dark"] .vendor-card,
+    [data-theme="dark"] .info-card {
+        background-color: #1e1e1e !important;
+        border-color: #333 !important;
+    }
+
+    [data-theme="dark"] .category-card:hover {
+        border-color: #4a9eff !important;
+    }
+
+    [data-theme="dark"] .category-name {
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .category-count,
+    [data-theme="dark"] .vendor-description,
+    [data-theme="dark"] .rating-count,
+    [data-theme="dark"] .info-text {
+        color: #aaa !important;
+    }
+
+    [data-theme="dark"] .card-title {
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .card-footer {
+        background-color: #252525 !important;
+        border-top-color: #333 !important;
+    }
+
+    [data-theme="dark"] .service-badge {
+        border-color: #444 !important;
+        color: #ccc !important;
+    }
+
+    [data-theme="dark"] .quote-modal {
+        background-color: #1e1e1e !important;
+        color: #fff !important;
+    }
+
+    [data-theme="dark"] .quote-modal .modal-header,
+    [data-theme="dark"] .quote-modal .modal-footer {
+        border-color: #333 !important;
+    }
+
+    [data-theme="dark"] .contact-info {
+        color: #ccc !important;
+    }
 </style>
 
 @code {
@@ -262,32 +323,49 @@
     private string quoteName = "";
     private string quoteEmail = "";
     private string quotePhone = "";
-private string quoteMessage = "";
+    private string quoteMessage = "";
 
-    private Dictionary<VendorCategory, string> categories = new()
+    protected override void OnInitialized()
     {
-        { VendorCategory.Isolatie, "Isolatie" },
-        { VendorCategory.Zonnepanelen, "Zonnepanelen" },
-  { VendorCategory.Thuisbatterij, "Thuisbatterij" },
-  { VendorCategory.Warmtepomp, "Warmtepomp" },
- { VendorCategory.Laadpaal, "Laadpaal" },
-      { VendorCategory.EnergieAdvies, "Energie Advies" },
-        { VendorCategory.SmartHome, "Smart Home" },
-        { VendorCategory.Glaswerk, "Glaswerk" }
-    };
+        AppState.OnChange += StateHasChanged;
+    }
+
+    private Dictionary<VendorCategory, string> GetCategories() => AppState.IsEnglish
+        ? new()
+        {
+            { VendorCategory.Isolatie, "Insulation" },
+            { VendorCategory.Zonnepanelen, "Solar Panels" },
+            { VendorCategory.Thuisbatterij, "Home Battery" },
+            { VendorCategory.Warmtepomp, "Heat Pump" },
+            { VendorCategory.Laadpaal, "EV Charger" },
+            { VendorCategory.EnergieAdvies, "Energy Advice" },
+            { VendorCategory.SmartHome, "Smart Home" },
+            { VendorCategory.Glaswerk, "Glazing" }
+        }
+        : new()
+        {
+            { VendorCategory.Isolatie, "Isolatie" },
+            { VendorCategory.Zonnepanelen, "Zonnepanelen" },
+            { VendorCategory.Thuisbatterij, "Thuisbatterij" },
+            { VendorCategory.Warmtepomp, "Warmtepomp" },
+            { VendorCategory.Laadpaal, "Laadpaal" },
+            { VendorCategory.EnergieAdvies, "Energie Advies" },
+            { VendorCategory.SmartHome, "Smart Home" },
+            { VendorCategory.Glaswerk, "Glaswerk" }
+        };
 
     [SupplyParameterFromQuery]
     public string? Category { get; set; }
 
     protected override async Task OnInitializedAsync()
-  {
+    {
         allVendors = await VendorService.GetAllVendorsAsync();
         featuredVendors = await VendorService.GetFeaturedVendorsAsync();
-     
+        
         if (!string.IsNullOrEmpty(Category) && Enum.TryParse<VendorCategory>(Category, out var cat))
         {
- selectedCategory = cat;
-     }
+            selectedCategory = cat;
+        }
         
         ApplyFilters();
     }
@@ -299,8 +377,8 @@ private string quoteMessage = "";
             selectedCategory = null;
         }
         else if (Enum.TryParse<VendorCategory>(e.Value.ToString(), out var cat))
-  {
-  selectedCategory = cat;
+        {
+            selectedCategory = cat;
         }
         ApplyFilters();
     }
@@ -316,7 +394,7 @@ private string quoteMessage = "";
         ApplyFilters();
     }
 
- private void ApplyFilters()
+    private void ApplyFilters()
     {
         filteredVendors = allVendors;
         
@@ -327,71 +405,66 @@ private string quoteMessage = "";
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
-    var term = searchTerm.ToLower();
-       filteredVendors = filteredVendors?.Where(v =>
-    v.Name.ToLower().Contains(term) ||
-      v.Description.ToLower().Contains(term) ||
-  v.Services.Any(s => s.ToLower().Contains(term))
-  ).ToList();
+            var term = searchTerm.ToLower();
+            filteredVendors = filteredVendors?.Where(v =>
+                v.Name.ToLower().Contains(term) ||
+                v.Description.ToLower().Contains(term) ||
+                v.Services.Any(s => s.ToLower().Contains(term))
+            ).ToList();
         }
         
         filteredVendors = filteredVendors?.OrderByDescending(v => v.Rating).ToList();
     }
 
-    private string GetCategoryIcon(VendorCategory category)
+    private string GetCategoryIcon(VendorCategory category) => category switch
     {
-        return category switch
-{
-VendorCategory.Isolatie => "\U0001F9F1",
-     VendorCategory.Zonnepanelen => "\u2600\uFE0F",
-    VendorCategory.Thuisbatterij => "\U0001F50B",
-      VendorCategory.Warmtepomp => "\U0001F321\uFE0F",
-  VendorCategory.Laadpaal => "\U0001F50C",
-    VendorCategory.EnergieAdvies => "\U0001F4CB",
-  VendorCategory.SmartHome => "\U0001F4F1",
-            VendorCategory.Glaswerk => "\U0001FA9F",
-   _ => "\U0001F3E2"
-     };
-    }
+        VendorCategory.Isolatie => "\U0001F9F1",
+        VendorCategory.Zonnepanelen => "\u2600\uFE0F",
+        VendorCategory.Thuisbatterij => "\U0001F50B",
+        VendorCategory.Warmtepomp => "\U0001F321\uFE0F",
+        VendorCategory.Laadpaal => "\U0001F50C",
+        VendorCategory.EnergieAdvies => "\U0001F4CB",
+        VendorCategory.SmartHome => "\U0001F4F1",
+        VendorCategory.Glaswerk => "\U0001FA9F",
+        _ => "\U0001F3E2"
+    };
 
-    private string GetCategoryIconHtml(VendorCategory category)
-  {
-  return category switch
-        {
-         VendorCategory.Isolatie => "&#x1F9F1;",
-   VendorCategory.Zonnepanelen => "&#x2600;&#xFE0F;",
-       VendorCategory.Thuisbatterij => "&#x1F50B;",
-          VendorCategory.Warmtepomp => "&#x1F321;&#xFE0F;",
-            VendorCategory.Laadpaal => "&#x1F50C;",
-      VendorCategory.EnergieAdvies => "&#x1F4CB;",
-      VendorCategory.SmartHome => "&#x1F4F1;",
-       VendorCategory.Glaswerk => "&#x1FA9F;",
-      _ => "&#x1F3E2;"
-        };
-    }
+    private string GetCategoryIconHtml(VendorCategory category) => category switch
+    {
+        VendorCategory.Isolatie => "&#x1F9F1;",
+        VendorCategory.Zonnepanelen => "&#x2600;&#xFE0F;",
+        VendorCategory.Thuisbatterij => "&#x1F50B;",
+        VendorCategory.Warmtepomp => "&#x1F321;&#xFE0F;",
+        VendorCategory.Laadpaal => "&#x1F50C;",
+        VendorCategory.EnergieAdvies => "&#x1F4CB;",
+        VendorCategory.SmartHome => "&#x1F4F1;",
+        VendorCategory.Glaswerk => "&#x1FA9F;",
+        _ => "&#x1F3E2;"
+    };
 
     private string GetCategoryName(VendorCategory category)
     {
-return categories.TryGetValue(category, out var name) ? name : category.ToString();
+        var cats = GetCategories();
+        return cats.TryGetValue(category, out var name) ? name : category.ToString();
     }
 
     private int GetVendorCount(VendorCategory category)
     {
-      return allVendors?.Count(v => v.Category == category) ?? 0;
+        return allVendors?.Count(v => v.Category == category) ?? 0;
     }
 
     private void RequestQuote(Vendor vendor)
     {
         selectedVendor = vendor;
         showQuoteModal = true;
-  }
+    }
 
     private void CloseQuoteModal()
     {
         showQuoteModal = false;
         selectedVendor = null;
         quoteName = "";
-  quoteEmail = "";
+        quoteEmail = "";
         quotePhone = "";
         quoteMessage = "";
     }
@@ -399,5 +472,10 @@ return categories.TryGetValue(category, out var name) ? name : category.ToString
     private void SubmitQuote()
     {
         CloseQuoteModal();
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
     }
 }

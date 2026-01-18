@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Components.Authorization;
 using urban_city_power_managment.Web.Components;
 using urban_city_power_managment.Web.Data;
 using urban_city_power_managment.Web.Services;
@@ -8,6 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Add authentication state provider for Blazor
+builder.Services.AddScoped<CustomAuthStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider>(provider => 
+    provider.GetRequiredService<CustomAuthStateProvider>());
+builder.Services.AddCascadingAuthenticationState();
+
 // Add secure session support for authentication
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -15,9 +22,9 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromHours(2);
     options.Cookie.HttpOnly = true;        // Prevents JavaScript access (XSS protection)
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // HTTPS only
-    options.Cookie.SameSite = SameSiteMode.Strict;  // CSRF protection
-    options.Cookie.Name = ".EindhovenEnergie.Session";  // Custom name (security through obscurity)
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Works on both HTTP and HTTPS
+    options.Cookie.SameSite = SameSiteMode.Lax;  // Allow navigation from external sites
+    options.Cookie.Name = ".EindhovenEnergie.Session";
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -33,17 +40,68 @@ Console.WriteLine($"?? MYSQLCONNSTR_localdb present: {!string.IsNullOrEmpty(conn
 // Azure format: Database=localdb;Data Source=127.0.0.1:port;User Id=user;Password=pass
 if (!string.IsNullOrEmpty(connectionString))
 {
-    // Azure MySQL In-App uses a specific format that needs parsing
     Console.WriteLine("?? Parsing Azure MySQL connection string...");
+    Console.WriteLine($"   Raw connection string: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
     
-    // The connection string from Azure should work directly with Pomelo
-    // But we need to ensure it's in the right format
-    if (!connectionString.Contains("Server=") && connectionString.Contains("Data Source="))
+    try
     {
-        // Convert Azure format to standard MySQL format
-        connectionString = connectionString
-            .Replace("Data Source=", "Server=")
-            .Replace(";Port=", ";Port="); // Keep port if separate
+        // Parse Azure MySQL In-App format and convert to Pomelo MySQL format
+        var parts = connectionString.Split(';')
+            .Select(p => p.Trim())
+            .Where(p => !string.IsNullOrEmpty(p))
+            .ToDictionary(
+                p => p.Split('=')[0].Trim(),
+                p => p.Contains('=') ? string.Join("=", p.Split('=').Skip(1)).Trim() : "",
+                StringComparer.OrdinalIgnoreCase
+            );
+        
+        string server = "127.0.0.1";
+        string port = "3306";
+        string database = "localdb";
+        string userId = "";
+        string password = "";
+        
+        // Extract database name
+        if (parts.TryGetValue("Database", out var db))
+            database = db;
+        
+        // Extract Data Source (contains host:port)
+        if (parts.TryGetValue("Data Source", out var dataSource))
+        {
+            if (dataSource.Contains(':'))
+            {
+                var hostPort = dataSource.Split(':');
+                server = hostPort[0];
+                port = hostPort[1];
+            }
+            else
+            {
+                server = dataSource;
+            }
+        }
+        
+        // Extract User Id
+        if (parts.TryGetValue("User Id", out var user))
+            userId = user;
+        else if (parts.TryGetValue("UserId", out user))
+            userId = user;
+        else if (parts.TryGetValue("User", out user))
+            userId = user;
+        
+        // Extract Password
+        if (parts.TryGetValue("Password", out var pwd))
+            password = pwd;
+        
+        // Build standard MySQL connection string for Pomelo
+        connectionString = $"Server={server};Port={port};Database={database};User={userId};Password={password};";
+        
+        Console.WriteLine($"   Parsed - Server: {server}, Port: {port}, Database: {database}, User: {userId}");
+        Console.WriteLine("? Connection string parsed successfully");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"? Error parsing connection string: {ex.Message}");
+        // Keep original connection string if parsing fails
     }
 }
 
@@ -96,6 +154,9 @@ builder.Services.AddScoped<IVendorService, VendorService>();
 builder.Services.AddScoped<IEnergyTipsService, EnergyTipsService>();
 builder.Services.AddScoped<IPowerGenerationService, PowerGenerationService>();
 builder.Services.AddScoped<DatabaseSeeder>();
+
+// Register global app state service for theme and language
+builder.Services.AddScoped<AppStateService>();
 
 builder.Services.AddHttpClient<IWeatherService, OpenMeteoWeatherService>(client =>
 {
