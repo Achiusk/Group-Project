@@ -29,19 +29,19 @@ namespace urban_city_power_managment.Web.Services
 
             Console.WriteLine("Seeding database with 10 mock accounts...");
 
-            // Create 10 mock user accounts
+            // Create 10 mock user accounts with dates of birth
             var mockUsers = new []
             {
-                new { FirstName = "Jan", LastName = "de Vries", Email = "jan.devries@example.nl", PostalCode = "5611AB", Street = "Vestdijk", Number = "12", Wijk = "Centrum" },
-                new { FirstName = "Emma", LastName = "Jansen", Email = "emma.jansen@example.nl", PostalCode = "5612BC", Street = "Stratumseind", Number = "45", Wijk = "Stratum" },
-                new { FirstName = "Pieter", LastName = "Bakker", Email = "pieter.bakker@example.nl", PostalCode = "5613CD", Street = "Markt", Number = "7", Wijk = "Centrum" },
-                new { FirstName = "Sophie", LastName = "Visser", Email = "sophie.visser@example.nl", PostalCode = "5614DE", Street = "Hoogstraat", Number = "89", Wijk = "Gestel" },
-                new { FirstName = "Lucas", LastName = "Smit", Email = "lucas.smit@example.nl", PostalCode = "5615EF", Street = "Willemstraat", Number = "23", Wijk = "Strijp" },
-                new { FirstName = "Fleur", LastName = "Mulder", Email = "fleur.mulder@example.nl", PostalCode = "5616FG", Street = "Strijpsestraat", Number = "56", Wijk = "Strijp" },
-                new { FirstName = "Daan", LastName = "Bos", Email = "daan.bos@example.nl", PostalCode = "5617GH", Street = "Woenselsestraat", Number = "34", Wijk = "Woensel-Noord" },
-                new { FirstName = "Lisa", LastName = "Meijer", Email = "lisa.meijer@example.nl", PostalCode = "5618HI", Street = "Fellenoord", Number = "78", Wijk = "Woensel-Zuid" },
-                new { FirstName = "Thomas", LastName = "Koning", Email = "thomas.koning@example.nl", PostalCode = "5619IJ", Street = "Veldhovenweg", Number = "15", Wijk = "Meerhoven" },
-                new { FirstName = "Anna", LastName = "Dekker", Email = "anna.dekker@example.nl", PostalCode = "5621KL", Street = "Gentelstraat", Number = "92", Wijk = "Tongelre" }
+                new { FirstName = "Jan", LastName = "de Vries", Email = "jan.devries@example.nl", PostalCode = "5611AB", Street = "Vestdijk", Number = "12", Wijk = "Centrum", BirthYear = 1985 },
+                new { FirstName = "Emma", LastName = "Jansen", Email = "emma.jansen@example.nl", PostalCode = "5612BC", Street = "Stratumseind", Number = "45", Wijk = "Stratum", BirthYear = 1990 },
+                new { FirstName = "Pieter", LastName = "Bakker", Email = "pieter.bakker@example.nl", PostalCode = "5613CD", Street = "Markt", Number = "7", Wijk = "Centrum", BirthYear = 1978 },
+                new { FirstName = "Sophie", LastName = "Visser", Email = "sophie.visser@example.nl", PostalCode = "5614DE", Street = "Hoogstraat", Number = "89", Wijk = "Gestel", BirthYear = 1992 },
+                new { FirstName = "Lucas", LastName = "Smit", Email = "lucas.smit@example.nl", PostalCode = "5615EF", Street = "Willemstraat", Number = "23", Wijk = "Strijp", BirthYear = 1988 },
+                new { FirstName = "Fleur", LastName = "Mulder", Email = "fleur.mulder@example.nl", PostalCode = "5616FG", Street = "Strijpsestraat", Number = "56", Wijk = "Strijp", BirthYear = 1995 },
+                new { FirstName = "Daan", LastName = "Bos", Email = "daan.bos@example.nl", PostalCode = "5617GH", Street = "Woenselsestraat", Number = "34", Wijk = "Woensel-Noord", BirthYear = 1982 },
+                new { FirstName = "Lisa", LastName = "Meijer", Email = "lisa.meijer@example.nl", PostalCode = "5618HI", Street = "Fellenoord", Number = "78", Wijk = "Woensel-Zuid", BirthYear = 1993 },
+                new { FirstName = "Thomas", LastName = "Koning", Email = "thomas.koning@example.nl", PostalCode = "5619IJ", Street = "Veldhovenweg", Number = "15", Wijk = "Meerhoven", BirthYear = 1975 },
+                new { FirstName = "Anna", LastName = "Dekker", Email = "anna.dekker@example.nl", PostalCode = "5621KL", Street = "Gentelstraat", Number = "92", Wijk = "Tongelre", BirthYear = 1998 }
             };
 
             int userId = 1;
@@ -51,24 +51,27 @@ namespace urban_city_power_managment.Web.Services
             {
                 bool hasSolar = _random.Next(100) > 50;
 
-                // Create user account
+                // Create user account with all required fields including DateOfBirth
                 var user = new UserAccount
                 {
                     Id = userId,
                     FirstName = mockUser.FirstName,
                     LastName = mockUser.LastName,
                     Email = mockUser.Email,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123!"),
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123!", 12), // Work factor 12 to match AuthService
+                    DateOfBirth = new DateTime(mockUser.BirthYear, _random.Next(1, 12), _random.Next(1, 28)), // Random birth date
                     PostalCode = mockUser.PostalCode,
                     HouseNumber = mockUser.Number,
                     HouseNumberAddition = "",
                     Street = mockUser.Street,
                     City = "Eindhoven",
+                    HasSmartMeter = hasSolar,
                     NetbeheerderId = "enexis",
                     NetbeheerderName = "Enexis Netbeheer",
                     CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(30, 365)),
                     LastLoginAt = DateTime.UtcNow.AddDays(-_random.Next(1, 30)),
-                    IsActive = true
+                    IsActive = true,
+                    EmailVerified = true
                 };
 
                 _context.Users.Add(user);
@@ -99,8 +102,8 @@ namespace urban_city_power_managment.Web.Services
             await SeedP1SensorDataAsync(consumers);
 
             Console.WriteLine("? Database seeded successfully!");
-            Console.WriteLine("? 10 mock accounts created (password: Password123!)");
-            Console.WriteLine("? Test account: jan.devries@example.nl");
+            Console.WriteLine("?? 10 mock accounts created (password: Password123!)");
+            Console.WriteLine("?? Test account: jan.devries@example.nl");
         }
 
         private async Task SeedP1SensorDataAsync(List<Consumer> consumers)
