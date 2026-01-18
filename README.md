@@ -21,25 +21,22 @@ A modern Blazor Server application for monitoring residential energy consumption
 
 ### Prerequisites
 - .NET 9 SDK
-- MySQL Server 8.0+ (or use Docker)
-
-### Run with Docker (Recommended)
-```bash
-docker-compose up -d
-```
-Access at: http://localhost:8080
+- MySQL Server 8.0+
 
 ### Run Locally
 ```bash
 dotnet run --project urban_city_power_managment.Web
 ```
 
-### Demo Credentials
-| Email | Password |
-|-------|----------|
-| jan.devries@example.nl | Password123! |
-
-*10 demo accounts available - all use the same password*
+### Configuration
+Update `appsettings.json` with your MySQL connection string:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=EindhovenEnergy;User=your_user;Password=your_password;"
+  }
+}
+```
 
 ## ??? Tech Stack
 
@@ -67,13 +64,9 @@ urban_city_power_managment.Web/
 
 ## ?? Deployment
 
-### Azure App Service
-The application is deployed to Azure with MySQL In-App database.
+The application is deployed to Azure App Service with MySQL In-App database.
 
-**Live URL:** [Azure Deployment](https://urbancitypowermanagmentweb20260114230645-ejhra4hkghhga3e4.italynorth-01.azurewebsites.net)
-
-### Docker
-See [DOCKER.md](DOCKER.md) for detailed Docker deployment instructions.
+**Live URL:** [Eindhoven Energie](https://urbancitypowermanagmentweb20260114230645-ejhra4hkghhga3e4.italynorth-01.azurewebsites.net)
 
 ## ?? Team
 
